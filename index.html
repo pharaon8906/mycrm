@@ -24,13 +24,9 @@ header{background:var(--p); color:#fff; padding:8px 12px; display:flex; justify-
 .container{padding:10px; max-width:600px; margin:0 auto;}
 .panel{display:none;} .panel.on{display:block;}
 .card { background: #fff; border-radius: 15px; padding: 12px 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; position: relative; overflow: hidden; border-left: 4px solid var(--p2); }
-.card.over { border-left-color: var(--danger); background: #fff5f5; }
 .c-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .c-name { font-size: 0.95rem; font-weight: 800; color: var(--p); }
 .status-badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 5px; background: #edf2f7; color: #4a5568; font-weight: bold; }
-.c-steps { display: flex; justify-content: space-between; margin: 8px 0; border-top: 1px solid #f8fafc; padding-top: 8px; }
-.step { display: flex; align-items: center; gap: 4px; opacity: 0.2; font-size: 0.7rem; }
-.step.active { opacity: 1; color: var(--p2); }
 .c-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #edf2f7; }
 .bottom-nav {position:fixed; bottom:0; width:100%; background:white; display:flex; border-top:1px solid #ddd; z-index:1000;}
 .n-i {flex:1; padding:8px; border:none; background:none; text-align:center; color:#718096; font-size:0.6rem; font-weight:bold;}
@@ -64,214 +60,91 @@ input,select,textarea{padding:10px; border:1px solid #e2e8f0; border-radius:8px;
   <div class="s-t" onclick="flt('Боржники',this)">💸 Боржники</div>
   <div class="s-t" onclick="flt('Кошторис',this)">📑 Кошторис</div>
   <div class="s-t" onclick="flt('В роботі',this)">🏭 В роботі</div>
-  <div class="s-t" onclick="flt('На складі',this)">🚚 На складі</div>
   <div class="s-t" onclick="flt('Виконано',this)">📦 Виконано</div>
 </div>
 
 <div class="container">
+  <div id="diag" style="display:none; background:#fff3cd; padding:10px; border-radius:10px; margin-bottom:10px; font-size:0.7rem; color:#856404;"></div>
   <div id="p-orders" class="panel on">
     <input type="text" id="q" placeholder="🔍 Пошук..." oninput="render()" style="margin-bottom:10px;padding:10px;border-radius:10px;border:1px solid #e2e8f0;width:100%;font-size:0.8rem;">
     <div id="list"></div>
   </div>
   <div id="p-clients" class="panel">
-    <input type="text" id="qc" placeholder="🔍 Пошук клієнта..." oninput="renderC()" style="margin-bottom:10px;padding:10px;border-radius:10px;border:1px solid #e2e8f0;width:100%;font-size:0.8rem;">
     <div id="listC"></div>
   </div>
-  <div id="p-stats" class="panel"><div id="statsDisplay"></div></div>
 </div>
 
 <div class="bottom-nav">
   <button class="n-i active" id="ni-orders" onclick="tab('orders')"><i class="fa fa-list"></i>Замовлення</button>
   <button class="n-i" id="ni-clients" onclick="tab('clients')"><i class="fa fa-users"></i>Клієнти</button>
-  <button class="n-i" id="ni-stats" onclick="tab('stats')"><i class="fa fa-chart-line"></i>Звіт</button>
 </div>
 
 <button class="fab" onclick="fab()"><i class="fa fa-plus"></i></button>
 
-<div id="mO" class="modal-w">
-  <div class="mbox">
-    <div style="display:flex;justify-content:space-between;margin-bottom:10px;"><h3>Замовлення</h3><i class="fa fa-times" onclick="closeM('mO')"></i></div>
-    <div class="fg"><label>Клієнт</label><input id="fCl" list="dlC"><datalist id="dlC"></datalist></div>
-    <div class="grid">
-      <div class="fg"><label>Виріб</label><input id="fPr"></div>
-      <div class="fg"><label>Фабрика</label><select id="fFa"><option>Eko-okna</option><option>Seharia</option><option>Ukraine</option></select></div>
-    </div>
-    <div class="grid">
-      <div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan()"><option>Кошторис</option><option>Підтверджено</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div>
-      <div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div>
-    </div>
-    <div id="canB" class="fg" style="display:none"><label style="color:red">Причина</label><textarea id="fCan"></textarea></div>
-    <div class="grid">
-      <div class="fg"><label>Ціна HT €</label><input id="fSa" type="number" oninput="calc()"></div>
-      <div class="fg"><label>Монтаж € (Прибуток)</label><input id="fIn" type="number" oninput="calc()"></div>
-    </div>
-    <div class="grid">
-      <div class="fg"><label>TVA %</label><select id="fTv" onchange="calc()"></select></div>
-      <div class="fg"><label>Сума TTC €</label><input id="fTt" readonly style="background:#fff9c4;font-weight:bold"></div>
-    </div>
-    <div class="grid">
-      <div class="fg"><label>Ціна Фабрики €</label><input id="fCo" type="number" oninput="calc()"></div>
-      <div class="fg"><label>Вже оплачено €</label><input id="fPa" type="number"></div>
-    </div>
-    <div class="fg"><label>Чистий прибуток</label><input id="fMr" readonly style="background:#e6fffa;font-weight:bold;color:#2c7a7b"></div>
-    <div class="fg"><label>Етапи</label>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.75rem">
-        <label><input type="checkbox" id="fChM"> 📐 Замір</label>
-        <label><input type="checkbox" id="fChO"> 🏭 Завод</label>
-        <label><input type="checkbox" id="fChS"> 🚚 Склад</label>
-        <label><input type="checkbox" id="fChI"> 🏠 Монтаж</label>
-      </div>
-    </div>
-    <div class="fg"><label>Передзвонити ⏰</label><input id="fRe" type="date"></div>
-    <div class="fg"><label>Нотатки</label><textarea id="fNo"></textarea></div>
-    <button class="btn-s" onclick="save()">ЗБЕРЕГТИ</button>
-    <button id="btnD" onclick="delO()" style="color:red;border:none;background:none;width:100%;margin-top:10px;font-size:0.8rem;display:none">Видалити</button>
-  </div>
-</div>
-
-<div id="mC" class="modal-w">
-  <div class="mbox">
-    <div style="display:flex;justify-content:space-between;margin-bottom:10px;"><h3>Клієнт</h3><i class="fa fa-times" onclick="closeM('mC')"></i></div>
-    <div class="fg"><label>ПІБ / Компанія</label><input id="cNa"></div>
-    <div class="fg"><label>Телефон</label><input id="cPh" type="tel"></div>
-    <div class="fg"><label>Адреса</label><input id="cAd"></div>
-    <div class="fg"><label>Нотатки</label><textarea id="cNo"></textarea></div>
-    <button class="btn-s" onclick="saveC()">ЗБЕРЕГТИ КЛІЄНТА</button>
-    <button id="btnDC" onclick="delC()" style="color:red;border:none;background:none;width:100%;margin-top:10px;font-size:0.8rem;display:none">Видалити</button>
-  </div>
-</div>
+<div id="mO" class="modal-w"><div class="mbox"><h3>Замовлення</h3><button onclick="closeM('mO')">Закрити</button></div></div>
 
 <script>
 const URL_SB = "https://ysctdrsxqtekxuvkjmdx.supabase.co";
 const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzY3RkcnN4cXRla3h1dmtqbWR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODkxOTksImV4cCI6MjA5OTE2NTE5OX0.vmOKBfc1dGLgrNu1YQ9IVF-v6nUGb2tzEK29L1X0aiQ";
 const _sb = window.supabase.createClient(URL_SB, KEY_SB);
 
-let co='heimek', orders=[], clients=[], editId=null, curT='orders', curS='Усі';
-const TVA_OPTS = { heimek: [0, 5.5, 20], luxwin: [0, 6, 21] };
+let co='heimek', orders=[], clients=[], curS='Усі';
 
 async function sync() {
+  document.getElementById('loader').style.display = 'flex';
+  const diag = document.getElementById('diag');
   try {
-    document.getElementById('loader').style.display = 'flex';
-    const { data: oData, error: oErr } = await _sb.from('orders').select('*').eq('company', co).order('created_at', { ascending: false });
-    if(oErr) throw oErr;
-    orders = oData || [];
-    const { data: cData, error: cErr } = await _sb.from('clients').select('*').eq('company', co);
-    if(cErr) throw cErr;
-    clients = cData || [];
-    updateDl(); render(); renderStats();
-  } catch (e) { 
-    document.getElementById('list').innerHTML = `<p style="color:red; padding:20px;">Помилка: ${e.message}</p>`;
-  } finally { document.getElementById('loader').style.display = 'none'; }
+    const { data, error } = await _sb.from('orders').select('*');
+    if(error) throw error;
+
+    if (!data || data.length === 0) {
+      diag.style.display = 'block';
+      diag.innerHTML = "<strong>Діагностика:</strong> База даних порожня. Перевірте Supabase Table Editor.";
+    } else {
+      const filtered = data.filter(o => String(o.company).toLowerCase() === co.toLowerCase());
+      if (filtered.length === 0) {
+        diag.style.display = 'block';
+        diag.innerHTML = `<strong>Діагностика:</strong> Знайдено ${data.length} замовлень, але жодне не має компанію '${co}'. <br>Перше замовлення в базі має компанію: '${data[0].company}'`;
+      } else {
+        diag.style.display = 'none';
+      }
+      orders = filtered;
+      render();
+    }
+  } catch (e) {
+    diag.style.display = 'block';
+    diag.innerHTML = "<strong>Помилка бази:</strong> " + e.message;
+  }
+  document.getElementById('loader').style.display = 'none';
 }
 
 const render = () => {
-  const q=document.getElementById('q').value.toLowerCase();
-  const list=document.getElementById('list'); const today=new Date().toISOString().split('T')[0];
-  let f = orders.filter(o=>(o.client + (o.product||'') + (o.factory||'')).toLowerCase().includes(q));
-  if (curS === 'Боржники') {
-    f = f.filter(o => ((parseFloat(o.total_ttc)||0) - (parseFloat(o.paid_amount)||0)) > 1 && o.status !== 'Виконано');
-  } else if(curS!=='Усі') f = f.filter(o => o.status === curS);
+  const list = document.getElementById('list');
+  const q = document.getElementById('q').value.toLowerCase();
+  let f = orders.filter(o => ( (o.client||'') + (o.product||'') ).toLowerCase().includes(q));
   
-  if(f.length === 0) { list.innerHTML = "<p style='text-align:center; padding:30px; color:gray;'>Замовлень не знайдено</p>"; return; }
+  if(curS !== 'Усі') f = f.filter(o => o.status === curS);
 
-  list.innerHTML = f.map(o=>{
-    const ttc = parseFloat(o.total_ttc)||0; const paid = parseFloat(o.paid_amount)||0; const debt = ttc - paid;
-    const over = o.deadline && o.deadline < today && o.status !== 'Виконано';
-    const rem = o.reminder_date === today;
-    const cl = clients.find(x=>x.name===o.client)||{};
-
+  list.innerHTML = f.map(o => {
+    // Підтримка різних назв колонок (ttc або total_ttc)
+    const price = o.total_ttc || o.totalTTC || 0;
     return `
-      <div class="card ${over?'over':''} ${rem?'rem':''}" onclick="openO('${o.id}')">
-        <div class="c-head"><div class="c-name">${o.client||'Без імені'}</div><div class="status-badge">${o.status}</div></div>
-        <div class="c-info"><i class="fa fa-industry"></i> ${o.factory} | <i class="fa fa-box-open"></i> ${o.product||'---'}</div>
-        <div class="c-steps">
-          <div class="step ${o.check_measured?'active':''}"><i class="fa fa-ruler-combined"></i><span>Замір</span></div>
-          <div class="step ${o.check_ordered?'active':''}"><i class="fa fa-file-signature"></i><span>Завод</span></div>
-          <div class="step ${o.check_storage?'active':''}"><i class="fa fa-warehouse"></i><span>Склад</span></div>
-          <div class="step ${o.check_installed?'active':''}"><i class="fa fa-tools"></i><span>Монтаж</span></div>
-        </div>
-        <div class="c-foot">
-          <div class="val">${ttc.toFixed(2)} €</div>
-          <div class="c-acts">
-            <a href="tel:${cl.phone}" onclick="event.stopPropagation()"><i class="fa fa-phone-alt" style="color:var(--success)"></i></a>
-            <a href="https://wa.me/${cl.phone}" onclick="event.stopPropagation()"><i class="fab fa-whatsapp" style="color:#25d366"></i></a>
-            <div class="debt-tag ${debt > 1 ? 'red' : 'green'}">${debt > 1 ? 'Борг: '+debt.toFixed(0)+'€' : 'ОК'}</div>
-          </div>
-        </div>
-      </div>`}).join('');
+      <div class="card">
+        <div class="c-head"><strong>${o.client || 'Без імені'}</strong> <small>${o.status}</small></div>
+        <div class="c-info">${o.product || '---'} | ${o.factory || '---'}</div>
+        <div class="c-foot"><strong>${parseFloat(price).toFixed(2)} €</strong></div>
+      </div>
+    `;
+  }).join('');
 }
 
-const renderC = () => {
-  const q=document.getElementById('qc').value.toLowerCase();
-  document.getElementById('listC').innerHTML = clients.filter(c=>(c.name||'').toLowerCase().includes(q)).map(c=>`
-    <div class="card" onclick="openCE('${c.id}')"><strong>${c.name||'Без імені'}</strong><br><small>${c.phone || '---'}</small></div>`).join('');
-}
+function setCo(k) { co=k; sync(); }
+function flt(s, el) { curS=s; document.querySelectorAll('.s-t').forEach(t=>t.classList.remove('active')); el.classList.add('active'); render(); }
+function tab(t) { sync(); }
+function closeM(id) { document.getElementById(id).style.display='none'; }
+function fab() { alert("Функція додавання буде доступна після перевірки зв'язку"); }
 
-const openO = id => {
-  editId=id; const o=id?orders.find(x=>x.id==id):{};
-  ['fCl','fPr','fSa','fCo','fIn','fPa','fDl','fRe','fNo','fCan'].forEach(i=>document.getElementById(i).value='');
-  ['fChM','fChO','fChS','fChI'].forEach(i=>document.getElementById(i).checked=false);
-  if(id){
-    document.getElementById('fCl').value=o.client; document.getElementById('fPr').value=o.product;
-    document.getElementById('fSa').value=o.sale_price_ht; document.getElementById('fTv').value=o.tva_rate;
-    document.getElementById('fCo').value=o.cost_price; document.getElementById('fIn').value=o.install_cost;
-    document.getElementById('fPa').value=o.paid_amount; document.getElementById('fDl').value=o.deadline;
-    document.getElementById('fRe').value=o.reminder_date; document.getElementById('fSt').value=o.status;
-    document.getElementById('fNo').value=o.notes; document.getElementById('fCan').value=o.cancel_reason;
-    document.getElementById('fChM').checked=o.check_measured; document.getElementById('fChO').checked=o.check_ordered;
-    document.getElementById('fChS').checked=o.check_storage; document.getElementById('fChI').checked=o.check_installed;
-    document.getElementById('btnD').style.display='block';
-  } else document.getElementById('btnD').style.display='none';
-  tglCan(); calc(); document.getElementById('mO').style.display='flex';
-}
-
-const openCE = id => {
-  editId=id; const c=clients.find(x=>x.id==id);
-  document.getElementById('cNa').value=c.name; document.getElementById('cPh').value=c.phone;
-  document.getElementById('cAd').value=c.address; document.getElementById('cNo').value=c.notes;
-  document.getElementById('btnDC').style.display='block'; document.getElementById('mC').style.display='flex';
-}
-
-async function save() {
-  const o = {
-    id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value,
-    factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value,
-    sale_price_ht: parseFloat(document.getElementById('fSa').value)||0, tva_rate: parseFloat(document.getElementById('fTv').value)||0, total_ttc: parseFloat(document.getElementById('fTt').value)||0,
-    cost_price: parseFloat(document.getElementById('fCo').value)||0, install_cost: parseFloat(document.getElementById('fIn').value)||0, paid_amount: parseFloat(document.getElementById('fPa').value)||0,
-    deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value,
-    cancel_reason: document.getElementById('fCan').value, check_measured: document.getElementById('fChM').checked,
-    check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked
-  };
-  await _sb.from('orders').upsert(o); closeM('mO'); sync();
-}
-
-async function saveC() {
-  const c = { id: editId || 'CNEW'+Date.now(), company: co, name: document.getElementById('cNa').value, phone: document.getElementById('cPh').value, address: document.getElementById('cAd').value, notes: document.getElementById('cNo').value };
-  await _sb.from('clients').upsert(c); closeM('mC'); sync();
-}
-
-async function delO() { if(confirm('Видалити замовлення?')) { await _sb.from('orders').delete().eq('id', editId); closeM('mO'); sync(); } }
-async function delC() { if(confirm('Видалити клієнта?')) { await _sb.from('clients').delete().eq('id', editId); closeM('mC'); sync(); } }
-const setCo = k => { co=k; document.body.setAttribute('data-co',k); document.getElementById('brd').innerText=k.toUpperCase()+' CRM'; updateTva(); sync(); }
-const tab = t => { curT=t; document.querySelectorAll('.panel').forEach(p=>p.style.display='none'); document.getElementById('p-'+t).style.display='block'; document.querySelectorAll('.n-i').forEach(i=>i.classList.remove('active')); document.getElementById('ni-'+t).classList.add('active'); if(t==='clients') renderC(); document.getElementById('navS').style.display = t === 'orders' ? 'flex' : 'none'; }
-const flt = (s,el) => { curS=s; document.querySelectorAll('.s-t').forEach(t=>t.classList.remove('active')); el.classList.add('active'); render(); }
-const calc = () => {
-  const h=parseFloat(document.getElementById('fSa').value)||0, t=parseFloat(document.getElementById('fTv').value)||0, c=parseFloat(document.getElementById('fCo').value)||0, i=parseFloat(document.getElementById('fIn').value)||0;
-  document.getElementById('fTt').value = ((h+i)*(1+t/100)).toFixed(2);
-  document.getElementById('fMr').value = ((h-c)+i).toFixed(2) + ' €';
-}
-const closeM = id => { document.getElementById(id).style.display='none'; editId=null; }
-const tglCan = () => { const b=document.getElementById('canB'); if(b) b.style.display = document.getElementById('fSt').value === 'Скасовано' ? 'block' : 'none'; }
-const fab = () => curT === 'clients' ? (editId=null, document.getElementById('cNa').value='', document.getElementById('cPh').value='', document.getElementById('cAd').value='', document.getElementById('cNo').value='', document.getElementById('mC').style.display='flex') : openO(null);
-const updateDl = () => { document.getElementById('dlC').innerHTML=clients.map(c=>`<option value="${c.name}">`).join(''); }
-function renderStats() {
-  const profit = orders.reduce((s, o) => s + (parseFloat(o.sale_price_ht)||0) - (parseFloat(o.cost_price)||0) + (parseFloat(o.install_cost)||0), 0);
-  const debt = orders.reduce((s, o) => { if(o.status==='Скасовано') return s; return s + (parseFloat(o.total_ttc)||0) - (parseFloat(o.paid_amount)||0); }, 0);
-  document.getElementById('statsDisplay').innerHTML = `<div style="background:var(--p); color:white; padding:20px; border-radius:20px; text-align:center; margin-bottom:15px;"><small>Чистий прибуток (HT)</small><h2 style="margin:5px 0;">${profit.toFixed(0)} €</h2><small>Загальний борг: ${debt.toFixed(0)} €</small></div>`;
-}
-function updateTva() { const sel = document.getElementById('fTv'); if(sel) sel.innerHTML = TVA_OPTS[co].map(v => `<option value="${v}">${v}%</option>`).join(''); }
-function openSheet() { window.open("https://supabase.com/dashboard/project/ysctdrsxqtekxuvkjmdx/editor", "_blank"); }
-window.onload = () => { updateTva(); sync(); };
+window.onload = sync;
 </script>
 </body>
 </html>
