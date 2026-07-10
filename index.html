@@ -17,7 +17,6 @@
   --success: #16a34a; --danger: #dc2626; --warning: #ea580c; --violet: #7c3aed;
   --txt: #0f172a; --radius: 16px;
   --sh: 0 2px 10px rgba(15,23,42,.06);
-  --sh-lg: 0 16px 40px -12px rgba(15,23,42,.22);
   --nav-h: 54px; --side-w: 232px;
 }
 [data-co="luxwin"] { --p: #0d2e1c; --p2: #059669; --a: #34d399; }
@@ -36,23 +35,29 @@ header { background: linear-gradient(120deg, var(--p), var(--p2)); color: #fff; 
 
 .container { padding: 14px; max-width: 1200px; margin: 0 auto; }
 .panel { display: none; } .panel.on { display: block; }
-#list { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+#list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
 
-.card { background: var(--surface); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--sh); border: 1px solid var(--line); position: relative; overflow: hidden; border-left: 5px solid var(--p2); display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; cursor: pointer; }
+.card { 
+  background: var(--surface); border-radius: var(--radius); padding: 14px; box-shadow: var(--sh); 
+  border: 1px solid var(--line); position: relative; overflow: hidden; border-left: 5px solid var(--p2);
+  display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; cursor: pointer;
+}
 .card.st-done { border-left-color: var(--success); background: linear-gradient(180deg, #f1fdf5, #fff 60%); }
 .card.st-cancelled { border-left-color: var(--danger); background: linear-gradient(180deg, #fef4f4, #fff 60%); opacity: 0.8; }
 .card.st-inwork { border-left-color: #ed8936; background: #fffaf0; }
 .card.st-storage { border-left-color: var(--violet); background: #f8f5ff; }
+.card.over { border: 2px solid var(--danger); }
 
 .c-row-1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .c-name { font-size: .95rem; font-weight: 800; color: var(--txt); }
 .status-badge { font-size: .55rem; padding: 3px 8px; border-radius: 20px; background: #eef2f8; color: var(--muted); font-weight: 800; text-transform: uppercase; }
 
-.c-steps-inline { display: flex; gap: 8px; font-size: 0.75rem; color: #cbd5e1; margin-bottom: 8px; }
+.c-steps-inline { display: flex; gap: 10px; font-size: 0.78rem; color: #cbd5e1; margin-bottom: 10px; }
 .c-steps-inline i.active { color: var(--p2); }
 
-.c-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px dashed var(--line); }
-.debt-tag { font-size: .65rem; font-weight: 800; padding: 2px 6px; border-radius: 6px; }
+.c-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px dashed var(--line); }
+.val { font-size: 1.1rem; font-weight: 900; }
+.debt-tag { font-size: .65rem; font-weight: 800; padding: 3px 8px; border-radius: 7px; }
 .debt-tag.red { background: #fee2e2; color: var(--danger); }
 .debt-tag.green { background: #dcfce7; color: var(--success); }
 
@@ -66,16 +71,16 @@ header { background: linear-gradient(120deg, var(--p), var(--p2)); color: #fff; 
 .pin-dots { display: flex; justify-content: center; gap: 15px; margin: 25px 0; }
 .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #334155; }
 .dot.fill { background: #3b82f6; border-color: #3b82f6; }
-.numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+.numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
 .num-btn { width: 64px; height: 64px; border-radius: 50%; border: none; background: #1e293b; color: white; font-size: 1.5rem; font-weight: 600; cursor: pointer; }
 
 .modal-w { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
 .mbox { background: #fff; width: 100%; max-width: 550px; border-radius: 22px 22px 0 0; padding: 25px; max-height: 95vh; overflow-y: auto; }
 .fg { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
 label { font-size: .65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
-input, select, textarea { padding: 12px; border: 1px solid var(--line); border-radius: 12px; font-size: 1rem; background: #f8fafc; width: 100%; }
+input, select, textarea { padding: 12px; border: 1px solid var(--line); border-radius: 12px; font-size: 1rem; background: #f8fafc; width: 100%; font-family: inherit; }
 
-.fab { position: fixed; right: 20px; bottom: 85px; width: 56px; height: 56px; border-radius: 18px; background: var(--p2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: none; box-shadow: 0 8px 20px rgba(37,99,235,0.4); z-index: 1000; }
+.fab { position: fixed; right: 20px; bottom: 85px; width: 56px; height: 56px; border-radius: 50%; background: var(--p2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: none; box-shadow: 0 8px 20px rgba(37,99,235,0.4); z-index: 1000; }
 .btn-s { background: var(--p2); color: #fff; width: 100%; padding: 15px; border: none; border-radius: 15px; font-weight: 900; font-size: 1rem; cursor: pointer; }
 
 #loader { position: fixed; inset: 0; background: #fff; z-index: 5000; display: none; justify-content: center; align-items: center; }
@@ -83,7 +88,7 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
 @media (min-width: 900px) {
   body { padding-left: var(--side-w); }
   .bottom-nav { top: 0; left: 0; width: var(--side-w); height: 100vh; flex-direction: column; padding: 30px 15px; border-right: 1px solid var(--line); }
-  .n-i { flex: none; text-align: left; padding: 12px; font-size: .9rem; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+  .n-i { flex: none; text-align: left; padding: 12px; font-size: .9rem; border-radius: 12px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
   .n-i i { margin: 0; font-size: 1.1rem; width: 24px; }
   .n-i.active { background: #eef2ff; }
 }
@@ -93,6 +98,7 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
 
 <div id="loader"><i class="fa fa-spinner fa-spin fa-2x" style="color:var(--p2)"></i></div>
 
+<!-- ПІН-КОД -->
 <div id="pinM">
   <div class="pin-box">
     <h2 id="pinTitle">Вхід</h2>
@@ -124,12 +130,12 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
 </header>
 
 <div class="nav-s" id="navS">
-  <div class="s-t active" data-s="Усі" onclick="flt('Усі',this)">Усі</div>
-  <div class="s-t" data-s="Боржники" onclick="flt('Боржники',this)">💸 Боржники</div>
-  <div class="s-t" data-s="Кошторис" onclick="flt('Кошторис',this)">📑 Кошторис</div>
-  <div class="s-t" data-s="В роботі" onclick="flt('В роботі',this)">🏭 В роботі</div>
-  <div class="s-t" data-s="На складі" onclick="flt('На складі',this)">🚚 На складі</div>
-  <div class="s-t" data-s="Виконано" onclick="flt('Виконано',this)">📦 Виконано</div>
+  <div class="s-t active" onclick="flt('Усі',this)">Усі</div>
+  <div class="s-t" onclick="flt('Боржники',this)">💸 Боржники</div>
+  <div class="s-t" onclick="flt('Кошторис',this)">📑 Кошторис</div>
+  <div class="s-t" onclick="flt('В роботі',this)">🏭 В роботі</div>
+  <div class="s-t" onclick="flt('На складі',this)">🚚 На складі</div>
+  <div class="s-t" onclick="flt('Виконано',this)">📦 Виконано</div>
 </div>
 
 <div class="container">
@@ -153,9 +159,9 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
 </div>
 
 <div class="bottom-nav">
-  <button class="n-i active" id="ni-orders" onclick="tab('orders')"><i class="fa-solid fa-list-ul"></i><span>Замовлення</span></button>
-  <button class="n-i" id="ni-clients" onclick="tab('clients')"><i class="fa-solid fa-users"></i><span>Клієнти</span></button>
-  <button class="n-i" id="ni-stats" onclick="tab('stats')"><i class="fa-solid fa-chart-line"></i><span>Звіт</span></button>
+  <button class="n-i active" id="ni-orders" onclick="tab('orders')"><i class="fa fa-list"></i><span>Замовлення</span></button>
+  <button class="n-i" id="ni-clients" onclick="tab('clients')"><i class="fa fa-users"></i><span>Клієнти</span></button>
+  <button class="n-i" id="ni-stats" onclick="tab('stats')"><i class="fa fa-chart-line"></i><span>Звіт</span></button>
 </div>
 
 <button class="fab" onclick="fab()"><i class="fa fa-plus"></i></button>
@@ -165,8 +171,8 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
     <div style="display:flex;justify-content:space-between;margin-bottom:15px;"><h3>Замовлення</h3><i class="fa fa-times" onclick="closeM('mO')"></i></div>
     <div class="fg"><label>Клієнт</label><input id="fCl" list="dlC"><datalist id="dlC"></datalist></div>
     <div class="grid"><div class="fg"><label>Виріб</label><input id="fPr"></div><div class="fg"><label>Фабрика</label><select id="fFa"><option>Eko-okna</option><option>Seharia</option><option>Ukraine</option></select></div></div>
-    <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan()"><option>Кошторис</option><option>Підтверджено</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
-    <div id="canB" class="fg" style="display:none"><label style="color:red">Причина</label><textarea id="fCan"></textarea></div>
+    <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan()"><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
+    <div id="canB" class="fg" style="display:none"><label style="color:red">Причина скасування</label><textarea id="fCan"></textarea></div>
     <div class="grid"><div class="fg"><label>Ціна HT €</label><input id="fSa" type="number" oninput="calc()"></div><div class="fg"><label>Монтаж €</label><input id="fIn" type="number" oninput="calc()"></div></div>
     <div class="grid"><div class="fg"><label>TVA %</label><select id="fTv" onchange="calc()"></select></div><div class="fg"><label>Сума TTC €</label><input id="fTt" readonly style="background:#fefce8;font-weight:bold"></div></div>
     <div class="grid"><div class="fg"><label>Ціна Фабрики €</label><input id="fCo" type="number" oninput="calc()"></div><div class="fg"><label>Передплата ФАБРИЦІ €</label><input id="fFaPa" type="number"></div></div>
@@ -181,7 +187,7 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
     </div>
     <div class="fg"><label>Передзвонити ⏰</label><input id="fRe" type="date"></div>
     <div class="fg"><label>Нотатки</label><textarea id="fNo" rows="2"></textarea></div>
-    <button class="btn-s" onclick="saveOrderFinal()">ЗБЕРЕГТИ</button>
+    <button class="btn-s" onclick="saveO()">ЗБЕРЕГТИ</button>
     <button id="btnD" onclick="delO()" style="color:red;border:none;background:none;width:100%;margin-top:10px;font-weight:bold;cursor:pointer;display:none">Видалити</button>
   </div>
 </div>
@@ -192,7 +198,7 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
     <div class="fg"><label>ПІБ / Компанія</label><input id="cNa"></div>
     <div class="grid"><div class="fg"><label>Телефон</label><input id="cPh" type="tel"></div><div class="fg"><label>Адреса</label><input id="cAd"></div></div>
     <div class="fg"><label>Нотатки</label><textarea id="cNo"></textarea></div>
-    <div id="hSec" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:none;"><label>Історія:</label><div id="hList"></div></div>
+    <div id="hSec" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:none;"><label>Історія замовлень:</label><div id="hList"></div></div>
     <button class="btn-s" onclick="saveC()">ЗБЕРЕГТИ КЛІЄНТА</button>
     <button id="btnDC" onclick="delC()" style="color:red;border:none;background:none;width:100%;margin-top:10px;font-weight:bold;display:none">Видалити</button>
   </div>
@@ -201,7 +207,7 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
 <script>
 const URL_SB = "https://ysctdrsxqtekxuvkjmdx.supabase.co";
 const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzY3RkcnN4cXRla3h1dmtqbWR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODkxOTksImV4cCI6MjA5OTE2NTE5OX0.vmOKBfc1dGLgrNu1YQ9IVF-v6nUGb2tzEK29L1X0aiQ";
-const _supabase = window.supabase.createClient(URL_SB, KEY_SB);
+const sb = window.supabase.createClient(URL_SB, KEY_SB);
 
 const PINS = { heimek: "1111", luxwin: "2222" };
 let co='heimek', orders=[], clients=[], editId=null, curT='orders', curS='Усі', currentPin="";
@@ -254,12 +260,12 @@ function loadCompany(key) {
 async function sync() {
   document.getElementById('loader').style.display = 'flex';
   try {
-    const { data: oData, error: oErr } = await _supabase.from('orders').select('*').eq('company', co).order('created_at', { ascending: false });
+    const { data: oData, error: oErr } = await sb.from('orders').select('*').eq('company', co).order('created_at', { ascending: false });
     if(oErr) throw oErr; orders = oData || [];
-    const { data: cData, error: cErr } = await _supabase.from('clients').select('*').eq('company', co);
+    const { data: cData, error: cErr } = await sb.from('clients').select('*').eq('company', co);
     if(cErr) throw cErr; clients = cData || [];
     updateDl(); render(); if(curT==='stats') renderStats();
-  } catch (e) { alert("Помилка завантаження: " + e.message); }
+  } catch (e) { alert("База: " + e.message); }
   finally { document.getElementById('loader').style.display = 'none'; }
 }
 
@@ -301,7 +307,7 @@ const render = () => {
           <div style="display:flex; align-items:center; gap:8px;">
             <a href="tel:${pLink}" onclick="event.stopPropagation()"><i class="fa fa-phone-alt" style="color:var(--success)"></i></a>
             <a href="https://wa.me/${pLink.replace('+','')}" onclick="event.stopPropagation()"><i class="fab fa-whatsapp" style="color:#25d366"></i></a>
-            <div class="debt-tag ${debt > 1 ? 'red' : 'green'}">${debt > 1 ? 'Борг: '+debt.toFixed(0)+'€' : 'OK'}</div>
+            <div class="debt-tag ${debt > 1 ? 'red' : 'green'}">${debt > 1 ? debt.toFixed(0)+'€' : 'OK'}</div>
           </div>
         </div>
       </div>`}).join('');
@@ -326,32 +332,42 @@ const openO = id => {
   tglCan(); calc(); document.getElementById('mO').style.display='flex';
 }
 
-async function saveOrderFinal() {
+const openCE = id => {
+  editId=id; const c=clients.find(x=>x.id==id);
+  document.getElementById('cNa').value=c.name; document.getElementById('cPh').value=c.phone;
+  document.getElementById('cAd').value=c.address; document.getElementById('cNo').value=c.notes;
+  const history = orders.filter(o => o.client === c.name);
+  document.getElementById('hSec').style.display = 'block';
+  document.getElementById('hList').innerHTML = history.map(o => `<div style="font-size:0.75rem; background:#f8fafc; padding:8px; border-radius:8px; margin-top:5px; display:flex; justify-content:space-between;" onclick="event.stopPropagation(); closeM('mC'); openO('${o.id}')"><span>${o.product}</span><b>${o.total_ttc} €</b></div>`).join('') || 'Замовлень немає';
+  document.getElementById('btnDC').style.display='block'; document.getElementById('mC').style.display='flex';
+}
+
+async function saveO() {
   const o = { id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value, factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value, sale_price_ht: n(document.getElementById('fSa').value), tva_rate: n(document.getElementById('fTv').value), total_ttc: n(document.getElementById('fTt').value), cost_price: n(document.getElementById('fCo').value), install_cost: n(document.getElementById('fIn').value), paid_amount: n(document.getElementById('fPa').value), factory_prepay: n(document.getElementById('fFaPa').value), deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value, cancel_reason: document.getElementById('fCan').value, check_measured: document.getElementById('fChM').checked, check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked };
-  const {error} = await _supabase.from('orders').upsert(o);
+  const {error} = await sb.from('orders').upsert(o);
   if(error) alert(error.message); else { closeM('mO'); sync(); }
 }
 
 async function saveC() {
   const c = { id: editId || 'CNEW'+Date.now(), company: co, name: document.getElementById('cNa').value, phone: document.getElementById('cPh').value, address: document.getElementById('cAd').value, notes: document.getElementById('cNo').value };
-  const {error} = await _supabase.from('clients').upsert(c);
+  const {error} = await sb.from('clients').upsert(c);
   if(error) alert(error.message); else { closeM('mC'); sync(); }
 }
 
 const tab = t => { curT=t; document.querySelectorAll('.panel').forEach(p=>p.style.display='none'); document.getElementById('p-'+t).style.display='block'; document.querySelectorAll('.n-i').forEach(i=>i.classList.remove('active')); document.getElementById('ni-'+t).classList.add('active'); if(t==='clients') renderC(); if(t==='stats') renderStats(); document.getElementById('navS').style.display = t === 'orders' ? 'flex' : 'none'; }
-const flt = (s,el) => { curS=s; document.querySelectorAll('.s-t').forEach(t=>t.classList.remove('active')); if(el) el.classList.add('active'); else document.querySelector(`[data-s='${s}']`).classList.add('active'); render(); }
+const flt = (s,el) => { curS=s; document.querySelectorAll('.s-t').forEach(t=>t.classList.remove('active')); if(el) el.classList.add('active'); else {const target = document.querySelector(`[data-s='${s}']`); if(target) target.classList.add('active');} render(); }
 const calc = () => { const h=n(document.getElementById('fSa').value), t=n(document.getElementById('fTv').value), c=n(document.getElementById('fCo').value), i=n(document.getElementById('fIn').value); document.getElementById('fTt').value = ((h+i)*(1+t/100)).toFixed(2); document.getElementById('fMr').value = ((h-c)+i).toFixed(2) + ' €'; }
 const closeM = id => { document.getElementById(id).style.display='none'; editId=null; }
 const tglCan = () => document.getElementById('canB').style.display = document.getElementById('fSt').value === 'Скасовано' ? 'block' : 'none';
 const fab = () => curT === 'clients' ? (editId=null, document.getElementById('cNa').value='', document.getElementById('cPh').value='', document.getElementById('cAd').value='', document.getElementById('cNo').value='', document.getElementById('hSec').style.display='none', document.getElementById('mC').style.display='flex') : openO(null);
 const updateDl = () => { document.getElementById('dlC').innerHTML=clients.map(c=>`<option value="${c.name}">`).join(''); }
-async function delO() { if(confirm('Видалити?')) { await _supabase.from('orders').delete().eq('id', editId); closeM('mO'); sync(); } }
-async function delC() { if(confirm('Видалити?')) { await _supabase.from('clients').delete().eq('id', editId); closeM('mC'); sync(); } }
+async function delO() { if(confirm('Видалити?')) { await sb.from('orders').delete().eq('id', editId); closeM('mO'); sync(); } }
+async function delC() { if(confirm('Видалити?')) { await sb.from('clients').delete().eq('id', editId); closeM('mC'); sync(); } }
 function renderC() { const q=document.getElementById('qc').value.toLowerCase(); document.getElementById('listC').innerHTML = clients.filter(c=>(c.name||'').toLowerCase().includes(q)).map(c=>`<div class="card" onclick="openCE('${c.id}')" style="border-left:none"><strong>${c.name||'Без імені'}</strong><br><small>${c.phone}</small></div>`).join(''); }
-function openCE(id) { editId=id; const c=clients.find(x=>x.id==id); document.getElementById('cNa').value=c.name; document.getElementById('cPh').value=c.phone; document.getElementById('cAd').value=c.address; document.getElementById('cNo').value=c.notes; const h = orders.filter(o => o.client === c.name); document.getElementById('hSec').style.display = 'block'; document.getElementById('hList').innerHTML = h.map(o => `<div style="font-size:0.75rem; background:#f8fafc; padding:8px; border-radius:8px; margin-top:5px; display:flex; justify-content:space-between;" onclick="event.stopPropagation(); closeM('mC'); openO('${o.id}')"><span>${o.product}</span><b>${o.total_ttc} €</b></div>`).join('') || '<small>Замовлень немає</small>'; document.getElementById('btnDC').style.display='block'; document.getElementById('mC').style.display='flex'; }
 function renderStats() { const profit = orders.reduce((s, o) => s + (parseFloat(o.sale_price_ht)||0) - (parseFloat(o.cost_price)||0) + (parseFloat(o.install_cost)||0), 0); const debt = orders.reduce((s, o) => { if(o.status==='Скасовано') return s; return s + (parseFloat(o.total_ttc)||0) - (parseFloat(o.paid_amount)||0); }, 0); document.getElementById('statsDisplay').innerHTML = `<div style="background:var(--p); color:white; padding:20px; border-radius:20px; text-align:center; margin-bottom:15px;"><small>Чистий прибуток (HT)</small><h2 style="margin:2px 0;">${profit.toFixed(0)} €</h2><small>Загальний борг: ${debt.toFixed(0)} €</small></div>`; }
 function updateTva() { const sel = document.getElementById('fTv'); if(sel) sel.innerHTML = TVA_OPTS[co].map(v => `<option value="${v}">${v}%</option>`).join(''); }
 function openSheet() { window.open("https://supabase.com/dashboard/project/ysctdrsxqtekxuvkjmdx/editor", "_blank"); }
+window.onload = () => { updateTva(); sync(); };
 </script>
 </body>
 </html>
