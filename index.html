@@ -3,92 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>ViknaPro Smart CRM</title>
+<title>ViknaPro Premium CRM</title>
+<!-- Бібліотеки -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
 <style>
 :root {
   --p: #14304e; --p2: #2563eb; --a: #60a5fa;
-  --bg: #f3f5fa;
-  --surface: #ffffff;
-  --line: #e6eaf2;
-  --line2: #eef1f7;
-  --muted: #64748b;
-  --muted2: #94a3b8;
+  --bg: #f3f5fa; --surface: #ffffff; --line: #e6eaf2; --line2: #eef1f7;
+  --muted: #64748b; --muted2: #94a3b8;
   --success: #16a34a; --danger: #dc2626; --warning: #ea580c; --violet: #7c3aed;
-  --txt: #0f172a;
-  --radius: 16px;
+  --txt: #0f172a; --radius: 16px;
   --sh-sm: 0 1px 2px rgba(15,23,42,.05);
   --sh: 0 2px 10px rgba(15,23,42,.06), 0 1px 3px rgba(15,23,42,.04);
   --sh-lg: 0 16px 40px -12px rgba(15,23,42,.22);
-  --nav-h: 54px;
-  --side-w: 232px;
+  --nav-h: 54px; --side-w: 232px;
 }
 [data-co="luxwin"] { --p: #0d2e1c; --p2: #059669; --a: #34d399; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body {
-  background: var(--bg); color: var(--txt);
-  font-family: 'Inter', -apple-system, system-ui, sans-serif;
-  padding-bottom: 74px; font-size: 13px; -webkit-font-smoothing: antialiased;
-}
+body { background: var(--bg); color: var(--txt); font-family: 'Inter', -apple-system, system-ui, sans-serif; padding-bottom: 74px; font-size: 13px; -webkit-font-smoothing: antialiased; }
 
-/* ---------- Header ---------- */
-header {
-  background: linear-gradient(120deg, var(--p), color-mix(in srgb, var(--p) 65%, var(--p2)));
-  color: #fff; padding: 0 16px; height: var(--nav-h);
-  display: flex; justify-content: space-between; align-items: center;
-  position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 14px rgba(15,23,42,.14);
-}
-#brd { font-weight: 800; font-size: .98rem; letter-spacing: -.3px; display: flex; align-items: center; gap: 9px; }
-#brd::before {
-  content: ""; width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0; background: rgba(255,255,255,.18);
-  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm7 2H5v6h6V5zm2 0v6h6V5h-6zm-2 8H5v6h6v-6zm2 0v6h6v-6h-6z'/></svg>") center/17px no-repeat;
-          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm7 2H5v6h6V5zm2 0v6h6V5h-6zm-2 8H5v6h6v-6zm2 0v6h6v-6h-6z'/></svg>") center/17px no-repeat;
-}
+header { background: linear-gradient(120deg, var(--p), color-mix(in srgb, var(--p) 65%, var(--p2))); color: #fff; padding: 0 16px; height: var(--nav-h); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 14px rgba(15,23,42,.14); }
 .btns { display: flex; background: rgba(0,0,0,.22); padding: 3px; border-radius: 9px; gap: 2px; }
 .btn-c { border: none; background: none; color: #fff; opacity: .62; padding: 5px 11px; cursor: pointer; font-weight: 700; font-size: .66rem; border-radius: 6px; transition: .16s; letter-spacing: .3px; }
 .btn-c.on { opacity: 1; background: rgba(255,255,255,.22); }
 
-/* ---------- Filter chips ---------- */
-.nav-s {
-  display: flex; gap: 7px; overflow-x: auto; padding: 9px 14px;
-  background: var(--surface); border-bottom: 1px solid var(--line);
-  position: sticky; top: var(--nav-h); z-index: 900; scrollbar-width: none;
-}
+.nav-s { display: flex; gap: 7px; overflow-x: auto; padding: 9px 14px; background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: var(--nav-h); z-index: 900; scrollbar-width: none; }
 .nav-s::-webkit-scrollbar { display: none; }
-.s-t {
-  padding: 7px 13px; border-radius: 20px; background: #f2f4f9; font-size: .7rem; font-weight: 700;
-  color: var(--muted); white-space: nowrap; border: 1px solid var(--line); cursor: pointer; transition: .15s; flex-shrink: 0;
-}
+.s-t { padding: 7px 13px; border-radius: 20px; background: #f2f4f9; font-size: .7rem; font-weight: 700; color: var(--muted); white-space: nowrap; border: 1px solid var(--line); cursor: pointer; transition: .15s; flex-shrink: 0; }
 .s-t:active { transform: scale(.95); }
 .s-t.active { background: var(--p2); color: #fff; border-color: var(--p2); box-shadow: 0 5px 14px -4px color-mix(in srgb, var(--p2) 55%, transparent); }
 
-/* ---------- Layout ---------- */
 .container { padding: 14px; max-width: 1280px; margin: 0 auto; }
 .panel { display: none; } .panel.on { display: block; }
 #list { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
 
-/* ---------- Toolbar ---------- */
 .tool-row { display: flex; gap: 9px; margin-bottom: 13px; }
 #q { flex: 1; }
-#q, #qc, #sortSel {
-  padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px;
-  font-size: .84rem; background: var(--surface); box-shadow: var(--sh-sm); font-family: inherit; color: var(--txt);
-}
+#q, #qc, #sortSel { padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; font-size: .84rem; background: var(--surface); box-shadow: var(--sh-sm); font-family: inherit; color: var(--txt); }
 #q:focus, #qc:focus, #sortSel:focus { outline: none; border-color: var(--p2); box-shadow: 0 0 0 3px color-mix(in srgb, var(--p2) 14%, transparent); }
 #sortSel { width: auto !important; font-size: .74rem !important; font-weight: 700; color: var(--muted) !important; cursor: pointer; padding: 0 12px !important; }
 #qc { width: 100%; }
 
-/* ---------- Order card ---------- */
-.card {
-  background: var(--surface); border-radius: var(--radius); padding: 13px 14px;
-  box-shadow: var(--sh); border: 1px solid var(--line); position: relative; overflow: hidden;
-  border-left: none; display: flex; flex-direction: column; justify-content: space-between;
-  cursor: pointer; transition: transform .14s, box-shadow .14s;
-}
+.card { background: var(--surface); border-radius: var(--radius); padding: 13px 14px; box-shadow: var(--sh); border: 1px solid var(--line); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: transform .14s, box-shadow .14s; }
 .card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--p2); }
 .card:hover { transform: translateY(-2px); box-shadow: var(--sh-lg); }
 .card.st-done::before { background: var(--success); }
@@ -115,114 +76,58 @@ header {
 .c-row-3 { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; padding-left: 6px; border-top: 1px solid var(--line2); }
 .c-steps-inline { display: flex; gap: 9px; font-size: .78rem; color: #cbd5e1; }
 .c-steps-inline i.active { color: var(--p2); transform: scale(1.1); }
-.c-row-3 > div:last-child span[style*="900"] { font-weight: 800 !important; font-size: .92rem; letter-spacing: -.3px; }
-.c-row-3 a { width: 30px; height: 30px; border-radius: 9px; background: #eafbf0; display: grid; place-items: center; }
 .debt-tag { font-size: .66rem; font-weight: 800; padding: 3px 8px; border-radius: 7px; }
 .debt-tag.red { background: #fee2e2; color: var(--danger); }
 .debt-tag.green { background: #dcfce7; color: var(--success); }
 
-/* ---------- Client card ---------- */
 #p-clients .card { flex-direction: row; align-items: center; gap: 12px; }
 #p-clients .card::before { display: none; }
 #p-clients .card strong { font-size: .9rem; font-weight: 800; }
 #p-clients .card small { color: var(--muted); font-size: .74rem; }
 #listC { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 11px; }
 
-/* ---------- Bottom Nav (mobile) ---------- */
-.bottom-nav {
-  position: fixed; bottom: 0; width: 100%;
-  background: rgba(255,255,255,.94); backdrop-filter: blur(12px);
-  display: flex; border-top: 1px solid var(--line); z-index: 1000;
-  padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); box-shadow: 0 -2px 12px rgba(15,23,42,.05);
-}
-.bottom-nav .side-brand { display: none; }
+.bottom-nav { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,0.94); backdrop-filter: blur(12px); display: flex; border-top: 1px solid var(--line); z-index: 1000; padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); box-shadow: 0 -2px 12px rgba(15,23,42,.05); }
 .n-i { flex: 1; padding: 7px 4px; border: none; background: none; text-align: center; color: var(--muted2); font-size: .61rem; font-weight: 700; cursor: pointer; transition: .15s; position: relative; border-radius: 10px; }
 .n-i i { display: block; font-size: 1.15rem; margin-bottom: 3px; }
 .n-i.active { color: var(--p2); }
 .n-i.active::before { content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 24px; height: 3px; border-radius: 3px; background: var(--p2); }
 
-/* ---------- FAB ---------- */
-.fab {
-  position: fixed; right: 16px; bottom: 84px; width: 54px; height: 54px; border-radius: 17px;
-  background: var(--p2); color: #fff; display: flex; align-items: center; justify-content: center;
-  font-size: 1.35rem; border: none; box-shadow: 0 8px 20px -4px color-mix(in srgb, var(--p2) 60%, transparent);
-  z-index: 1000; cursor: pointer; transition: .16s;
-}
+.fab { position: fixed; right: 16px; bottom: 84px; width: 54px; height: 54px; border-radius: 17px; background: var(--p2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; border: none; box-shadow: 0 8px 20px -4px color-mix(in srgb, var(--p2) 60%, transparent); z-index: 1000; cursor: pointer; transition: .16s; }
 .fab:active { transform: scale(.9) rotate(90deg); }
 
-/* ---------- Modals ---------- */
 .modal-w { position: fixed; inset: 0; background: rgba(15,23,42,.55); backdrop-filter: blur(3px); z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
-.modal-w[style*="flex"] .mbox { animation: slideUp .28s cubic-bezier(.2,.9,.3,1); }
-@keyframes slideUp { from { transform: translateY(40px); opacity: .4; } to { transform: none; opacity: 1; } }
 .mbox { background: var(--surface); width: 100%; max-width: 560px; border-radius: 22px 22px 0 0; padding: 22px 20px 26px; max-height: 94vh; overflow-y: auto; }
 .mbox h3 { font-size: 1.05rem; font-weight: 800; letter-spacing: -.3px; }
-.mbox > div:first-child i.fa-times { color: var(--muted2); font-size: 1.1rem; cursor: pointer; padding: 4px; }
 .fg { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
 label { font-size: .6rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
 input, select, textarea { padding: 11px 12px; border: 1px solid var(--line); border-radius: 11px; font-size: .9rem; background: #f8fafc; width: 100%; font-family: inherit; color: var(--txt); transition: .15s; }
 input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p2); background: #fff; box-shadow: 0 0 0 3px color-mix(in srgb, var(--p2) 13%, transparent); }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
-.fg > div[style*="grid"] label { display: flex; align-items: center; gap: 8px; text-transform: none; font-size: .8rem; font-weight: 600; color: var(--txt); padding: 10px 11px; background: #f8fafc; border: 1px solid var(--line); border-radius: 11px; cursor: pointer; letter-spacing: 0; }
-.fg > div[style*="grid"] input[type=checkbox] { width: auto; accent-color: var(--p2); transform: scale(1.2); }
 .btn-s { background: var(--p2); color: #fff; width: 100%; padding: 14px; border: none; border-radius: 14px; font-weight: 800; font-size: .92rem; cursor: pointer; margin-top: 4px; box-shadow: 0 8px 18px -6px color-mix(in srgb, var(--p2) 55%, transparent); transition: .16s; }
-.btn-s:active { transform: scale(.98); }
 
-/* ---------- Loader ---------- */
 #loader { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: flex; justify-content: center; align-items: center; }
-#loader i { color: var(--p2); }
 
-/* ================= DESKTOP ================= */
 @media (min-width: 900px) {
   body { padding: 0 0 0 var(--side-w); }
-
   header { padding: 0 26px; }
-
-  /* bottom-nav → left sidebar */
-  .bottom-nav {
-    top: 0; bottom: 0; left: 0; width: var(--side-w); height: 100vh;
-    flex-direction: column; align-items: stretch; gap: 4px;
-    border-top: none; border-right: 1px solid var(--line);
-    background: var(--surface); backdrop-filter: none; box-shadow: none;
-    padding: 16px 12px;
-  }
-  .bottom-nav .side-brand {
-    display: flex; align-items: center; gap: 10px; padding: 6px 10px 18px;
-    font-weight: 800; font-size: 1rem; color: var(--p); letter-spacing: -.3px;
-  }
-  .bottom-nav .side-brand i { color: var(--p2); font-size: 1.2rem; }
-  .n-i {
-    flex: none; display: flex; flex-direction: row; align-items: center; gap: 12px;
-    text-align: left; padding: 12px 14px; font-size: .84rem; border-radius: 12px; color: var(--muted);
-  }
+  .bottom-nav { top: 0; bottom: 0; left: 0; width: var(--side-w); height: 100vh; flex-direction: column; align-items: stretch; gap: 4px; border-top: none; border-right: 1px solid var(--line); background: var(--surface); backdrop-filter: none; box-shadow: none; padding: 16px 12px; }
+  .n-i { flex: none; display: flex; flex-direction: row; align-items: center; gap: 12px; text-align: left; padding: 12px 14px; font-size: .84rem; border-radius: 12px; color: var(--muted); }
   .n-i i { margin: 0; font-size: 1.05rem; width: 22px; text-align: center; }
   .n-i.active { color: var(--p2); background: color-mix(in srgb, var(--p2) 10%, transparent); }
   .n-i.active::before { display: none; }
-
   .container { padding: 22px 30px 60px; }
   #list { grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 14px; }
-  .card { padding: 15px 16px; }
-
-  .fab { right: 30px; bottom: 30px; width: 58px; height: 58px; }
-
-  /* modals centered */
   .modal-w { align-items: center; padding: 24px; }
-  .mbox { border-radius: 20px; max-width: 620px; max-height: 88vh; box-shadow: var(--sh-lg); }
-  .modal-w[style*="flex"] .mbox { animation: popIn .22s cubic-bezier(.2,.9,.3,1); }
-  @keyframes popIn { from { transform: scale(.96); opacity: .4; } to { transform: none; opacity: 1; } }
-
-  .tool-row { max-width: 640px; }
-}
-@media (min-width: 1300px) {
-  #list { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .mbox { border-radius: 20px; max-width: 620px; max-height: 88vh; }
 }
 </style>
 </head>
 <body data-co="heimek">
 
-<div id="loader"><i class="fa fa-spinner fa-spin fa-2x" style="color:var(--p2)"></i></div>
+<div id="loader"><i class="fa fa-spinner fa-spin fa-2x"></i></div>
 
 <header>
-  <div style="font-weight:bold; font-size: 0.85rem;" id="brd">HEIMEK CRM</div>
+  <div style="font-weight:900; letter-spacing: -0.5px;" id="brd">HEIMEK CRM</div>
   <div class="btns">
     <button class="btn-c on" id="b-hmk" onclick="setCo('heimek')">HMK</button>
     <button class="btn-c" id="b-lux" onclick="setCo('luxwin')">LUX</button>
@@ -242,8 +147,8 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
 <div class="container">
   <div id="p-orders" class="panel on">
     <div class="tool-row">
-      <input type="text" id="q" placeholder="🔍 Пошук..." oninput="render()" style="flex:1;">
-      <select id="sortSel" onchange="render()" style="width: auto; padding: 5px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.7rem; font-weight: bold; color: #64748b;">
+      <input type="text" id="q" placeholder="🔍 Пошук..." oninput="render()">
+      <select id="sortSel" onchange="render()">
         <option value="status">⇅ Статус</option>
         <option value="deadline">⇅ Дедлайн</option>
         <option value="new">⇅ Нові</option>
@@ -255,35 +160,33 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
     <div id="list"></div>
   </div>
   <div id="p-clients" class="panel">
-    <input type="text" id="qc" placeholder="🔍 Пошук клієнта..." oninput="renderC()" style="margin-bottom:10px; padding:10px; border-radius:10px; border:1px solid #cbd5e1; width:100%; font-size:0.8rem;">
-    <div id="listC"></div>
+    <input type="text" id="qc" placeholder="🔍 Пошук клієнта..." oninput="renderC()">
+    <div id="listC" style="margin-top:15px"></div>
   </div>
   <div id="p-stats" class="panel"><div id="statsDisplay"></div></div>
 </div>
 
 <div class="bottom-nav">
-  <div class="side-brand"><i class="fa fa-cubes"></i> ViknaPro CRM</div>
-  <button class="n-i active" id="ni-orders" onclick="tab('orders')"><i class="fa fa-list"></i>Замовлення</button>
-  <button class="n-i" id="ni-clients" onclick="tab('clients')"><i class="fa fa-users"></i>Клієнти</button>
-  <button class="n-i" id="ni-stats" onclick="tab('stats')"><i class="fa fa-chart-line"></i>Звіт</button>
+  <button class="n-i active" id="ni-orders" onclick="tab('orders')"><i class="fa fa-list"></i><span>Замовлення</span></button>
+  <button class="n-i" id="ni-clients" onclick="tab('clients')"><i class="fa fa-users"></i><span>Клієнти</span></button>
+  <button class="n-i" id="ni-stats" onclick="tab('stats')"><i class="fa fa-chart-line"></i><span>Звіт</span></button>
 </div>
 
 <button class="fab" onclick="fab()"><i class="fa fa-plus"></i></button>
 
-<!-- МОДАЛКИ (БЕЗ ЗМІН) -->
 <div id="mO" class="modal-w">
   <div class="mbox">
-    <div style="display:flex;justify-content:space-between;margin-bottom:10px;"><h3>Замовлення</h3><i class="fa fa-times" onclick="closeM('mO')"></i></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:15px;"><h3>Замовлення</h3><i class="fa fa-times" onclick="closeM('mO')"></i></div>
     <div class="fg"><label>Клієнт</label><input id="fCl" list="dlC"><datalist id="dlC"></datalist></div>
     <div class="grid"><div class="fg"><label>Виріб</label><input id="fPr"></div><div class="fg"><label>Фабрика</label><select id="fFa"><option>Eko-okna</option><option>Seharia</option><option>Ukraine</option></select></div></div>
     <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan()"><option>Кошторис</option><option>Підтверджено</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
     <div id="canB" class="fg" style="display:none"><label style="color:red">Причина скасування</label><textarea id="fCan"></textarea></div>
     <div class="grid"><div class="fg"><label>Ціна HT €</label><input id="fSa" type="number" oninput="calc()"></div><div class="fg"><label>Монтаж €</label><input id="fIn" type="number" oninput="calc()"></div></div>
-    <div class="grid"><div class="fg"><label>TVA %</label><select id="fTv" onchange="calc()"></select></div><div class="fg"><label>Сума TTC €</label><input id="fTt" readonly style="background:#fef08a;font-weight:bold"></div></div>
+    <div class="grid"><div class="fg"><label>TVA %</label><select id="fTv" onchange="calc()"></select></div><div class="fg"><label>Сума TTC €</label><input id="fTt" readonly style="background:#fefce8;font-weight:bold"></div></div>
     <div class="grid"><div class="fg"><label>Ціна Фабрики €</label><input id="fCo" type="number" oninput="calc()"></div><div class="fg"><label>Вже оплачено €</label><input id="fPa" type="number"></div></div>
-    <div class="fg"><label>Чистий прибуток</label><input id="fMr" readonly style="background:#ccfbf1;font-weight:bold;color:#0f766e"></div>
+    <div class="fg"><label>Чистий прибуток</label><input id="fMr" readonly style="background:#f0fdf4;font-weight:bold;color:#166534"></div>
     <div class="fg"><label>Етапи</label>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.75rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.75rem">
         <label><input type="checkbox" id="fChM"> 📐 Замір</label>
         <label><input type="checkbox" id="fChO"> 🏭 Завод</label>
         <label><input type="checkbox" id="fChS"> 🚚 Склад</label>
@@ -299,11 +202,11 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
 
 <div id="mC" class="modal-w">
   <div class="mbox">
-    <div style="display:flex;justify-content:space-between;margin-bottom:10px;"><h3>Клієнт</h3><i class="fa fa-times" onclick="closeM('mC')"></i></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:15px;"><h3>Клієнт</h3><i class="fa fa-times" onclick="closeM('mC')"></i></div>
     <div class="fg"><label>ПІБ / Компанія</label><input id="cNa"></div>
     <div class="grid"><div class="fg"><label>Телефон</label><input id="cPh" type="tel"></div><div class="fg"><label>Адреса</label><input id="cAd"></div></div>
     <div class="fg"><label>Нотатки</label><textarea id="cNo"></textarea></div>
-    <div id="hSec" style="margin-top:10px; border-top:1px solid #eee; padding-top:10px; display:none;"><label>Історія:</label><div id="hList"></div></div>
+    <div id="hSec" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:none;"><label>Історія:</label><div id="hList"></div></div>
     <button class="btn-s" onclick="saveC()">ЗБЕРЕГТИ КЛІЄНТА</button>
     <button id="btnDC" onclick="delC()" style="color:red;border:none;background:none;width:100%;margin-top:10px;font-size:0.8rem;display:none">Видалити</button>
   </div>
@@ -311,7 +214,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
 
 <script>
 const URL_SB = "https://ysctdrsxqtekxuvkjmdx.supabase.co";
-const KEY_SB = "eyJhbGci••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••";
+const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzY3RkcnN4cXRla3h1dmtqbWR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODkxOTksImV4cCI6MjA5OTE2NTE5OX0.vmOKBfc1dGLgrNu1YQ9IVF-v6nUGb2tzEK29L1X0aiQ";
 const _sb = window.supabase.createClient(URL_SB, KEY_SB);
 
 let co='heimek', orders=[], clients=[], editId=null, curT='orders', curS='Усі';
@@ -331,7 +234,6 @@ const render = () => {
   const q=document.getElementById('q').value.toLowerCase();
   const sort=document.getElementById('sortSel').value;
   const list=document.getElementById('list'); const today=new Date().toISOString().split('T')[0];
-
   let f = orders.filter(o=>( (o.client||"") + (o.product||"") + (o.factory||"") ).toLowerCase().includes(q));
   if (curS === 'Боржники') f = f.filter(o => ((parseFloat(o.total_ttc)||0) - (parseFloat(o.paid_amount)||0)) > 1 && o.status !== 'Виконано' && o.status !== 'Скасовано');
   else if(curS!=='Усі') f = f.filter(o => o.status === curS);
@@ -343,7 +245,7 @@ const render = () => {
   else if(sort === 'old') f.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
   else if(sort === 'name') f.sort((a,b) => (a.client||"").localeCompare(b.client||""));
   else if(sort === 'price') f.sort((a,b) => (parseFloat(b.total_ttc)||0) - (parseFloat(a.total_ttc)||0));
-
+  
   list.innerHTML = f.map(o=>{
     const ttc = parseFloat(o.total_ttc)||0; const paid = parseFloat(o.paid_amount)||0; const debt = ttc - paid;
     const over = o.deadline && o.deadline < today && o.status !== 'Виконано' && o.status !== 'Скасовано';
@@ -351,9 +253,10 @@ const render = () => {
     const cl = clients.find(x=>x.name===o.client)||{};
     let stCl = o.status === 'Виконано' ? 'st-done' : o.status === 'Скасовано' ? 'st-cancelled' : o.status === 'В роботі' ? 'st-inwork' : o.status === 'На складі' ? 'st-storage' : '';
 
-    return `<div class="card ${over?'st-over':''} ${rem?'rem':''} ${stCl}" onclick="openO('${o.id}')">
+    return `
+      <div class="card ${over?'st-over':''} ${rem?'rem':''} ${stCl}" onclick="openO('${o.id}')">
         <div class="c-row-1"><div class="c-name">${o.client||'Без імені'}</div><div class="status-badge">${o.status}</div></div>
-        <div class="c-row-2">🏭 ${o.factory} | ${o.product||'---'}</div>
+        <div class="c-row-2"><i class="fa fa-industry" style="font-size:10px"></i> ${o.factory} | ${o.product||'---'}</div>
         <div class="c-row-3">
           <div class="c-steps-inline">
             <i class="fa fa-ruler-combined ${o.check_measured?'active':''}"></i>
@@ -364,73 +267,90 @@ const render = () => {
           <div style="display:flex; align-items:center; gap:8px;">
             <a href="tel:${cl.phone}" onclick="event.stopPropagation()"><i class="fa fa-phone-alt" style="color:var(--success)"></i></a>
             <span style="font-weight:900;">${ttc.toFixed(0)}€</span>
-            <span class="debt-tag ${debt > 1 ? 'red' : 'green'}">${debt > 1 ? debt.toFixed(0)+'€' : 'OK'}</span>
+            <span class="debt-tag ${debt > 1 ? 'red' : 'green'}">${debt > 1 ? debt.toFixed(0)+'€' : 'ОК'}</span>
           </div>
         </div>
       </div>`}).join('');
 }
 
-const renderStats = () => {
-  const container = document.getElementById('statsDisplay');
-  const profit = orders.reduce((s, o) => s + (parseFloat(o.sale_price_ht)||0) - (parseFloat(o.cost_price)||0) + (parseFloat(o.install_cost)||0), 0);
-  const statuses = ['Кошторис', 'Підтверджено', 'В роботі', 'На складі'];
-
-  let statsHtml = '';
-  statuses.forEach(s => {
-    const sOrders = orders.filter(o => o.status === s);
-    const totalHT = sOrders.reduce((sum, o) => sum + (parseFloat(o.sale_price_ht) || 0), 0);
-    // Знаходимо кнопку фільтра для кліку
-    statsHtml += `
-      <div onclick="tab('orders'); flt('${s}', document.querySelector('[data-s=\\'${s}\\']'))" style="background:white; padding:15px; border-radius:15px; margin-bottom:10px; border:1px solid #eee; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
-        <div><small style="color:gray; text-transform:uppercase;">${s}</small><br><strong>${sOrders.length} замовл.</strong></div>
-        <div style="text-align:right;"><b style="font-size:1.1rem; color:var(--p2)">${totalHT.toFixed(0)} €</b></div>
-      </div>`;
-  });
-
-  container.innerHTML = `
-    <div style="background:var(--p); color:white; padding:20px; border-radius:20px; text-align:center; margin-bottom:15px;">
-      <small>Чистий прибуток (HT)</small><h2 style="margin:5px 0;">${profit.toFixed(0)} €</h2>
-    </div>
-    ${statsHtml}
-  `;
+const openO = id => {
+  editId=id; const o=id?orders.find(x=>x.id==id):{};
+  ['fCl','fPr','fSa','fCo','fIn','fPa','fDl','fRe','fNo','fCan'].forEach(i=>document.getElementById(i).value='');
+  ['fChM','fChO','fChS','fChI'].forEach(i=>document.getElementById(i).checked=false);
+  if(id){
+    document.getElementById('fCl').value=o.client; document.getElementById('fPr').value=o.product;
+    document.getElementById('fSa').value=o.sale_price_ht; document.getElementById('fTv').value=o.tva_rate;
+    document.getElementById('fCo').value=o.cost_price; document.getElementById('fIn').value=o.install_cost;
+    document.getElementById('fPa').value=o.paid_amount; document.getElementById('fDl').value=o.deadline;
+    document.getElementById('fRe').value=o.reminder_date; document.getElementById('fSt').value=o.status;
+    document.getElementById('fNo').value=o.notes; document.getElementById('fCan').value=o.cancel_reason;
+    document.getElementById('fChM').checked=o.check_measured; document.getElementById('fChO').checked=o.check_ordered;
+    document.getElementById('fChS').checked=o.check_storage; document.getElementById('fChI').checked=o.check_installed;
+    document.getElementById('btnD').style.display='block';
+  } else document.getElementById('btnD').style.display='none';
+  tglCan(); calc(); document.getElementById('mO').style.display='flex';
 }
 
-function flt(s,el) {
-  curS=s;
-  document.querySelectorAll('.s-t').forEach(t=>t.classList.remove('active'));
-  if(el) el.classList.add('active');
-  else {
-    // Якщо клікнули зі звіту, шукаємо потрібну кнопку
-    const target = document.querySelector(`[data-s='${s}']`);
-    if(target) target.classList.add('active');
-  }
-  render();
+const openCE = id => {
+  editId=id; const c=clients.find(x=>x.id==id);
+  document.getElementById('cNa').value=c.name; document.getElementById('cPh').value=c.phone;
+  document.getElementById('cAd').value=c.address; document.getElementById('cNo').value=c.notes;
+  const history = orders.filter(o => o.client === c.name);
+  document.getElementById('hSec').style.display = 'block';
+  document.getElementById('hList').innerHTML = history.map(o => `
+    <div style="font-size:0.75rem; background:#f8fafc; padding:8px; border-radius:8px; margin-top:5px; display:flex; justify-content:space-between;" onclick="event.stopPropagation(); closeM('mC'); openO('${o.id}')">
+      <span>${o.product}</span><b>${o.total_ttc} €</b>
+    </div>`).join('') || 'Замовлень немає';
+  document.getElementById('btnDC').style.display='block'; document.getElementById('mC').style.display='flex';
 }
 
-const tab = t => {
-  curT=t; document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
-  document.getElementById('p-'+t).style.display='block';
-  document.querySelectorAll('.n-i').forEach(i=>i.classList.remove('active'));
-  document.getElementById('ni-'+t).classList.add('active');
+async function saveO() {
+  const o = {
+    id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value,
+    factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value,
+    sale_price_ht: parseFloat(document.getElementById('fSa').value)||0, tva_rate: parseFloat(document.getElementById('fTv').value)||0, total_ttc: parseFloat(document.getElementById('fTt').value)||0,
+    cost_price: parseFloat(document.getElementById('fCo').value)||0, install_cost: parseFloat(document.getElementById('fIn').value)||0, paid_amount: parseFloat(document.getElementById('fPa').value)||0,
+    deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value,
+    cancel_reason: document.getElementById('fCan').value, check_measured: document.getElementById('fChM').checked,
+    check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked
+  };
+  await _sb.from('orders').upsert(o); closeM('mO'); sync();
+}
+
+async function saveC() {
+  const c = { id: editId || 'CNEW'+Date.now(), company: co, name: document.getElementById('cNa').value, phone: document.getElementById('cPh').value, address: document.getElementById('cAd').value, notes: document.getElementById('cNo').value };
+  await _sb.from('clients').upsert(c); closeM('mC'); sync();
+}
+
+const setCo = k => { co=k; document.body.setAttribute('data-co',k); document.getElementById('brd').innerText=k.toUpperCase()+' CRM'; updateTva(); sync(); }
+const tab = t => { 
+  curT=t; document.querySelectorAll('.panel').forEach(p=>p.style.display='none'); 
+  document.getElementById('p-'+t).style.display='block'; 
+  document.querySelectorAll('.n-i').forEach(i=>i.classList.remove('active')); 
+  document.getElementById('ni-'+t).classList.add('active'); 
   document.getElementById('navS').style.display = t === 'orders' ? 'flex' : 'none';
-  if(t==='clients') renderC();
+  if(t==='clients') renderC(); 
   if(t==='stats') renderStats();
 }
 
-// РЕШТА ФУНКЦІЙ (БЕЗ ЗМІН)
-const openO = id => { editId=id; const o=id?orders.find(x=>x.id==id):{}; ['fCl','fPr','fSa','fCo','fIn','fPa','fDl','fRe','fNo','fCan'].forEach(i=>document.getElementById(i).value=''); ['fChM','fChO','fChS','fChI'].forEach(i=>document.getElementById(i).checked=false); if(id){ document.getElementById('fCl').value=o.client; document.getElementById('fPr').value=o.product; document.getElementById('fSa').value=o.sale_price_ht; document.getElementById('fTv').value=o.tva_rate; document.getElementById('fCo').value=o.cost_price; document.getElementById('fIn').value=o.install_cost; document.getElementById('fPa').value=o.paid_amount; document.getElementById('fDl').value=o.deadline; document.getElementById('fRe').value=o.reminder_date; document.getElementById('fSt').value=o.status; document.getElementById('fNo').value=o.notes; document.getElementById('fCan').value=o.cancel_reason; document.getElementById('fChM').checked=o.check_measured; document.getElementById('fChO').checked=o.check_ordered; document.getElementById('fChS').checked=o.check_storage; document.getElementById('fChI').checked=o.check_installed; document.getElementById('btnD').style.display='block'; } else document.getElementById('btnD').style.display='none'; tglCan(); calc(); document.getElementById('mO').style.display='flex'; }
-async function saveO() { const o = { id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value, factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value, sale_price_ht: parseFloat(document.getElementById('fSa').value)||0, tva_rate: parseFloat(document.getElementById('fTv').value)||0, total_ttc: parseFloat(document.getElementById('fTt').value)||0, cost_price: parseFloat(document.getElementById('fCo').value)||0, install_cost: parseFloat(document.getElementById('fIn').value)||0, paid_amount: parseFloat(document.getElementById('fPa').value)||0, deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value, cancel_reason: document.getElementById('fCan').value, check_measured: document.getElementById('fChM').checked, check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked }; await _sb.from('orders').upsert(o); closeM('mO'); sync(); }
-const openCE = id => { editId=id; const c=clients.find(x=>x.id==id); document.getElementById('cNa').value=c.name; document.getElementById('cPh').value=c.phone; document.getElementById('cAd').value=c.address; document.getElementById('cNo').value=c.notes; const h = orders.filter(o => o.client === c.name); document.getElementById('hSec').style.display = 'block'; document.getElementById('hList').innerHTML = h.map(o => `<div style="font-size:0.7rem; background:#f8fafc; padding:6px; border-radius:6px; margin-top:4px; display:flex; justify-content:space-between;" onclick="event.stopPropagation(); closeM('mC'); openO('${o.id}')"><span>${o.product}</span><b>${o.total_ttc} €</b></div>`).join('') || '<small>Замовлень немає</small>'; document.getElementById('btnDC').style.display='block'; document.getElementById('mC').style.display='flex'; }
-async function saveC() { const c = { id: editId || 'CNEW'+Date.now(), company: co, name: document.getElementById('cNa').value, phone: document.getElementById('cPh').value, address: document.getElementById('cAd').value, notes: document.getElementById('cNo').value }; await _sb.from('clients').upsert(c); closeM('mC'); sync(); }
-async function delO() { if(confirm('Видалити?')) { await _sb.from('orders').delete().eq('id', editId); closeM('mO'); sync(); } }
-async function delC() { if(confirm('Видалити?')) { await _sb.from('clients').delete().eq('id', editId); closeM('mC'); sync(); } }
-const setCo = k => { co=k; document.body.setAttribute('data-co',k); document.getElementById('brd').innerText=k.toUpperCase()+' CRM'; document.getElementById('b-hmk').classList.toggle('on', k==='heimek'); document.getElementById('b-lux').classList.toggle('on', k==='luxwin'); updateTva(); sync(); }
-const calc = () => { const h=parseFloat(document.getElementById('fSa').value)||0, t=parseFloat(document.getElementById('fTv').value)||0, c=parseFloat(document.getElementById('fCo').value)||0, i=parseFloat(document.getElementById('fIn').value)||0; document.getElementById('fTt').value = ((h+i)*(1+t/100)).toFixed(2); document.getElementById('fMr').value = ((h-c)+i).toFixed(2) + ' €'; }
+const flt = (s,el) => { curS=s; document.querySelectorAll('.s-t').forEach(t=>t.classList.remove('active')); el.classList.add('active'); render(); }
+const calc = () => {
+  const h=parseFloat(document.getElementById('fSa').value)||0, t=parseFloat(document.getElementById('fTv').value)||0, c=parseFloat(document.getElementById('fCo').value)||0, i=parseFloat(document.getElementById('fIn').value)||0;
+  document.getElementById('fTt').value = ((h+i)*(1+t/100)).toFixed(2);
+  document.getElementById('fMr').value = ((h-c)+i).toFixed(2) + ' €';
+}
 const closeM = id => { document.getElementById(id).style.display='none'; editId=null; }
 const tglCan = () => { const b=document.getElementById('canB'); if(b) b.style.display = document.getElementById('fSt').value === 'Скасовано' ? 'block' : 'none'; }
 const fab = () => curT === 'clients' ? (editId=null, document.getElementById('cNa').value='', document.getElementById('cPh').value='', document.getElementById('cAd').value='', document.getElementById('cNo').value='', document.getElementById('hSec').style.display='none', document.getElementById('mC').style.display='flex') : openO(null);
 const updateDl = () => { document.getElementById('dlC').innerHTML=clients.map(c=>`<option value="${c.name}">`).join(''); }
+async function delO() { if(confirm('Видалити?')) { await _sb.from('orders').delete().eq('id', editId); closeM('mO'); sync(); } }
+async function delC() { if(confirm('Видалити?')) { await _sb.from('clients').delete().eq('id', editId); closeM('mC'); sync(); } }
 function renderC() { const q=document.getElementById('qc').value.toLowerCase(); document.getElementById('listC').innerHTML = clients.filter(c=>(c.name||'').toLowerCase().includes(q)).map(c=>`<div class="card" onclick="openCE('${c.id}')"><strong>${c.name||'Без імені'}</strong><br><small>${c.phone}</small></div>`).join(''); }
+function renderStats() {
+  const profit = orders.reduce((s, o) => s + (parseFloat(o.sale_price_ht)||0) - (parseFloat(o.cost_price)||0) + (parseFloat(o.install_cost)||0), 0);
+  const debt = orders.reduce((s, o) => { if(o.status==='Скасовано') return s; return s + (parseFloat(o.total_ttc)||0) - (parseFloat(o.paid_amount)||0); }, 0);
+  document.getElementById('statsDisplay').innerHTML = `<div style="background:var(--p); color:white; padding:20px; border-radius:20px; text-align:center; margin-bottom:15px;"><small>Чистий прибуток (HT)</small><h2 style="margin:5px 0;">${profit.toFixed(0)} €</h2><small>Загальний борг: ${debt.toFixed(0)} €</small></div>`;
+}
 function updateTva() { const sel = document.getElementById('fTv'); if(sel) sel.innerHTML = TVA_OPTS[co].map(v => `<option value="${v}">${v}%</option>`).join(''); }
 function openSheet() { window.open("https://supabase.com/dashboard/project/ysctdrsxqtekxuvkjmdx/editor", "_blank"); }
 window.onload = () => { updateTva(); sync(); };
