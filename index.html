@@ -13,51 +13,68 @@
 }
 [data-co="luxwin"] { --p: #0f2d1a; --p2: #276749; --a: #68d391; }
 *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent;}
-body { background: var(--bg); color: var(--txt); font-family: 'Segoe UI', sans-serif; padding-bottom: 70px; }
+body { background: var(--bg); color: var(--txt); font-family: 'Segoe UI', sans-serif; padding-bottom: 75px; }
+
 header{background:var(--p); color:#fff; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:1000;}
 .btns{display:flex; background:rgba(0,0,0,0.2); padding:2px; border-radius:10px;}
 .btn-c{border:none; background:none; color:#fff; opacity:0.5; padding:4px 10px; cursor:pointer; font-weight:bold; font-size:0.65rem;}
 .btn-c.on{opacity:1; background:rgba(255,255,255,0.2); border-radius:8px;}
+
 .nav-s{display:flex; gap:8px; overflow-x:auto; padding:8px 12px; background:#fff; border-bottom:1px solid #eee; position:sticky; top:41px; z-index:900; scrollbar-width:none;}
+.nav-s::-webkit-scrollbar { display: none; }
 .s-t{padding:6px 12px; border-radius:15px; background:#f0f2f5; font-size:0.65rem; font-weight:bold; color:#718096; white-space:nowrap; border:1px solid #e2e8f0; cursor:pointer;}
 .s-t.active{background:var(--p2); color:#fff; border-color:var(--p2);}
+
 .container{padding:10px; max-width:600px; margin:0 auto;}
 .panel{display:none;} .panel.on{display:block;}
-.card { background: #fff; border-radius: 15px; padding: 12px 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; position: relative; overflow: hidden; border-left: 4px solid var(--p2); }
+
+.card {
+  background: #fff; border-radius: 15px; padding: 12px 14px; margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+  position: relative; overflow: hidden; border-left: 4px solid var(--p2);
+}
 .card.over { border-left-color: var(--danger); background: #fff5f5; }
-.card.rem { border-right: 3px solid orange; background: #fffaf0; }
-.c-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+
+.c-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
 .c-name { font-size: 0.95rem; font-weight: 800; color: var(--p); flex: 1; }
 .status-badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 5px; background: #edf2f7; color: #4a5568; font-weight: bold; }
-.c-info { font-size: 0.75rem; color: #718096; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+.c-info { font-size: 0.75rem; color: #718096; margin-bottom: 8px; }
+
 .c-steps { display: flex; justify-content: space-between; margin: 8px 0; border-top: 1px solid #f8fafc; padding-top: 8px; }
 .step { display: flex; align-items: center; gap: 4px; opacity: 0.2; }
 .step.active { opacity: 1; color: var(--p2); }
 .step i { font-size: 0.75rem; }
 .step span { font-size: 0.55rem; font-weight: bold; text-transform: uppercase; }
+
 .c-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #edf2f7; }
 .val { font-size: 1rem; font-weight: 900; }
+.c-acts { display: flex; gap: 12px; align-items: center; }
+.c-acts i { font-size: 1.1rem; color: #cbd5e0; }
 .debt-tag { padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; }
 .debt-tag.red { background: #fff5f5; color: var(--danger); }
 .debt-tag.green { background: #f0fff4; color: var(--success); }
+
 .bottom-nav {position:fixed; bottom:0; width:100%; background:white; display:flex; border-top:1px solid #ddd; z-index:1000;}
-.n-i {flex:1; padding:8px; border:none; background:none; text-align:center; color:#718096; font-size:0.55rem; font-weight:bold;}
+.n-i {flex:1; padding:8px; border:none; background:none; text-align:center; color:#718096; font-size:0.6rem; font-weight:bold;}
 .n-i.active {color:var(--p2);}
 .n-i i {display:block; font-size:1.1rem; margin-bottom:2px;}
+
 .modal-w{position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:2000; display:none; align-items:flex-end; justify-content:center;}
-.mbox{background:#fff; width:100%; max-width:550px; border-radius:20px 20px 0 0; padding:20px; max-height:95vh; overflow-y:auto;}
-.fg{display:flex; flex-direction:column; gap:3px; margin-bottom:10px;}
-label{font-size:0.6rem; font-weight:bold; color:#718096; text-transform:uppercase;}
-input,select,textarea{padding:10px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9rem; background:#f8fafc; width:100%;}
-.grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
-.fab{position:fixed; right:15px; bottom:75px; width:50px; height:50px; border-radius:25px; background:var(--p2); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.2rem; border:none; box-shadow:0 4px 10px rgba(0,0,0,0.2); z-index:1000;}
-.btn-s{background:var(--p2); color:#fff; width:100%; padding:12px; border:none; border-radius:12px; font-weight:bold; font-size:0.9rem; margin-top:10px;}
+.mbox {background:white; width:100%; max-width:550px; border-radius:25px 25px 0 0; padding:25px; max-height:95vh; overflow-y:auto;}
+.fg{display:flex; flex-direction:column; gap:3px; margin-bottom:12px;}
+label{font-size:0.65rem; font-weight:bold; color:#718096; text-transform:uppercase;}
+input,select,textarea{padding:12px; border:1px solid #e2e8f0; border-radius:10px; font-size:1rem; background:#f8fafc; width:100%;}
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+
+.fab{position:fixed; right:20px; bottom:80px; width:56px; height:56px; border-radius:28px; background:var(--p2); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.5rem; border:none; box-shadow:0 4px 15px rgba(0,0,0,0.2); z-index:1000;}
+.btn-s{background:var(--p2); color:#fff; width:100%; padding:15px; border:none; border-radius:15px; font-weight:bold; font-size:1rem;}
+
 #loader { position: fixed; inset: 0; background: white; z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 </style>
 </head>
 <body data-co="heimek">
 
-<div id="loader"><i class="fa fa-spinner fa-spin fa-2x" style="color:var(--p2)"></i><p id="loadMsg" style="margin-top:10px; font-size:0.7rem; color:gray;">Завантаження...</p></div>
+<div id="loader"><i class="fa fa-spinner fa-spin fa-2x" style="color:var(--p2)"></i><p style="margin-top:10px; font-size:0.7rem; color:gray;">Завантаження...</p></div>
 
 <header>
   <div style="font-weight:bold; font-size: 0.9rem;" id="brd">HEIMEK CRM</div>
@@ -133,20 +150,27 @@ input,select,textarea{padding:10px; border:1px solid #e2e8f0; border-radius:8px;
     </div>
     <div class="fg"><label>Передзвонити ⏰</label><input id="fRe" type="date"></div>
     <div class="fg"><label>Нотатки</label><textarea id="fNo"></textarea></div>
-    <button class="btn-s" onclick="save()">ЗБЕРЕГТИ</button>
+    <button class="btn-s" onclick="saveO()">ЗБЕРЕГТИ</button>
     <button id="btnD" onclick="delO()" style="color:red;border:none;background:none;width:100%;margin-top:10px;font-size:0.8rem;display:none">Видалити</button>
   </div>
 </div>
 
+<!-- МОДАЛКА КЛІЄНТА -->
 <div id="mC" class="modal-w">
   <div class="mbox">
     <div style="display:flex;justify-content:space-between;margin-bottom:10px;"><h3>Клієнт</h3><i class="fa fa-times" onclick="closeM('mC')"></i></div>
     <div class="fg"><label>ПІБ / Компанія</label><input id="cNa"></div>
-    <div class="fg"><label>Телефон</label><input id="cPh" type="tel"></div>
-    <div class="fg"><label>Адреса</label><input id="cAd"></div>
+    <div class="grid">
+      <div class="fg"><label>Телефон</label><input id="cPh" type="tel"></div>
+      <div class="fg"><label>Адреса</label><input id="cAd"></div>
+    </div>
     <div class="fg"><label>Нотатки</label><textarea id="cNo"></textarea></div>
-    <button class="btn-s" onclick="saveC()">ЗБЕРЕГТИ КЛІЄНТА</button>
-    <button id="btnDC" onclick="delC()" style="color:red;border:none;background:none;width:100%;margin-top:10px;font-size:0.8rem;display:none">Видалити</button>
+    <div id="hSec" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:none;">
+      <label>Історія замовлень:</label>
+      <div id="hList"></div>
+    </div>
+    <button class="btn-s" onclick="saveC()" style="margin-top:15px;">ЗБЕРЕГТИ КЛІЄНТА</button>
+    <button id="btnDC" onclick="delC()" style="color:red;border:none;background:none;width:100%;margin-top:10px;font-size:0.8rem;display:none">Видалити клієнта</button>
   </div>
 </div>
 
@@ -171,7 +195,7 @@ async function sync() {
 const render = () => {
   const q=document.getElementById('q').value.toLowerCase();
   const list=document.getElementById('list'); const today=new Date().toISOString().split('T')[0];
-  let f = orders.filter(o=>( (o.client||"") + (o.product||'') + (o.factory||'')).toLowerCase().includes(q));
+  let f = orders.filter(o=>(o.client + (o.product||'') + (o.factory||'')).toLowerCase().includes(q));
   if (curS === 'Боржники') {
     f = f.filter(o => ((parseFloat(o.total_ttc)||0) - (parseFloat(o.paid_amount)||0)) > 1 && o.status !== 'Виконано');
   } else if(curS!=='Усі') f = f.filter(o => o.status === curS);
@@ -197,6 +221,7 @@ const render = () => {
           <div class="c-acts">
             <a href="tel:${cl.phone}" onclick="event.stopPropagation()"><i class="fa fa-phone-alt" style="color:var(--success)"></i></a>
             <a href="https://wa.me/${cl.phone}" onclick="event.stopPropagation()"><i class="fab fa-whatsapp" style="color:#25d366"></i></a>
+            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cl.address||'')}" onclick="event.stopPropagation()"><i class="fa fa-map-marker-alt" style="color:var(--danger)"></i></a>
             <div class="debt-tag ${debt > 1 ? 'red' : 'green'}">${debt > 1 ? 'Борг: '+debt.toFixed(0)+'€' : 'ОК'}</div>
           </div>
         </div>
@@ -205,7 +230,7 @@ const render = () => {
 
 const renderC = () => {
   const q=document.getElementById('qc').value.toLowerCase();
-  document.getElementById('listC').innerHTML = clients.filter(c=>( (c.name||"") ).toLowerCase().includes(q)).map(c=>`
+  document.getElementById('listC').innerHTML = clients.filter(c=>(c.name||'').toLowerCase().includes(q)).map(c=>`
     <div class="card" onclick="openCE('${c.id}')"><strong>${c.name||'Без імені'}</strong><br><small>${c.phone || '---'}</small></div>`).join('');
 }
 
@@ -231,10 +256,16 @@ const openCE = id => {
   editId=id; const c=clients.find(x=>x.id==id);
   document.getElementById('cNa').value=c.name; document.getElementById('cPh').value=c.phone;
   document.getElementById('cAd').value=c.address; document.getElementById('cNo').value=c.notes;
+  const history = orders.filter(o => o.client === c.name);
+  document.getElementById('hSec').style.display = 'block';
+  document.getElementById('hList').innerHTML = history.map(o => `
+    <div style="font-size:0.75rem; background:#f8fafc; padding:8px; border-radius:8px; margin-top:5px; display:flex; justify-content:space-between;" onclick="event.stopPropagation(); closeM('mC'); openO('${o.id}')">
+      <span>${o.product}</span><b>${o.total_ttc} €</b>
+    </div>`).join('') || 'Замовлень немає';
   document.getElementById('btnDC').style.display='block'; document.getElementById('mC').style.display='flex';
 }
 
-async function save() {
+async function saveO() {
   const o = {
     id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value,
     factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value,
@@ -264,6 +295,7 @@ const tab = t => {
   document.getElementById('navS').style.display = t === 'orders' ? 'flex' : 'none';
   if(t==='clients') renderC(); 
 }
+const flt = (s,el) => { curS=s; document.querySelectorAll('.s-t').forEach(t=>t.classList.remove('active')); el.classList.add('active'); render(); }
 const calc = () => {
   const h=parseFloat(document.getElementById('fSa').value)||0, t=parseFloat(document.getElementById('fTv').value)||0, c=parseFloat(document.getElementById('fCo').value)||0, i=parseFloat(document.getElementById('fIn').value)||0;
   document.getElementById('fTt').value = ((h+i)*(1+t/100)).toFixed(2);
@@ -271,9 +303,9 @@ const calc = () => {
 }
 const closeM = id => { document.getElementById(id).style.display='none'; editId=null; }
 const tglCan = () => { const b=document.getElementById('canB'); if(b) b.style.display = document.getElementById('fSt').value === 'Скасовано' ? 'block' : 'none'; }
-const fab = () => curT === 'clients' ? (editId=null, document.getElementById('cNa').value='', document.getElementById('cPh').value='', document.getElementById('cAd').value='', document.getElementById('cNo').value='', document.getElementById('mC').style.display='flex') : openO(null);
+const fab = () => curT === 'clients' ? (editId=null, document.getElementById('cNa').value='', document.getElementById('cPh').value='', document.getElementById('cAd').value='', document.getElementById('cNo').value='', document.getElementById('hSec').style.display='none', document.getElementById('mC').style.display='flex') : openO(null);
 const updateDl = () => { document.getElementById('dlC').innerHTML=clients.map(c=>`<option value="${c.name}">`).join(''); }
-function renderStats() {
+const renderStats = () => {
   const profit = orders.reduce((s, o) => s + (parseFloat(o.sale_price_ht)||0) - (parseFloat(o.cost_price)||0) + (parseFloat(o.install_cost)||0), 0);
   const debt = orders.reduce((s, o) => { if(o.status==='Скасовано') return s; return s + (parseFloat(o.total_ttc)||0) - (parseFloat(o.paid_amount)||0); }, 0);
   document.getElementById('statsDisplay').innerHTML = `<div style="background:var(--p); color:white; padding:20px; border-radius:20px; text-align:center; margin-bottom:15px;"><small>Чистий прибуток (HT)</small><h2 style="margin:5px 0;">${profit.toFixed(0)} €</h2><small>Загальний борг: ${debt.toFixed(0)} €</small></div>`;
