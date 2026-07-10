@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>ViknaPro Premium CRM</title>
+<title>ViknaPro Secure CRM</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,16 +31,15 @@ header { background: linear-gradient(120deg, var(--p), var(--p2)); color: #fff; 
 .btn-c.on { opacity: 1; background: rgba(255,255,255,0.22); }
 
 .nav-s { display: flex; gap: 7px; overflow-x: auto; padding: 9px 14px; background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: var(--nav-h); z-index: 900; scrollbar-width: none; }
-.nav-s::-webkit-scrollbar { display: none; }
-.s-t { padding: 7px 13px; border-radius: 20px; background: #f2f4f9; font-size: .7rem; font-weight: 700; color: var(--muted); white-space: nowrap; border: 1px solid var(--line); cursor: pointer; }
-.s-t.active { background: var(--p2); color: #fff; border-color: var(--p2); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+.s-t { padding: 7px 13px; border-radius: 20px; background: #f2f4f9; font-size: .7rem; font-weight: 700; color: var(--muted); white-space: nowrap; border: 1px solid var(--line); cursor: pointer; transition: .15s; }
+.s-t.active { background: var(--p2); color: #fff; border-color: var(--p2); box-shadow: 0 5px 14px -4px rgba(37,99,235,0.4); }
 
 .container { padding: 14px; max-width: 1200px; margin: 0 auto; }
 .panel { display: none; } .panel.on { display: block; }
 #list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
 
 .card { 
-  background: var(--surface); border-radius: var(--radius); padding: 14px; box-shadow: var(--sh); 
+  background: var(--surface); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--sh); 
   border: 1px solid var(--line); position: relative; overflow: hidden; border-left: 5px solid var(--p2);
   display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s;
 }
@@ -60,7 +59,7 @@ header { background: linear-gradient(120deg, var(--p), var(--p2)); color: #fff; 
 .c-steps-inline i.active { color: var(--p2); }
 
 .c-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px dashed var(--line); }
-.val { font-size: 1.1rem; font-weight: 900; }
+.val { font-size: 1.1rem; font-weight: 900; color: var(--txt); }
 .debt-tag { font-size: .65rem; font-weight: 800; padding: 3px 8px; border-radius: 7px; }
 .debt-tag.red { background: #fee2e2; color: var(--danger); }
 .debt-tag.green { background: #dcfce7; color: var(--success); }
@@ -70,28 +69,26 @@ header { background: linear-gradient(120deg, var(--p), var(--p2)); color: #fff; 
 .n-i.active { color: var(--p2); }
 .n-i i { display: block; font-size: 1.2rem; margin-bottom: 2px; }
 
+/* PIN Modal */
+#pinM { background: var(--p); color: white; text-align: center; align-items: center; }
+.pin-box { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 20px; width: 280px; }
+.pin-dots { display: flex; justify-content: center; gap: 15px; margin: 20px 0; }
+.dot { width: 15px; height: 15px; border-radius: 50%; border: 2px solid white; }
+.dot.fill { background: white; }
+.numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+.num-btn { width: 60px; height: 60px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); background: none; color: white; font-size: 1.5rem; font-weight: bold; cursor: pointer; }
+.num-btn:active { background: rgba(255,255,255,0.2); }
+
 .modal-w { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
 .mbox { background: #fff; width: 100%; max-width: 550px; border-radius: 22px 22px 0 0; padding: 25px; max-height: 95vh; overflow-y: auto; }
 .fg { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
 label { font-size: .65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
 input, select, textarea { padding: 12px; border: 1px solid var(--line); border-radius: 12px; font-size: 1rem; background: #f8fafc; width: 100%; font-family: inherit; }
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-/* ВИПРАВЛЕНА КНОПКА ФАБ */
-.fab { 
-  position: fixed; right: 20px; bottom: 85px; 
-  width: 56px; height: 56px; border-radius: 50%; 
-  background: var(--p2); color: #fff; 
-  display: flex; align-items: center; justify-content: center; 
-  font-size: 1.5rem; border: none; 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
-  z-index: 1000; transition: 0.2s;
-}
-.fab:active { transform: scale(0.9); }
-
+.fab { position: fixed; right: 20px; bottom: 85px; width: 56px; height: 56px; border-radius: 50%; background: var(--p2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: none; box-shadow: 0 8px 20px rgba(0,0,0,0.2); z-index: 1000; }
 .btn-s { background: var(--p2); color: #fff; width: 100%; padding: 15px; border: none; border-radius: 15px; font-weight: 900; font-size: 1rem; }
 
-#loader { position: fixed; inset: 0; background: #fff; z-index: 5000; display: flex; justify-content: center; align-items: center; }
+#loader { position: fixed; inset: 0; background: #fff; z-index: 5000; display: none; justify-content: center; align-items: center; }
 
 @media (min-width: 900px) {
   body { padding-left: var(--side-w); }
@@ -105,6 +102,29 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
 <body data-co="heimek">
 
 <div id="loader"><i class="fa fa-spinner fa-spin fa-2x" style="color:var(--p2)"></i></div>
+
+<!-- ПІН-КОД МОДАЛКА -->
+<div id="pinM" class="modal-w" style="display: flex; align-items: center;">
+  <div class="pin-box">
+    <h2 id="pinTitle">Вхід: HEIMEK</h2>
+    <div class="pin-dots">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+    <div class="numpad">
+      <button class="num-btn" onclick="pressNum('1')">1</button>
+      <button class="num-btn" onclick="pressNum('2')">2</button>
+      <button class="num-btn" onclick="pressNum('3')">3</button>
+      <button class="num-btn" onclick="pressNum('4')">4</button>
+      <button class="num-btn" onclick="pressNum('5')">5</button>
+      <button class="num-btn" onclick="pressNum('6')">6</button>
+      <button class="num-btn" onclick="pressNum('7')">7</button>
+      <button class="num-btn" onclick="pressNum('8')">8</button>
+      <button class="num-btn" onclick="pressNum('9')">9</button>
+      <button class="num-btn" style="border:none" onclick="clearPin()"><i class="fa fa-backspace"></i></button>
+      <button class="num-btn" onclick="pressNum('0')">0</button>
+    </div>
+  </div>
+</div>
 
 <header>
   <div style="font-weight:900; letter-spacing: -0.5px;" id="brd">HEIMEK CRM</div>
@@ -128,7 +148,7 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
 <div class="container">
   <div id="p-orders" class="panel on">
     <div style="display:flex; gap:10px; margin-bottom:15px;">
-      <input type="text" id="q" placeholder="🔍 Пошук..." oninput="render()" style="flex:1">
+      <input type="text" id="q" placeholder="🔍 Пошук замовлення..." oninput="render()" style="flex:1">
       <select id="sortSel" onchange="render()" style="width:auto; padding:5px 10px; border-radius:10px; border:1px solid var(--line); font-weight:bold; color:var(--muted); font-size:0.7rem; background:white;">
         <option value="status">⇅ Статус</option>
         <option value="deadline">⇅ Дедлайн</option>
@@ -138,12 +158,10 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
     </div>
     <div id="list"></div>
   </div>
-
   <div id="p-clients" class="panel">
     <input type="text" id="qc" placeholder="🔍 Пошук клієнта..." oninput="renderC()">
     <div id="listC" style="margin-top:15px"></div>
   </div>
-
   <div id="p-stats" class="panel"><div id="statsDisplay"></div></div>
 </div>
 
@@ -155,20 +173,13 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
 
 <button class="fab" onclick="fab()"><i class="fa fa-plus"></i></button>
 
+<!-- МОДАЛКИ -->
 <div id="mO" class="modal-w">
   <div class="mbox">
     <div style="display:flex;justify-content:space-between;margin-bottom:15px;"><h3>Замовлення</h3><i class="fa fa-times" onclick="closeM('mO')"></i></div>
     <div class="fg"><label>Клієнт</label><input id="fCl" list="dlC"><datalist id="dlC"></datalist></div>
     <div class="grid"><div class="fg"><label>Виріб</label><input id="fPr"></div><div class="fg"><label>Фабрика</label><select id="fFa"><option>Eko-okna</option><option>Seharia</option><option>Ukraine</option></select></div></div>
-    <div class="grid">
-      <div class="fg"><label>Статус</label>
-        <select id="fSt" onchange="tglCan()">
-          <option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option>
-          <option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option>
-        </select>
-      </div>
-      <div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div>
-    </div>
+    <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan()"><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
     <div id="canB" class="fg" style="display:none"><label style="color:red">Причина скасування</label><textarea id="fCan"></textarea></div>
     <div class="grid"><div class="fg"><label>Ціна HT €</label><input id="fSa" type="number" oninput="calc()"></div><div class="fg"><label>Монтаж €</label><input id="fIn" type="number" oninput="calc()"></div></div>
     <div class="grid"><div class="fg"><label>TVA %</label><select id="fTv" onchange="calc()"></select></div><div class="fg"><label>Сума TTC €</label><input id="fTt" readonly style="background:#fefce8;font-weight:bold"></div></div>
@@ -185,7 +196,7 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
     <div class="fg"><label>Передзвонити ⏰</label><input id="fRe" type="date"></div>
     <div class="fg"><label>Нотатки</label><textarea id="fNo" rows="2"></textarea></div>
     <button class="btn-s" onclick="saveO()">ЗБЕРЕГТИ</button>
-    <button id="btnD" onclick="delO()" style="color:red;border:none;background:none;width:100%;margin-top:10px;font-weight:bold;cursor:pointer;display:none">Видалити</button>
+    <button id="btnD" onclick="delO()" style="color:red;border:none;background:none;width:100%;margin-top:12px;font-weight:bold;cursor:pointer;display:none">Видалити</button>
   </div>
 </div>
 
@@ -206,20 +217,58 @@ const URL_SB = "https://ysctdrsxqtekxuvkjmdx.supabase.co";
 const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzY3RkcnN4cXRla3h1dmtqbWR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODkxOTksImV4cCI6MjA5OTE2NTE5OX0.vmOKBfc1dGLgrNu1YQ9IVF-v6nUGb2tzEK29L1X0aiQ";
 const _sb = window.supabase.createClient(URL_SB, KEY_SB);
 
-let co='heimek', orders=[], clients=[], editId=null, curT='orders', curS='Усі';
-const TVA_OPTS = { heimek: [0, 5.5, 20], luxwin: [0, 6, 21] };
-const n = v => parseFloat(v) || 0;
+// ПІН-КОДИ (Можна змінити)
+const PINS = { heimek: "1111", luxwin: "2222" };
 
-// Розумне форматування телефону
-const getPhoneLink = (p) => {
-  if(!p) return "#";
-  let c = p.replace(/\s+/g, '');
-  if(c.startsWith('0')) {
-    const prefix = (co === 'heimek') ? '33' : '32';
-    return `+${prefix}${c.substring(1)}`;
+let co='heimek', orders=[], clients=[], editId=null, curT='orders', curS='Усі', currentPin = "";
+
+window.onload = () => { updateTva(); setCo('heimek'); };
+
+// Логіка ПІН-коду
+function setCo(key) {
+  const isAuth = sessionStorage.getItem('auth_' + key);
+  if (isAuth === 'true') {
+    loadCompany(key);
+  } else {
+    co = key;
+    currentPin = "";
+    document.getElementById('pinTitle').innerText = "Вхід: " + key.toUpperCase();
+    updatePinDots();
+    document.getElementById('pinM').style.display = 'flex';
   }
-  return c.startsWith('+') ? c : `+${c}`;
-};
+}
+
+function pressNum(n) {
+  if (currentPin.length < 4) {
+    currentPin += n;
+    updatePinDots();
+    if (currentPin.length === 4) {
+      if (currentPin === PINS[co]) {
+        sessionStorage.setItem('auth_' + co, 'true');
+        document.getElementById('pinM').style.display = 'none';
+        loadCompany(co);
+      } else {
+        alert("Невірний код!");
+        clearPin();
+      }
+    }
+  }
+}
+
+function clearPin() { currentPin = ""; updatePinDots(); }
+function updatePinDots() {
+  const dots = document.querySelectorAll('.dot');
+  dots.forEach((d, i) => d.classList.toggle('fill', i < currentPin.length));
+}
+
+function loadCompany(key) {
+  co = key;
+  document.body.setAttribute('data-co', key);
+  document.getElementById('brd').innerText = key.toUpperCase() + ' CRM';
+  document.querySelectorAll('.btn-c').forEach(b => b.classList.toggle('on', b.id === 'b-' + (key === 'heimek' ? 'hmk' : 'lux')));
+  updateTva();
+  sync();
+}
 
 async function sync() {
   document.getElementById('loader').style.display = 'flex';
@@ -231,11 +280,21 @@ async function sync() {
   document.getElementById('loader').style.display = 'none';
 }
 
+const n = v => parseFloat(v) || 0;
+const getPhoneLink = (p) => {
+  if(!p) return "#";
+  let c = p.replace(/\s+/g, '');
+  if(c.startsWith('0')) {
+    const prefix = (co === 'heimek') ? '33' : '32';
+    return `+${prefix}${c.substring(1)}`;
+  }
+  return c.startsWith('+') ? c : `+${c}`;
+};
+
 const render = () => {
   const q=document.getElementById('q').value.toLowerCase();
   const sort=document.getElementById('sortSel').value;
   const list=document.getElementById('list'); const today=new Date().toISOString().split('T')[0];
-  
   let f = orders.filter(o=>( (o.client||"") + (o.product||"") + (o.factory||"") ).toLowerCase().includes(q));
   if (curS === 'Боржники') f = f.filter(o => (n(o.total_ttc) - n(o.paid_amount)) > 1 && o.status !== 'Виконано' && o.status !== 'Скасовано');
   else if(curS!=='Усі') f = f.filter(o => o.status === curS);
@@ -252,13 +311,12 @@ const render = () => {
     const rem = o.reminder_date === today;
     const cl = clients.find(x=>x.name===o.client)||{};
     let stCl = o.status === 'Виконано' ? 'st-done' : o.status === 'Скасовано' ? 'st-cancelled' : o.status === 'В роботі' ? 'st-inwork' : o.status === 'На складі' ? 'st-storage' : o.status === 'Перевірка' ? 'st-verify' : '';
-
     const pLink = getPhoneLink(cl.phone);
 
     return `
-      <div class="card ${over?'st-over':''} ${rem?'rem':''} ${stCl}" onclick="openO('${o.id}')">
+      <div class="card ${over?'over':''} ${rem?'rem':''} ${stCl}" onclick="openO('${o.id}')">
         <div class="c-row-1"><div class="c-name">${o.client||'Без імені'}</div><div class="status-badge">${o.status}</div></div>
-        <div class="c-row-2">${o.factory} | ${o.product||'---'}</div>
+        <div class="c-row-2"><i class="fa fa-industry" style="font-size:10px"></i> ${o.factory} | ${o.product||'---'}</div>
         <div class="c-steps-inline">
           <i class="fa fa-ruler-combined ${o.check_measured?'active':''}"></i>
           <i class="fa fa-file-signature ${o.check_ordered?'active':''}"></i>
@@ -309,18 +367,16 @@ const tab = t => { curT=t; document.querySelectorAll('.panel').forEach(p=>p.styl
 const flt = (s,el) => { curS=s; document.querySelectorAll('.s-t').forEach(t=>t.classList.remove('active')); if(el) el.classList.add('active'); else {const target = document.querySelector(`[data-s='${s}']`); if(target) target.classList.add('active');} render(); }
 const calc = () => { const h=n(document.getElementById('fSa').value), t=n(document.getElementById('fTv').value), c=n(document.getElementById('fCo').value), i=n(document.getElementById('fIn').value); document.getElementById('fTt').value = ((h+i)*(1+t/100)).toFixed(2); document.getElementById('fMr').value = ((h-c)+i).toFixed(2) + ' €'; }
 const closeM = id => { document.getElementById(id).style.display='none'; editId=null; }
-const tglCan = () => { const b=document.getElementById('canB'); if(b) b.style.display = document.getElementById('fSt').value === 'Скасовано' ? 'block' : 'none'; }
+const tglCan = () => document.getElementById('canB').style.display = document.getElementById('fSt').value === 'Скасовано' ? 'block' : 'none';
 const fab = () => curT === 'clients' ? (editId=null, document.getElementById('cNa').value='', document.getElementById('cPh').value='', document.getElementById('cAd').value='', document.getElementById('cNo').value='', document.getElementById('hSec').style.display='none', document.getElementById('mC').style.display='flex') : openO(null);
 const updateDl = () => { document.getElementById('dlC').innerHTML=clients.map(c=>`<option value="${c.name}">`).join(''); }
 async function delO() { if(confirm('Видалити?')) { await _sb.from('orders').delete().eq('id', editId); closeM('mO'); sync(); } }
 async function delC() { if(confirm('Видалити?')) { await _sb.from('clients').delete().eq('id', editId); closeM('mC'); sync(); } }
 function renderC() { const q=document.getElementById('qc').value.toLowerCase(); document.getElementById('listC').innerHTML = clients.filter(c=>(c.name||'').toLowerCase().includes(q)).map(c=>`<div class="card" onclick="openCE('${c.id}')" style="border-left:none"><strong>${c.name||'Без імені'}</strong><br><small>${c.phone}</small></div>`).join(''); }
 function openCE(id) { editId=id; const c=clients.find(x=>x.id==id); document.getElementById('cNa').value=c.name; document.getElementById('cPh').value=c.phone; document.getElementById('cAd').value=c.address; document.getElementById('cNo').value=c.notes; const h = orders.filter(o => o.client === c.name); document.getElementById('hSec').style.display = 'block'; document.getElementById('hList').innerHTML = h.map(o => `<div style="font-size:0.75rem; background:#f8fafc; padding:8px; border-radius:8px; margin-top:5px; display:flex; justify-content:space-between;" onclick="event.stopPropagation(); closeM('mC'); openO('${o.id}')"><span>${o.product}</span><b>${o.total_ttc} €</b></div>`).join('') || '<small>Замовлень немає</small>'; document.getElementById('btnDC').style.display='block'; document.getElementById('mC').style.display='flex'; }
-function setCo(k) { co=k; document.body.setAttribute('data-co',k); document.getElementById('brd').innerText=k.toUpperCase()+' CRM'; updateTva(); sync(); }
+function renderStats() { const profit = orders.reduce((s, o) => s + (parseFloat(o.sale_price_ht)||0) - (parseFloat(o.cost_price)||0) + (parseFloat(o.install_cost)||0), 0); const debt = orders.reduce((s, o) => { if(o.status==='Скасовано') return s; return s + (parseFloat(o.total_ttc)||0) - (parseFloat(o.paid_amount)||0); }, 0); document.getElementById('statsDisplay').innerHTML = `<div style="background:var(--p); color:white; padding:15px; border-radius:20px; text-align:center; margin-bottom:10px;"><small>Прибуток (HT)</small><h2 style="margin:2px 0;">${profit.toFixed(0)} €</h2><small>Борги: ${debt.toFixed(0)} €</small></div>`; }
 function updateTva() { const sel = document.getElementById('fTv'); if(sel) sel.innerHTML = TVA_OPTS[co].map(v => `<option value="${v}">${v}%</option>`).join(''); }
-function renderStats() { const profit = orders.reduce((s, o) => s + (parseFloat(o.sale_price_ht)||0) - (parseFloat(o.cost_price)||0) + (parseFloat(o.install_cost)||0), 0); const debt = orders.reduce((s, o) => { if(o.status==='Скасовано') return s; return s + (parseFloat(o.total_ttc)||0) - (parseFloat(o.paid_amount)||0); }, 0); document.getElementById('statsDisplay').innerHTML = `<div style="background:var(--p); color:white; padding:15px; border-radius:15px; text-align:center; margin-bottom:12px;"><small>Чистий прибуток (HT)</small><h2 style="margin:2px 0;">${profit.toFixed(0)} €</h2><small>Загальний борг: ${debt.toFixed(0)} €</small></div>`; }
 function openSheet() { window.open("https://supabase.com/dashboard/project/ysctdrsxqtekxuvkjmdx/editor", "_blank"); }
-window.onload = () => { updateTva(); sync(); };
 </script>
 </body>
 </html>
