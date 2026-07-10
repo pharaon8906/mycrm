@@ -30,7 +30,7 @@ header { background: var(--p); color: #fff; padding: 6px 12px; display: flex; ju
 .panel { display: none; } .panel.on { display: block; }
 #list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
 
-/* Кольорові картки */
+/* Картка */
 .card {
   background: #fff; border-radius: 12px; padding: 10px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #cbd5e1;
@@ -132,7 +132,7 @@ input, select, textarea { padding: 10px; border: 1px solid #cbd5e1; border-radiu
     <div class="fg"><label>Клієнт</label><input id="fCl" list="dlC"><datalist id="dlC"></datalist></div>
     <div class="grid"><div class="fg"><label>Виріб</label><input id="fPr"></div><div class="fg"><label>Фабрика</label><select id="fFa"><option>Eko-okna</option><option>Seharia</option><option>Ukraine</option></select></div></div>
     <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan()"><option>Кошторис</option><option>Підтверджено</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
-    <div id="canB" class="fg" style="display:none"><label style="color:red">Причина</label><textarea id="fCan"></textarea></div>
+    <div id="canB" class="fg" style="display:none"><label style="color:red">Причина скасування</label><textarea id="fCan"></textarea></div>
     <div class="grid"><div class="fg"><label>Ціна HT €</label><input id="fSa" type="number" oninput="calc()"></div><div class="fg"><label>Монтаж € (Прибуток)</label><input id="fIn" type="number" oninput="calc()"></div></div>
     <div class="grid"><div class="fg"><label>TVA %</label><select id="fTv" onchange="calc()"></select></div><div class="fg"><label>Сума TTC €</label><input id="fTt" readonly style="background:#fef08a;font-weight:bold"></div></div>
     <div class="grid"><div class="fg"><label>Ціна Фабрики €</label><input id="fCo" type="number" oninput="calc()"></div><div class="fg"><label>Вже оплачено €</label><input id="fPa" type="number"></div></div>
@@ -147,7 +147,7 @@ input, select, textarea { padding: 10px; border: 1px solid #cbd5e1; border-radiu
     </div>
     <div class="fg"><label>Передзвонити ⏰</label><input id="fRe" type="date"></div>
     <div class="fg"><label>Нотатки</label><textarea id="fNo" rows="2"></textarea></div>
-    <button class="btn-s" onclick="saveO()">ЗБЕРЕГТИ</button>
+    <button class="btn-s" onclick="saveOrderFinal()">ЗБЕРЕГТИ</button>
     <button id="btnD" onclick="delO()" style="color:red;border:none;background:none;width:100%;margin-top:10px;font-size:0.8rem;display:none">Видалити</button>
   </div>
 </div>
@@ -158,6 +158,7 @@ input, select, textarea { padding: 10px; border: 1px solid #cbd5e1; border-radiu
     <div class="fg"><label>ПІБ / Компанія</label><input id="cNa"></div>
     <div class="grid"><div class="fg"><label>Телефон</label><input id="cPh" type="tel"></div><div class="fg"><label>Адреса</label><input id="cAd"></div></div>
     <div class="fg"><label>Нотатки</label><textarea id="cNo"></textarea></div>
+    <div id="hSec" style="margin-top:10px; border-top:1px solid #eee; padding-top:10px; display:none;"><label>Історія:</label><div id="hList"></div></div>
     <button class="btn-s" onclick="saveC()">ЗБЕРЕГТИ КЛІЄНТА</button>
     <button id="btnDC" onclick="delC()" style="color:red;border:none;background:none;width:100%;margin-top:10px;font-size:0.8rem;display:none">Видалити</button>
   </div>
@@ -187,10 +188,19 @@ const render = () => {
   const list=document.getElementById('list'); const today=new Date().toISOString().split('T')[0];
   
   let f = orders.filter(o=>( (o.client||"") + (o.product||"") + (o.factory||"") ).toLowerCase().includes(q));
-  if (curS === 'Боржники') f = f.filter(o => ((parseFloat(o.total_ttc)||0) - (parseFloat(o.paid_amount)||0)) > 1 && o.status !== 'Виконано' && o.status !== 'Скасовано');
-  else if(curS!=='Усі') f = f.filter(o => o.status === curS);
+  
+  // ВИПРАВЛЕНА ЛОГІКА БОРЖНИКІВ
+  if (curS === 'Боржники') {
+    f = f.filter(o => {
+      const debt = (parseFloat(o.total_ttc)||0) - (parseFloat(o.paid_amount)||0);
+      const isActiveStatus = (o.status === 'Підтверджено' || o.status === 'В роботі' || o.status === 'На складі');
+      return isActiveStatus && debt > 1;
+    });
+  } else if(curS!=='Усі') {
+    f = f.filter(o => o.status === curS);
+  }
 
-  // Логіка сортування
+  // Сортування
   const stPriority = { 'В роботі': 1, 'На складі': 2, 'Підтверджено': 3, 'Кошторис': 4, 'Виконано': 5, 'Скасовано': 6 };
   if(sort === 'status') f.sort((a,b) => (stPriority[a.status] || 99) - (stPriority[b.status] || 99));
   else if(sort === 'new') f.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
@@ -248,7 +258,7 @@ const openO = id => {
   tglCan(); calc(); document.getElementById('mO').style.display='flex';
 }
 
-async function saveO() {
+async function saveOrderFinal() {
   const o = {
     id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value,
     factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value,
@@ -263,7 +273,6 @@ async function saveO() {
 
 const fab = () => curT === 'clients' ? (editId=null, document.getElementById('cNa').value='', document.getElementById('cPh').value='', document.getElementById('cAd').value='', document.getElementById('cNo').value='', document.getElementById('mC').style.display='flex') : openO(null);
 
-// Решта допоміжних функцій (без змін)
 const setCo = k => { co=k; document.body.setAttribute('data-co',k); document.getElementById('brd').innerText=k.toUpperCase()+' CRM'; updateTva(); sync(); }
 const tab = t => { curT=t; document.querySelectorAll('.panel').forEach(p=>p.style.display='none'); document.getElementById('p-'+t).style.display='block'; document.querySelectorAll('.n-i').forEach(i=>i.classList.remove('active')); document.getElementById('ni-'+t).classList.add('active'); if(t==='clients') renderC(); document.getElementById('navS').style.display = t === 'orders' ? 'flex' : 'none'; }
 const flt = (s,el) => { curS=s; document.querySelectorAll('.s-t').forEach(t=>t.classList.remove('active')); el.classList.add('active'); render(); }
@@ -279,7 +288,7 @@ async function delO() { if(confirm('Видалити?')) { await _sb.from('order
 async function saveC() { const c = { id: editId || 'CNEW'+Date.now(), company: co, name: document.getElementById('cNa').value, phone: document.getElementById('cPh').value, address: document.getElementById('cAd').value, notes: document.getElementById('cNo').value }; await _sb.from('clients').upsert(c); closeM('mC'); sync(); }
 async function delC() { if(confirm('Видалити?')) { await _sb.from('clients').delete().eq('id', editId); closeM('mC'); sync(); } }
 function renderC() { const q=document.getElementById('qc').value.toLowerCase(); document.getElementById('listC').innerHTML = clients.filter(c=>(c.name||'').toLowerCase().includes(q)).map(c=>`<div class="card" onclick="openCE('${c.id}')"><strong>${c.name||'Без імені'}</strong><br><small>${c.phone}</small></div>`).join(''); }
-const openCE = id => { editId=id; const c=clients.find(x=>x.id==id); document.getElementById('cNa').value=c.name; document.getElementById('cPh').value=c.phone; document.getElementById('cAd').value=c.address; document.getElementById('cNo').value=c.notes; document.getElementById('btnDC').style.display='block'; document.getElementById('mC').style.display='flex'; }
+const openCE = id => { editId=id; const c=clients.find(x=>x.id==id); document.getElementById('cNa').value=c.name; document.getElementById('cPh').value=c.phone; document.getElementById('cAd').value=c.address; document.getElementById('cNo').value=c.notes; const h = orders.filter(o => o.client === c.name); document.getElementById('hSec').style.display = 'block'; document.getElementById('hList').innerHTML = h.map(o => `<div style="font-size:0.7rem; background:#f8fafc; padding:6px; border-radius:6px; margin-top:4px; display:flex; justify-content:space-between;" onclick="event.stopPropagation(); closeM('mC'); openO('${o.id}')"><span>${o.product}</span><b>${o.total_ttc} €</b></div>`).join('') || '<small>Замовлень немає</small>'; document.getElementById('btnDC').style.display='block'; document.getElementById('mC').style.display='flex'; }
 function renderStats() {
   const profit = orders.reduce((s, o) => s + (parseFloat(o.sale_price_ht)||0) - (parseFloat(o.cost_price)||0) + (parseFloat(o.install_cost)||0), 0);
   const debt = orders.reduce((s, o) => { if(o.status==='Скасовано') return s; return s + (parseFloat(o.total_ttc)||0) - (parseFloat(o.paid_amount)||0); }, 0);
