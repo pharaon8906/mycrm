@@ -31,12 +31,13 @@ header { background: linear-gradient(120deg, var(--p), var(--p2)); color: #fff; 
 .btn-c.on { opacity: 1; background: rgba(255,255,255,0.22); }
 
 .nav-s { display: flex; gap: 7px; overflow-x: auto; padding: 9px 14px; background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: var(--nav-h); z-index: 900; scrollbar-width: none; }
-.s-t { padding: 7px 13px; border-radius: 20px; background: #f2f4f9; font-size: .7rem; font-weight: 700; color: var(--muted); white-space: nowrap; border: 1px solid var(--line); cursor: pointer; transition: .15s; }
+.nav-s::-webkit-scrollbar { display: none; }
+.s-t { padding: 7px 13px; border-radius: 20px; background: #f2f4f9; font-size: .7rem; font-weight: 700; color: var(--muted); white-space: nowrap; border: 1px solid var(--line); cursor: pointer; transition: 0.15s; }
 .s-t.active { background: var(--p2); color: #fff; border-color: var(--p2); box-shadow: 0 5px 14px -4px rgba(37,99,235,0.4); }
 
 .container { padding: 14px; max-width: 1200px; margin: 0 auto; }
 .panel { display: none; } .panel.on { display: block; }
-#list { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+#list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
 
 .card { 
   background: var(--surface); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--sh); 
@@ -46,54 +47,47 @@ header { background: linear-gradient(120deg, var(--p), var(--p2)); color: #fff; 
 .card.st-done { border-left-color: var(--success); background: #f0fff4; }
 .card.st-cancelled { border-left-color: var(--danger); background: #fff5f5; opacity: 0.8; }
 .card.st-inwork { border-left-color: #ed8936; background: #fffaf0; }
-.card.st-verify { border-left-color: #06b6d4; background: #ecfeff; }
 .card.st-storage { border-left-color: var(--violet); background: #f8f5ff; }
 
 .c-row-1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-.c-name { font-size: .95rem; font-weight: 800; color: var(--txt); }
-.status-badge { font-size: .55rem; padding: 3px 8px; border-radius: 20px; background: #eef2f8; color: var(--muted); font-weight: 800; text-transform: uppercase; }
-.c-row-2 { font-size: 0.75rem; color: var(--muted); margin-bottom: 10px; }
-.c-steps-inline { display: flex; gap: 10px; font-size: 0.78rem; color: #cbd5e1; margin-bottom: 10px; }
+.c-name { font-size: .92rem; font-weight: 800; color: var(--txt); }
+.status-badge { font-size: .55rem; padding: 2px 6px; border-radius: 20px; background: #eef2f8; color: var(--muted); font-weight: 800; text-transform: uppercase; }
+.c-steps-inline { display: flex; gap: 8px; font-size: 0.75rem; color: #cbd5e1; margin: 5px 0; }
 .c-steps-inline i.active { color: var(--p2); }
-.c-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px dashed var(--line); }
+
+.c-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px dashed var(--line); }
 .val { font-size: 1.1rem; font-weight: 900; }
-.debt-tag { font-size: .65rem; font-weight: 800; padding: 3px 8px; border-radius: 7px; }
+.debt-tag { font-size: .65rem; font-weight: 800; padding: 2px 6px; border-radius: 7px; }
 .debt-tag.red { background: #fee2e2; color: var(--danger); }
 .debt-tag.green { background: #dcfce7; color: var(--success); }
 
-/* Звіти - ПРЕМІУМ ДАШБОРД */
-.st-hero { background: linear-gradient(135deg, var(--p), var(--p2)); color: white; padding: 25px; border-radius: 24px; text-align: center; margin-bottom: 20px; box-shadow: var(--sh-lg); position: relative; overflow: hidden; }
-.st-hero::after { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); }
-.st-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 15px; }
-.st-box { background: white; padding: 20px; border-radius: 20px; border: 1px solid var(--line); box-shadow: var(--sh); transition: 0.2s; position: relative; }
-.st-box:hover { transform: translateY(-3px); box-shadow: var(--sh-lg); }
-.st-box i { font-size: 1.5rem; color: var(--p2); margin-bottom: 12px; display: block; }
-.st-box b { display: block; font-size: 1.4rem; font-weight: 900; color: var(--txt); margin-top: 5px; }
-.st-box small { color: var(--muted); font-weight: 800; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.5px; }
-.st-mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-.st-mini { background: #f8fafc; padding: 10px; border-radius: 12px; font-size: 0.7rem; border: 1px solid var(--line); }
-.st-mini b { font-size: 0.85rem; display: block; margin-top: 2px; }
+/* Звіти */
+.st-main { background: linear-gradient(135deg, var(--p), var(--p2)); color: white; padding: 24px; border-radius: 24px; text-align: center; margin-bottom: 16px; }
+.st-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.st-box { background: white; padding: 18px; border-radius: 20px; border: 1px solid var(--line); box-shadow: var(--sh); cursor: pointer; }
+.st-box b { display: block; font-size: 1.2rem; font-weight: 900; margin-top: 4px; }
+.st-box small { color: var(--muted); font-weight: 700; text-transform: uppercase; font-size: 0.6rem; }
 
-/* Навігація */
-.bottom-nav { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,.98); backdrop-filter: blur(10px); display: flex; border-top: 1px solid var(--line); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-.n-i { flex: 1; padding: 10px 5px; border: none; background: none; text-align: center; color: var(--muted2); font-size: .65rem; font-weight: 700; cursor: pointer; }
+.bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid #ddd; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+.n-i { flex: 1; padding: 10px 5px; border: none; background: none; text-align: center; color: var(--muted2); font-size: .6rem; font-weight: 700; }
 .n-i.active { color: var(--p2); }
-.n-i i { display: block; font-size: 1.3rem; margin-bottom: 3px; }
+.n-i i { display: block; font-size: 1.2rem; margin-bottom: 2px; }
 
 .modal-w { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
 .mbox { background: #fff; width: 100%; max-width: 550px; border-radius: 22px 22px 0 0; padding: 25px; max-height: 95vh; overflow-y: auto; }
 .fg { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
 label { font-size: .65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
-input, select, textarea { padding: 12px; border: 1px solid var(--line); border-radius: 12px; font-size: 1rem; background: #f8fafc; width: 100%; font-family: inherit; }
+input, select, textarea { padding: 12px; border: 1px solid var(--line); border-radius: 12px; font-size: 1rem; background: #f8fafc; width: 100%; }
 
-.fab { position: fixed; right: 20px; bottom: 85px; width: 56px; height: 56px; border-radius: 18px; background: var(--p2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: none; box-shadow: 0 8px 20px rgba(37,99,235,0.4); z-index: 1000; }
+.fab { position: fixed; right: 20px; bottom: 85px; width: 56px; height: 56px; border-radius: 28px; background: var(--p2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000; }
+.btn-s { background: var(--p2); color: #fff; width: 100%; padding: 15px; border: none; border-radius: 15px; font-weight: 900; font-size: 1rem; margin-top: 10px; cursor: pointer; }
 
 #loader { position: fixed; inset: 0; background: #fff; z-index: 5000; display: flex; justify-content: center; align-items: center; }
 
 @media (min-width: 900px) {
   body { padding-left: var(--side-w); }
-  .bottom-nav { top: 0; left: 0; width: var(--side-w); height: 100vh; flex-direction: column; padding: 30px 15px; border-right: 1px solid var(--line); background: var(--surface); border-top: none; }
-  .n-i { flex: none; text-align: left; padding: 14px; font-size: .9rem; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+  .bottom-nav { top: 0; left: 0; width: var(--side-w); height: 100vh; flex-direction: column; padding: 30px 15px; border-right: 1px solid var(--line); border-top: none; }
+  .n-i { flex: none; text-align: left; padding: 12px; font-size: .9rem; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
   .n-i i { margin: 0; font-size: 1.1rem; width: 24px; }
   .n-i.active { background: #eef2ff; }
 }
@@ -116,7 +110,6 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
   <div class="s-t" data-s="Боржники" onclick="flt('Боржники',this)">💸 Боржники</div>
   <div class="s-t" data-s="Кошторис" onclick="flt('Кошторис',this)">📑 Кошторис</div>
   <div class="s-t" data-s="Підтверджено" onclick="flt('Підтверджено',this)">✅ Підтверджено</div>
-  <div class="s-t" data-s="Перевірка" onclick="flt('Перевірка',this)">🔍 Перевірка</div>
   <div class="s-t" data-s="В роботі" onclick="flt('В роботі',this)">🏭 В роботі</div>
   <div class="s-t" data-s="На складі" onclick="flt('На складі',this)">🚚 На складі</div>
   <div class="s-t" data-s="Виконано" onclick="flt('Виконано',this)">📦 Виконано</div>
@@ -125,7 +118,7 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
 <div class="container">
   <div id="p-orders" class="panel on">
     <div style="display:flex; gap:10px; margin-bottom:15px;">
-      <input type="text" id="q" placeholder="Пошук замовлення або клієнта..." oninput="render()" style="flex:1">
+      <input type="text" id="q" placeholder="🔍 Пошук..." oninput="render()" style="flex:1">
       <select id="sortSel" onchange="render()" style="width:auto; padding:5px 10px; border-radius:10px; border:1px solid var(--line); font-weight:bold; color:var(--muted); font-size:0.7rem; background:white;">
         <option value="status">⇅ Статус</option>
         <option value="deadline">⇅ Дедлайн</option>
@@ -135,12 +128,10 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
     </div>
     <div id="list"></div>
   </div>
-
   <div id="p-clients" class="panel">
     <input type="text" id="qc" placeholder="🔍 Пошук клієнта..." oninput="renderC()">
     <div id="listC" style="margin-top:15px"></div>
   </div>
-
   <div id="p-stats" class="panel"><div id="statsDisplay"></div></div>
 </div>
 
@@ -152,7 +143,6 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
 
 <button class="fab" onclick="fab()"><i class="fa fa-plus"></i></button>
 
-<!-- МОДАЛКИ (Включаючи ПЕРЕДПЛАТУ ФАБРИЦІ) -->
 <div id="mO" class="modal-w">
   <div class="mbox">
     <div style="display:flex;justify-content:space-between;margin-bottom:15px;"><h3>Замовлення</h3><i class="fa fa-times" onclick="closeM('mO')"></i></div>
@@ -182,8 +172,8 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
     </div>
     <div class="fg"><label>Передзвонити ⏰</label><input id="fRe" type="date"></div>
     <div class="fg"><label>Нотатки</label><textarea id="fNo" rows="2"></textarea></div>
-    <button class="btn-s" onclick="saveO()">ЗБЕРЕГТИ</button>
-    <button id="btnD" onclick="delO()" style="color:red;border:none;background:none;width:100%;margin-top:10px;font-weight:bold;cursor:pointer;display:none">Видалити</button>
+    <button class="btn-s" onclick="saveOrderFinal()">ЗБЕРЕГТИ</button>
+    <button id="btnD" onclick="delO()" style="color:red;border:none;background:none;width:100%;margin-top:12px;font-weight:bold;cursor:pointer;display:none">Видалити</button>
   </div>
 </div>
 
@@ -193,30 +183,31 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
     <div class="fg"><label>ПІБ / Компанія</label><input id="cNa"></div>
     <div class="grid"><div class="fg"><label>Телефон</label><input id="cPh" type="tel"></div><div class="fg"><label>Адреса</label><input id="cAd"></div></div>
     <div class="fg"><label>Нотатки</label><textarea id="cNo"></textarea></div>
-    <div id="hSec" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:none;"><label>Історія замовлень:</label><div id="hList"></div></div>
+    <div id="hSec" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:none;"><label>Історія:</label><div id="hList"></div></div>
     <button class="btn-s" onclick="saveC()">ЗБЕРЕГТИ КЛІЄНТА</button>
-    <button id="btnDC" onclick="delC()" style="color:red;border:none;background:none;width:100%;margin-top:10px;font-weight:bold;display:none">Видалити клієнта</button>
+    <button id="btnDC" onclick="delC()" style="color:red;border:none;background:none;width:100%;margin-top:10px;font-weight:bold;display:none">Видалити</button>
   </div>
 </div>
 
 <script>
 const URL_SB = "https://ysctdrsxqtekxuvkjmdx.supabase.co";
 const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzY3RkcnN4cXRla3h1dmtqbWR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODkxOTksImV4cCI6MjA5OTE2NTE5OX0.vmOKBfc1dGLgrNu1YQ9IVF-v6nUGb2tzEK29L1X0aiQ";
-const _sb = window.supabase.createClient(URL_SB, KEY_SB);
+const sb = window.supabase.createClient(URL_SB, KEY_SB);
 
 let co='heimek', orders=[], clients=[], editId=null, curT='orders', curS='Усі';
 const TVA_OPTS = { heimek: [0, 5.5, 20], luxwin: [0, 6, 21] };
 const n = v => parseFloat(v) || 0;
-const fN = v => n(v).toLocaleString('uk-UA');
 
 async function sync() {
   document.getElementById('loader').style.display = 'flex';
-  const { data: oData } = await _sb.from('orders').select('*').eq('company', co).order('created_at', { ascending: false });
-  orders = oData || [];
-  const { data: cData } = await _sb.from('clients').select('*').eq('company', co);
-  clients = cData || [];
-  updateDl(); render(); if(curT==='stats') renderStats();
-  document.getElementById('loader').style.display = 'none';
+  try {
+    const { data: oData, error: oErr } = await sb.from('orders').select('*').eq('company', co).order('created_at', { ascending: false });
+    if(oErr) throw oErr; orders = oData || [];
+    const { data: cData, error: cErr } = await sb.from('clients').select('*').eq('company', co);
+    if(cErr) throw cErr; clients = cData || [];
+    updateDl(); render(); if(curT==='stats') renderStats();
+  } catch (e) { alert("Помилка: " + e.message); }
+  finally { document.getElementById('loader').style.display = 'none'; }
 }
 
 const render = () => {
@@ -226,20 +217,21 @@ const render = () => {
   let f = orders.filter(o=>( (o.client||"") + (o.product||"") + (o.factory||"") ).toLowerCase().includes(q));
   if (curS === 'Боржники') f = f.filter(o => (n(o.total_ttc) - n(o.paid_amount)) > 1 && o.status !== 'Виконано' && o.status !== 'Скасовано');
   else if(curS!=='Усі') f = f.filter(o => o.status === curS);
-
+  
   const stPriority = { 'В роботі': 1, 'На складі': 2, 'Підтверджено': 3, 'Кошторис': 4, 'Виконано': 5, 'Скасовано': 6 };
   if(sort === 'status') f.sort((a,b) => (stPriority[a.status] || 99) - (stPriority[b.status] || 99));
   else if(sort === 'deadline') f.sort((a,b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
   else if(sort === 'new') f.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
   else if(sort === 'price') f.sort((a,b) => n(b.total_ttc) - n(a.total_ttc));
-  
+
   list.innerHTML = f.map(o=>{
     const ttc = n(o.total_ttc), paid = n(o.paid_amount), debt = ttc - paid;
     const over = o.deadline && o.deadline < today && o.status !== 'Виконано' && o.status !== 'Скасовано';
     const rem = o.reminder_date === today;
     const cl = clients.find(x=>x.name===o.client)||{};
-    let stCl = o.status === 'Виконано' ? 'st-done' : o.status === 'Скасовано' ? 'st-cancelled' : o.status === 'В роботі' ? 'st-inwork' : o.status === 'На складі' ? 'st-storage' : o.status === 'Перевірка' ? 'st-verify' : '';
-    let pLink = (cl.phone||"").startsWith('0') ? `+${co==='heimek'?'33':'32'}${cl.phone.substring(1)}` : cl.phone;
+    let stCl = o.status === 'Виконано' ? 'st-done' : o.status === 'Скасовано' ? 'st-cancelled' : o.status === 'В роботі' ? 'st-inwork' : o.status === 'На складі' ? 'st-storage' : '';
+    let p = cl.phone || "";
+    let pLink = p.startsWith('0') ? `+${co==='heimek'?'33':'32'}${p.substring(1)}` : p;
 
     return `<div class="card ${over?'over':''} ${rem?'rem':''} ${stCl}" onclick="openO('${o.id}')">
         <div class="c-row-1"><div class="c-name">${o.client||'Без імені'}</div><div class="status-badge">${o.status}</div></div>
@@ -251,11 +243,11 @@ const render = () => {
           <i class="fa fa-tools ${o.check_installed?'active':''}"></i>
         </div>
         <div class="c-foot">
-          <div class="val">${n(ttc).toFixed(0)} €</div>
+          <div class="val">${n(ttc).toFixed(0)}€</div>
           <div style="display:flex; align-items:center; gap:8px;">
             <a href="tel:${pLink}" onclick="event.stopPropagation()"><i class="fa fa-phone-alt" style="color:var(--success)"></i></a>
-            <a href="https://wa.me/${(pLink||'').replace('+','')}" onclick="event.stopPropagation()"><i class="fab fa-whatsapp" style="color:#25d366"></i></a>
-            <div class="debt-tag ${debt > 1 ? 'red' : 'green'}">${debt > 1 ? 'Борг: '+n(debt).toFixed(0)+'€' : 'OK'}</div>
+            <a href="https://wa.me/${pLink.replace('+','')}" onclick="event.stopPropagation()"><i class="fab fa-whatsapp" style="color:#25d366"></i></a>
+            <div class="debt-tag ${debt > 1 ? 'red' : 'green'}">${debt > 1 ? debt.toFixed(0)+'€' : 'OK'}</div>
           </div>
         </div>
       </div>`}).join('');
@@ -264,65 +256,64 @@ const render = () => {
 function renderStats() {
   const container = document.getElementById('statsDisplay');
   const valid = orders.filter(o => o.status !== 'Скасовано');
-  
-  // Розрахунки
-  const totalTTC = valid.reduce((s, o) => s + n(o.total_ttc), 0);
-  const totalProfit = valid.reduce((s, o) => s + (n(o.sale_price_ht) - n(o.cost_price)) + n(o.install_cost), 0);
-  const inWorkOrders = orders.filter(o => o.status === 'В роботі');
-  const profitInWork = inWorkOrders.reduce((s, o) => s + (n(o.sale_price_ht) - n(o.cost_price)) + n(o.install_cost), 0);
-  const clientDebt = valid.reduce((s, o) => s + (n(o.total_ttc) - n(o.paid_amount)), 0);
-  const factoryDebtInWork = inWorkOrders.reduce((s, o) => s + (n(o.cost_price) - n(o.factory_prepay)), 0);
+  const profit = valid.reduce((s, o) => s + (n(o.sale_price_ht)-n(o.cost_price)+n(o.install_cost)), 0);
+  const rev = valid.reduce((s, o) => s + n(o.total_ttc), 0);
+  const debt = valid.reduce((s, o) => s + (n(o.total_ttc)-n(o.paid_amount)), 0);
+  const fDebt = valid.reduce((s, o) => s + (n(o.cost_price)-n(o.factory_prepay)), 0);
 
-  let factoryHtml = '';
-  ['Eko-okna', 'Seharia', 'Ukraine'].forEach(f => {
-    const fo = valid.filter(o => o.factory === f);
-    const fp = fo.reduce((s, o) => s + (n(o.sale_price_ht) - n(o.cost_price)) + n(o.install_cost), 0);
-    factoryHtml += `<div class="st-box"><b>${f}</b><small>Чистий прибуток:</small><b>${fN(fp)}</b><span>${fo.length} замовл.</span></div>`;
+  const statuses = ['Кошторис', 'Підтверджено', 'В роботі', 'На складі'];
+  let sHtml = '';
+  statuses.forEach(s => {
+    const so = orders.filter(o => o.status === s);
+    const ss = so.reduce((sum, o) => sum + n(o.total_ttc), 0);
+    sHtml += `<div onclick="tab('orders'); flt('${s}', document.querySelector('[data-s=\\'${s}\\']'))" style="background:white; padding:15px; border-radius:15px; margin-bottom:10px; border:1px solid #eee; display:flex; justify-content:space-between; cursor:pointer;"><div><small style="color:gray">${s}</small><br><strong>${so.length} замовл.</strong></div><b>${ss.toFixed(0)} €</b></div>`;
   });
 
-  container.innerHTML = `
-    <div class="st-main">
-      <small>Загальний чистий прибуток (HT)</small>
-      <div style="font-size:2.5rem; font-weight:900; margin:5px 0;">${fN(totalProfit)}</div>
-      <small style="opacity:0.7">Загальний обіг (TTC): ${fN(totalTTC)}</small>
-    </div>
-    
-    <div class="st-grid">
-      <div class="st-box" style="border-left:4px solid var(--p2)" onclick="tab('orders'); flt('В роботі', document.querySelector('[data-s=\\'В роботі\\']'))">
-        <i class="fa fa-tools"></i><small>Прибуток в роботі</small><b>${fN(profitInWork)}</b>
-      </div>
-      <div class="st-box" style="border-left:4px solid var(--warning)">
-        <i class="fa fa-industry"></i><small>Борг фабрикам (Робота)</small><b>${fN(factoryDebtInWork)}</b>
-      </div>
-      <div class="st-box" style="border-left:4px solid var(--danger)" onclick="tab('orders'); flt('Боржники', document.querySelector('[data-s=\\'Боржники\\']'))">
-        <i class="fa fa-wallet"></i><small>Борг клієнтів</small><b>${fN(clientDebt)}</b>
-      </div>
-      <div class="st-box">
-        <i class="fa fa-chart-pie"></i><small>Загальний борг фабрик</small><b>${fN(valid.reduce((s,o)=>s+(n(o.cost_price)-n(o.factory_prepay)),0))}</b>
-      </div>
-    </div>
-
-    <h4 style="margin:20px 0 10px; font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; padding-left:5px;">Аналітика по фабриках:</h4>
-    <div class="st-grid">${factoryHtml}</div>
-  `;
+  container.innerHTML = `<div class="st-main"><small>ЧИСТИЙ ПРИБУТОК</small><h2 style="font-size:2.4rem">${n(profit).toLocaleString()} €</h2><p>Обіг (TTC): ${n(rev).toLocaleString()} €</p></div><div class="st-grid"><div class="st-box" style="border-left:4px solid var(--danger)"><b>${n(debt).toFixed(0)}€</b><small>Борг Клієнтів</small></div><div class="st-box" style="border-left:4px solid var(--warning)"><b>${n(fDebt).toFixed(0)}€</b><small>Борг Фабрикам</small></div></div><h4 style="margin:10px 0; color:gray; font-size:0.7rem; text-transform:uppercase;">Етапи:</h4><div class="st-grid">${sHtml}</div>`;
 }
 
-// РЕШТА ФУНКЦІЙ (save, calc, delete) - БЕЗ ЗМІН
-const calc = () => { const h=n(document.getElementById('fSa').value), t=n(document.getElementById('fTv').value), c=n(document.getElementById('fCo').value), i=n(document.getElementById('fIn').value); document.getElementById('fTt').value = ((h+i)*(1+t/100)).toFixed(2); document.getElementById('fMr').value = ((h-c)+i).toFixed(2) + ' €'; }
-async function saveO() { const o = { id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value, factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value, sale_price_ht: n(document.getElementById('fSa').value), tva_rate: n(document.getElementById('fTv').value), total_ttc: n(document.getElementById('fTt').value), cost_price: n(document.getElementById('fCo').value), install_cost: n(document.getElementById('fIn').value), paid_amount: n(document.getElementById('fPa').value), factory_prepay: n(document.getElementById('fFaPa').value), deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value, cancel_reason: document.getElementById('fCan').value, check_measured: document.getElementById('fChM').checked, check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked }; await _sb.from('orders').upsert(o); closeM('mO'); sync(); }
-const openO = id => { editId=id; const o=id?orders.find(x=>x.id==id):{}; ['fCl','fPr','fSa','fCo','fIn','fPa','fDl','fRe','fNo','fCan','fFaPa'].forEach(i=>document.getElementById(i).value=''); ['fChM','fChO','fChS','fChI'].forEach(i=>document.getElementById(i).checked=false); if(id){ document.getElementById('fCl').value=o.client; document.getElementById('fPr').value=o.product; document.getElementById('fSa').value=o.sale_price_ht; document.getElementById('fTv').value=o.tva_rate; document.getElementById('fCo').value=o.cost_price; document.getElementById('fIn').value=o.install_cost; document.getElementById('fPa').value=o.paid_amount; document.getElementById('fDl').value=o.deadline; document.getElementById('fRe').value=o.reminder_date; document.getElementById('fSt').value=o.status; document.getElementById('fNo').value=o.notes; document.getElementById('fCan').value=o.cancel_reason; document.getElementById('fFaPa').value=o.factory_prepay; document.getElementById('fChM').checked=!!o.check_measured; document.getElementById('fChO').checked=!!o.check_ordered; document.getElementById('fChS').checked=!!o.check_storage; document.getElementById('fChI').checked=!!o.check_installed; document.getElementById('btnD').style.display='block'; } else document.getElementById('btnD').style.display='none'; tglCan(); calc(); document.getElementById('mO').style.display='flex'; }
-const fab = () => curT === 'clients' ? (editId=null, document.getElementById('cNa').value='', document.getElementById('cPh').value='', document.getElementById('cAd').value='', document.getElementById('cNo').value='', document.getElementById('hSec').style.display='none', document.getElementById('mC').style.display='flex') : openO(null);
-const closeM = id => { document.getElementById(id).style.display='none'; editId=null; }
+const openO = id => {
+  editId=id; const o=id?orders.find(x=>x.id==id):{};
+  ['fCl','fPr','fSa','fCo','fIn','fPa','fDl','fRe','fNo','fCan','fFaPa'].forEach(i=>document.getElementById(i).value='');
+  ['fChM','fChO','fChS','fChI'].forEach(i=>document.getElementById(i).checked=false);
+  if(id){
+    document.getElementById('fCl').value=o.client; document.getElementById('fPr').value=o.product;
+    document.getElementById('fSa').value=o.sale_price_ht; document.getElementById('fTv').value=o.tva_rate;
+    document.getElementById('fCo').value=o.cost_price; document.getElementById('fIn').value=o.install_cost;
+    document.getElementById('fPa').value=o.paid_amount; document.getElementById('fDl').value=o.deadline;
+    document.getElementById('fRe').value=o.reminder_date; document.getElementById('fSt').value=o.status;
+    document.getElementById('fNo').value=o.notes; document.getElementById('fCan').value=o.cancel_reason;
+    document.getElementById('fFaPa').value=o.factory_prepay;
+    document.getElementById('fChM').checked=!!o.check_measured; document.getElementById('fChO').checked=!!o.check_ordered;
+    document.getElementById('fChS').checked=!!o.check_storage; document.getElementById('fChI').checked=!!o.check_installed;
+    document.getElementById('btnD').style.display='block';
+  } else document.getElementById('btnD').style.display='none';
+  tglCan(); calc(); document.getElementById('mO').style.display='flex';
+}
+
+async function saveOrderFinal() {
+  const o = { id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value, factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value, sale_price_ht: n(document.getElementById('fSa').value), tva_rate: n(document.getElementById('fTv').value), total_ttc: n(document.getElementById('fTt').value), cost_price: n(document.getElementById('fCo').value), install_cost: n(document.getElementById('fIn').value), paid_amount: n(document.getElementById('fPa').value), factory_prepay: n(document.getElementById('fFaPa').value), deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value, cancel_reason: document.getElementById('fCan').value, check_measured: document.getElementById('fChM').checked, check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked };
+  await sb.from('orders').upsert(o); closeM('mO'); sync();
+}
+
+async function saveC() {
+  const c = { id: editId || 'CNEW'+Date.now(), company: co, name: document.getElementById('cNa').value, phone: document.getElementById('cPh').value, address: document.getElementById('cAd').value, notes: document.getElementById('cNo').value };
+  await sb.from('clients').upsert(c); closeM('mC'); sync();
+}
+
+const setCo = k => { co=k; sync(); }
 const tab = t => { curT=t; document.querySelectorAll('.panel').forEach(p=>p.style.display='none'); document.getElementById('p-'+t).style.display='block'; document.querySelectorAll('.n-i').forEach(i=>i.classList.remove('active')); document.getElementById('ni-'+t).classList.add('active'); if(t==='clients') renderC(); if(t==='stats') renderStats(); document.getElementById('navS').style.display = t === 'orders' ? 'flex' : 'none'; }
 const flt = (s,el) => { curS=s; document.querySelectorAll('.s-t').forEach(t=>t.classList.remove('active')); if(el) el.classList.add('active'); else {const target = document.querySelector(`[data-s='${s}']`); if(target) target.classList.add('active');} render(); }
-const setCo = k => { co=k; document.body.setAttribute('data-co',k); document.getElementById('brd').innerText=k.toUpperCase()+' CRM'; updateTva(); sync(); }
-const updateTva = () => { const sel = document.getElementById('fTv'); if(sel) sel.innerHTML = TVA_OPTS[co].map(v => `<option value="${v}">${v}%</option>`).join(''); }
+const calc = () => { const h=n(document.getElementById('fSa').value), t=n(document.getElementById('fTv').value), c=n(document.getElementById('fCo').value), i=n(document.getElementById('fIn').value); document.getElementById('fTt').value = ((h+i)*(1+t/100)).toFixed(2); document.getElementById('fMr').value = ((h-c)+i).toFixed(2) + ' €'; }
+const closeM = id => { document.getElementById(id).style.display='none'; editId=null; }
+const tglCan = () => { const b=document.getElementById('canB'); if(b) b.style.display = document.getElementById('fSt').value === 'Скасовано' ? 'block' : 'none'; }
+const fab = () => curT === 'clients' ? (editId=null, document.getElementById('cNa').value='', document.getElementById('cPh').value='', document.getElementById('cAd').value='', document.getElementById('cNo').value='', document.getElementById('hSec').style.display='none', document.getElementById('mC').style.display='flex') : openO(null);
 const updateDl = () => { document.getElementById('dlC').innerHTML=clients.map(c=>`<option value="${c.name}">`).join(''); }
-async function delO() { if(confirm('Видалити?')) { await _sb.from('orders').delete().eq('id', editId); closeM('mO'); sync(); } }
-async function saveC() { const c = { id: editId || 'CNEW'+Date.now(), company: co, name: document.getElementById('cNa').value, phone: document.getElementById('cPh').value, address: document.getElementById('cAd').value, notes: document.getElementById('cNo').value }; await _sb.from('clients').upsert(c); closeM('mC'); sync(); }
-async function delC() { if(confirm('Видалити?')) { await _sb.from('clients').delete().eq('id', editId); closeM('mC'); sync(); } }
+async function delO() { if(confirm('Видалити?')) { await sb.from('orders').delete().eq('id', editId); closeM('mO'); sync(); } }
+async function delC() { if(confirm('Видалити?')) { await sb.from('clients').delete().eq('id', editId); closeM('mC'); sync(); } }
 function renderC() { const q=document.getElementById('qc').value.toLowerCase(); document.getElementById('listC').innerHTML = clients.filter(c=>(c.name||'').toLowerCase().includes(q)).map(c=>`<div class="card" onclick="openCE('${c.id}')" style="border-left:none"><strong>${c.name||'Без імені'}</strong><br><small>${c.phone}</small></div>`).join(''); }
 function openCE(id) { editId=id; const c=clients.find(x=>x.id==id); document.getElementById('cNa').value=c.name; document.getElementById('cPh').value=c.phone; document.getElementById('cAd').value=c.address; document.getElementById('cNo').value=c.notes; const h = orders.filter(o => o.client === c.name); document.getElementById('hSec').style.display = 'block'; document.getElementById('hList').innerHTML = h.map(o => `<div style="font-size:0.75rem; background:#f8fafc; padding:8px; border-radius:8px; margin-top:5px; display:flex; justify-content:space-between;" onclick="event.stopPropagation(); closeM('mC'); openO('${o.id}')"><span>${o.product}</span><b>${o.total_ttc} €</b></div>`).join('') || '<small>Замовлень немає</small>'; document.getElementById('btnDC').style.display='block'; document.getElementById('mC').style.display='flex'; }
+function updateTva() { const sel = document.getElementById('fTv'); if(sel) sel.innerHTML = TVA_OPTS[co].map(v => `<option value="${v}">${v}%</option>`).join(''); }
 function openSheet() { window.open("https://supabase.com/dashboard/project/ysctdrsxqtekxuvkjmdx/editor", "_blank"); }
 window.onload = () => { updateTva(); sync(); };
 </script>
