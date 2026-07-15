@@ -29,6 +29,7 @@ header { background: linear-gradient(120deg, var(--p), var(--p2)); color: #fff; 
 .btns { display: flex; background: rgba(0,0,0,.22); padding: 3px; border-radius: 9px; }
 .btn-c { border: none; background: none; color: #fff; opacity: .6; padding: 5px 11px; cursor: pointer; font-weight: 700; font-size: .66rem; border-radius: 6px; }
 .btn-c.on { opacity: 1; background: rgba(255,255,255,0.22); }
+#logoutBtn { display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.22); border: none; color: #fff; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; }
 
 .nav-s { display: flex; gap: 7px; overflow-x: auto; padding: 9px 14px; background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: var(--nav-h); z-index: 900; scrollbar-width: none; }
 .nav-s::-webkit-scrollbar { display: none; }
@@ -39,19 +40,30 @@ header { background: linear-gradient(120deg, var(--p), var(--p2)); color: #fff; 
 .panel { display: none; } .panel.on { display: block; }
 #list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
 
-.card { 
-  background: var(--surface); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--sh); 
+.card {
+  background: var(--surface); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--sh);
   border: 1px solid var(--line); position: relative; overflow: hidden; border-left: 5px solid var(--p2);
   display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; cursor: pointer;
 }
+.card:hover { transform: translateY(-2px); box-shadow: var(--sh-lg); }
 .card.st-done { border-left-color: var(--success); background: #f0fff4; }
 .card.st-cancelled { border-left-color: var(--danger); background: #fff5f5; opacity: 0.8; }
 .card.st-inwork { border-left-color: #ed8936; background: #fffaf0; }
 .card.st-storage { border-left-color: var(--violet); background: #f8f5ff; }
+.card.st-check { border-left-color: #0891b2; background: #f0fdff; }
+.card.over { box-shadow: 0 0 0 1.5px var(--danger), var(--sh); }
+.card.rem::after { content: "⏰"; position: absolute; top: 8px; right: 10px; font-size: .7rem; animation: pulse 1.6s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 
-.c-row-1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-.c-name { font-size: .92rem; font-weight: 800; color: var(--txt); }
-.status-badge { font-size: .55rem; padding: 2px 6px; border-radius: 20px; background: #eef2f8; color: var(--muted); font-weight: 800; text-transform: uppercase; }
+.c-row-1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 8px; }
+.c-name { font-size: .92rem; font-weight: 800; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.status-badge { font-size: .55rem; padding: 2px 6px; border-radius: 20px; background: #eef2f8; color: var(--muted); font-weight: 800; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
+.st-done .status-badge { background: #dcfce7; color: var(--success); }
+.st-cancelled .status-badge { background: #fee2e2; color: var(--danger); }
+.st-inwork .status-badge { background: #ffedd5; color: var(--warning); }
+.st-storage .status-badge { background: #ede9fe; color: var(--violet); }
+.st-check .status-badge { background: #cffafe; color: #0e7490; }
+.c-row-2 { font-size: .72rem; color: var(--muted); }
 .c-steps-inline { display: flex; gap: 8px; font-size: 0.75rem; color: #cbd5e1; margin: 5px 0; }
 .c-steps-inline i.active { color: var(--p2); }
 
@@ -61,7 +73,6 @@ header { background: linear-gradient(120deg, var(--p), var(--p2)); color: #fff; 
 .debt-tag.red { background: #fee2e2; color: var(--danger); }
 .debt-tag.green { background: #dcfce7; color: var(--success); }
 
-/* Звіти */
 .st-main { background: linear-gradient(135deg, var(--p), var(--p2)); color: white; padding: 24px; border-radius: 24px; text-align: center; margin-bottom: 16px; }
 .st-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
 .st-box { background: white; padding: 18px; border-radius: 20px; border: 1px solid var(--line); box-shadow: var(--sh); cursor: pointer; }
@@ -69,20 +80,28 @@ header { background: linear-gradient(120deg, var(--p), var(--p2)); color: #fff; 
 .st-box small { color: var(--muted); font-weight: 700; text-transform: uppercase; font-size: 0.6rem; }
 
 .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid #ddd; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-.n-i { flex: 1; padding: 10px 5px; border: none; background: none; text-align: center; color: var(--muted2); font-size: .6rem; font-weight: 700; }
+.n-i { flex: 1; padding: 10px 5px; border: none; background: none; text-align: center; color: var(--muted2); font-size: .6rem; font-weight: 700; cursor: pointer; }
 .n-i.active { color: var(--p2); }
 .n-i i { display: block; font-size: 1.2rem; margin-bottom: 2px; }
 
 .modal-w { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
 .mbox { background: #fff; width: 100%; max-width: 550px; border-radius: 22px 22px 0 0; padding: 25px; max-height: 95vh; overflow-y: auto; }
 .fg { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 label { font-size: .65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
-input, select, textarea { padding: 12px; border: 1px solid var(--line); border-radius: 12px; font-size: 1rem; background: #f8fafc; width: 100%; }
+input, select, textarea { padding: 12px; border: 1px solid var(--line); border-radius: 12px; font-size: 1rem; background: #f8fafc; width: 100%; font-family: inherit; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p2); background: #fff; }
 
-.fab { position: fixed; right: 20px; bottom: 85px; width: 56px; height: 56px; border-radius: 28px; background: var(--p2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000; }
+.fab { position: fixed; right: 20px; bottom: 85px; width: 56px; height: 56px; border-radius: 28px; background: var(--p2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000; cursor: pointer; }
 .btn-s { background: var(--p2); color: #fff; width: 100%; padding: 15px; border: none; border-radius: 15px; font-weight: 900; font-size: 1rem; margin-top: 10px; cursor: pointer; }
 
 #loader { position: fixed; inset: 0; background: #fff; z-index: 5000; display: flex; justify-content: center; align-items: center; }
+
+#authScreen { position: fixed; inset: 0; background: var(--bg); z-index: 6000; display: none; align-items: center; justify-content: center; padding: 24px; }
+#authScreen .box { background: #fff; padding: 28px; border-radius: 20px; width: 100%; max-width: 340px; box-shadow: var(--sh-lg); }
+#authScreen h2 { text-align: center; margin-bottom: 4px; }
+#authScreen .sub { text-align: center; color: var(--muted); font-size: .8rem; margin-bottom: 18px; }
+#authErr { color: var(--danger); font-size: .75rem; margin-bottom: 8px; display: none; }
 
 @media (min-width: 900px) {
   body { padding-left: var(--side-w); }
@@ -90,18 +109,35 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
   .n-i { flex: none; text-align: left; padding: 12px; font-size: .9rem; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
   .n-i i { margin: 0; font-size: 1.1rem; width: 24px; }
   .n-i.active { background: #eef2ff; }
+  .modal-w { align-items: center; }
+  .mbox { border-radius: 20px; max-width: 620px; max-height: 90vh; }
+  .fab { right: 30px; bottom: 30px; }
 }
 </style>
 </head>
 <body data-co="heimek">
 
+<div id="authScreen">
+  <div class="box">
+    <h2>ViknaPro CRM</h2>
+    <p class="sub">Вхід у систему</p>
+    <div class="fg"><label>Email</label><input id="authEmail" type="email" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="fg"><label>Пароль</label><input id="authPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div id="authErr"></div>
+    <button class="btn-s" onclick="doLogin()">УВІЙТИ</button>
+  </div>
+</div>
+
 <div id="loader"><i class="fa fa-spinner fa-spin fa-2x" style="color:var(--p2)"></i></div>
 
 <header>
   <div style="font-weight:900; letter-spacing: -0.5px;" id="brd">HEIMEK CRM</div>
-  <div class="btns">
-    <button class="btn-c on" id="b-hmk" onclick="setCo('heimek')">HMK</button>
-    <button class="btn-c" id="b-lux" onclick="setCo('luxwin')">LUX</button>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <div class="btns">
+      <button class="btn-c on" id="b-hmk" onclick="setCo('heimek')">HMK</button>
+      <button class="btn-c" id="b-lux" onclick="setCo('luxwin')">LUX</button>
+    </div>
+    <button id="logoutBtn" onclick="logout()" title="Вийти"><i class="fa fa-right-from-bracket"></i></button>
   </div>
 </header>
 
@@ -110,6 +146,7 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
   <div class="s-t" data-s="Боржники" onclick="flt('Боржники',this)">💸 Боржники</div>
   <div class="s-t" data-s="Кошторис" onclick="flt('Кошторис',this)">📑 Кошторис</div>
   <div class="s-t" data-s="Підтверджено" onclick="flt('Підтверджено',this)">✅ Підтверджено</div>
+  <div class="s-t" data-s="Перевірка" onclick="flt('Перевірка',this)">🔎 Перевірка</div>
   <div class="s-t" data-s="В роботі" onclick="flt('В роботі',this)">🏭 В роботі</div>
   <div class="s-t" data-s="На складі" onclick="flt('На складі',this)">🚚 На складі</div>
   <div class="s-t" data-s="Виконано" onclick="flt('Виконано',this)">📦 Виконано</div>
@@ -163,7 +200,7 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
     <div class="grid"><div class="fg"><label>Ціна Фабрики €</label><input id="fCo" type="number" oninput="calc()"></div><div class="fg"><label>Передплата ФАБРИЦІ €</label><input id="fFaPa" type="number"></div></div>
     <div class="grid"><div class="fg"><label>Передплата КЛІЄНТА €</label><input id="fPa" type="number"></div><div class="fg"><label>Чистий прибуток</label><input id="fMr" readonly style="background:#f0fdf4;font-weight:bold;color:#166534"></div></div>
     <div class="fg"><label>Етапи</label>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.75rem">
+      <div class="grid" style="font-size:0.75rem">
         <label><input type="checkbox" id="fChM"> 📐 Замір</label>
         <label><input type="checkbox" id="fChO"> 🏭 Завод</label>
         <label><input type="checkbox" id="fChS"> 🚚 Склад</label>
@@ -191,12 +228,43 @@ input, select, textarea { padding: 12px; border: 1px solid var(--line); border-r
 
 <script>
 const URL_SB = "https://ysctdrsxqtekxuvkjmdx.supabase.co";
-const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzY3RkcnN4cXRla3h1dmtqbWR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODkxOTksImV4cCI6MjA5OTE2NTE5OX0.vmOKBfc1dGLgrNu1YQ9IVF-v6nUGb2tzEK29L1X0aiQ";
+const KEY_SB = "eyJhbGci••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••";
 const sb = window.supabase.createClient(URL_SB, KEY_SB);
 
 let co='heimek', orders=[], clients=[], editId=null, curT='orders', curS='Усі';
 const TVA_OPTS = { heimek: [0, 5.5, 20], luxwin: [0, 6, 21] };
 const n = v => parseFloat(v) || 0;
+
+async function initAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) return onLoggedIn(session);
+  document.getElementById('loader').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+}
+
+async function doLogin() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPass').value;
+  const err = document.getElementById('authErr');
+  err.style.display = 'none';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { err.textContent = 'Невірний email або пароль'; err.style.display = 'block'; return; }
+  onLoggedIn(data.session);
+}
+
+async function onLoggedIn(session) {
+  const { data: prof } = await sb.from('profiles').select('company').eq('id', session.user.id).single();
+  co = (prof && prof.company) ? prof.company : 'heimek';
+  document.body.setAttribute('data-co', co);
+  document.getElementById('brd').innerText = co.toUpperCase() + ' CRM';
+  document.querySelector('.btns').style.display = 'none';
+  document.getElementById('logoutBtn').style.display = 'flex';
+  document.getElementById('authScreen').style.display = 'none';
+  updateTva();
+  sync();
+}
+
+async function logout() { await sb.auth.signOut(); location.reload(); }
 
 async function sync() {
   document.getElementById('loader').style.display = 'flex';
@@ -217,8 +285,8 @@ const render = () => {
   let f = orders.filter(o=>( (o.client||"") + (o.product||"") + (o.factory||"") ).toLowerCase().includes(q));
   if (curS === 'Боржники') f = f.filter(o => (n(o.total_ttc) - n(o.paid_amount)) > 1 && o.status !== 'Виконано' && o.status !== 'Скасовано');
   else if(curS!=='Усі') f = f.filter(o => o.status === curS);
-  
-  const stPriority = { 'В роботі': 1, 'На складі': 2, 'Підтверджено': 3, 'Кошторис': 4, 'Виконано': 5, 'Скасовано': 6 };
+
+  const stPriority = { 'В роботі': 1, 'На складі': 2, 'Перевірка': 3, 'Підтверджено': 4, 'Кошторис': 5, 'Виконано': 6, 'Скасовано': 7 };
   if(sort === 'status') f.sort((a,b) => (stPriority[a.status] || 99) - (stPriority[b.status] || 99));
   else if(sort === 'deadline') f.sort((a,b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
   else if(sort === 'new') f.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
@@ -229,7 +297,7 @@ const render = () => {
     const over = o.deadline && o.deadline < today && o.status !== 'Виконано' && o.status !== 'Скасовано';
     const rem = o.reminder_date === today;
     const cl = clients.find(x=>x.name===o.client)||{};
-    let stCl = o.status === 'Виконано' ? 'st-done' : o.status === 'Скасовано' ? 'st-cancelled' : o.status === 'В роботі' ? 'st-inwork' : o.status === 'На складі' ? 'st-storage' : '';
+    let stCl = o.status === 'Виконано' ? 'st-done' : o.status === 'Скасовано' ? 'st-cancelled' : o.status === 'В роботі' ? 'st-inwork' : o.status === 'На складі' ? 'st-storage' : o.status === 'Перевірка' ? 'st-check' : '';
     let p = cl.phone || "";
     let pLink = p.startsWith('0') ? `+${co==='heimek'?'33':'32'}${p.substring(1)}` : p;
 
@@ -255,13 +323,13 @@ const render = () => {
 
 function renderStats() {
   const container = document.getElementById('statsDisplay');
-  const valid = orders.filter(o => o.status !== 'Скасовано');
-  const profit = valid.reduce((s, o) => s + (n(o.sale_price_ht)-n(o.cost_price)+n(o.install_cost)), 0);
-  const rev = valid.reduce((s, o) => s + n(o.total_ttc), 0);
-  const debt = valid.reduce((s, o) => s + (n(o.total_ttc)-n(o.paid_amount)), 0);
-  const fDebt = valid.reduce((s, o) => s + (n(o.cost_price)-n(o.factory_prepay)), 0);
+  const sold = orders.filter(o => o.status !== 'Скасовано' && o.status !== 'Кошторис');
+  const profit = sold.reduce((s, o) => s + (n(o.sale_price_ht)-n(o.cost_price)+n(o.install_cost)), 0);
+  const rev = sold.reduce((s, o) => s + n(o.total_ttc), 0);
+  const debt = sold.reduce((s, o) => s + (n(o.total_ttc)-n(o.paid_amount)), 0);
+  const fDebt = sold.reduce((s, o) => s + (n(o.cost_price)-n(o.factory_prepay)), 0);
 
-  const statuses = ['Кошторис', 'Підтверджено', 'В роботі', 'На складі'];
+  const statuses = ['Кошторис', 'Підтверджено', 'Перевірка', 'В роботі', 'На складі'];
   let sHtml = '';
   statuses.forEach(s => {
     const so = orders.filter(o => o.status === s);
@@ -269,7 +337,7 @@ function renderStats() {
     sHtml += `<div onclick="tab('orders'); flt('${s}', document.querySelector('[data-s=\\'${s}\\']'))" style="background:white; padding:15px; border-radius:15px; margin-bottom:10px; border:1px solid #eee; display:flex; justify-content:space-between; cursor:pointer;"><div><small style="color:gray">${s}</small><br><strong>${so.length} замовл.</strong></div><b>${ss.toFixed(0)} €</b></div>`;
   });
 
-  container.innerHTML = `<div class="st-main"><small>ЧИСТИЙ ПРИБУТОК</small><h2 style="font-size:2.4rem">${n(profit).toLocaleString()} €</h2><p>Обіг (TTC): ${n(rev).toLocaleString()} €</p></div><div class="st-grid"><div class="st-box" style="border-left:4px solid var(--danger)"><b>${n(debt).toFixed(0)}€</b><small>Борг Клієнтів</small></div><div class="st-box" style="border-left:4px solid var(--warning)"><b>${n(fDebt).toFixed(0)}€</b><small>Борг Фабрикам</small></div></div><h4 style="margin:10px 0; color:gray; font-size:0.7rem; text-transform:uppercase;">Етапи:</h4><div class="st-grid">${sHtml}</div>`;
+  container.innerHTML = `<div class="st-main"><small>ЧИСТИЙ ПРИБУТОК</small><h2 style="font-size:2.4rem">${n(profit).toLocaleString()} €</h2><p>Обіг (TTC): ${n(rev).toLocaleString()} €</p></div><div class="st-grid"><div class="st-box" style="border-left:4px solid var(--danger)"><b>${n(debt).toFixed(0)}€</b><small>Борг Клієнтів</small></div><div class="st-box" style="border-left:4px solid var(--warning)"><b>${n(fDebt).toFixed(0)}€</b><small>Борг Фабрикам</small></div></div><h4 style="margin:10px 0; color:gray; font-size:0.7rem; text-transform:uppercase;">Етапи:</h4><div>${sHtml}</div>`;
 }
 
 const openO = id => {
@@ -301,13 +369,13 @@ async function saveC() {
   await sb.from('clients').upsert(c); closeM('mC'); sync();
 }
 
-const setCo = k => { co=k; sync(); }
+const setCo = k => { co=k; document.body.setAttribute('data-co',k); document.getElementById('brd').innerText=k.toUpperCase()+' CRM'; document.getElementById('b-hmk').classList.toggle('on', k==='heimek'); document.getElementById('b-lux').classList.toggle('on', k==='luxwin'); updateTva(); sync(); }
 const tab = t => { curT=t; document.querySelectorAll('.panel').forEach(p=>p.style.display='none'); document.getElementById('p-'+t).style.display='block'; document.querySelectorAll('.n-i').forEach(i=>i.classList.remove('active')); document.getElementById('ni-'+t).classList.add('active'); if(t==='clients') renderC(); if(t==='stats') renderStats(); document.getElementById('navS').style.display = t === 'orders' ? 'flex' : 'none'; }
 const flt = (s,el) => { curS=s; document.querySelectorAll('.s-t').forEach(t=>t.classList.remove('active')); if(el) el.classList.add('active'); else {const target = document.querySelector(`[data-s='${s}']`); if(target) target.classList.add('active');} render(); }
 const calc = () => { const h=n(document.getElementById('fSa').value), t=n(document.getElementById('fTv').value), c=n(document.getElementById('fCo').value), i=n(document.getElementById('fIn').value); document.getElementById('fTt').value = ((h+i)*(1+t/100)).toFixed(2); document.getElementById('fMr').value = ((h-c)+i).toFixed(2) + ' €'; }
 const closeM = id => { document.getElementById(id).style.display='none'; editId=null; }
 const tglCan = () => { const b=document.getElementById('canB'); if(b) b.style.display = document.getElementById('fSt').value === 'Скасовано' ? 'block' : 'none'; }
-const fab = () => curT === 'clients' ? (editId=null, document.getElementById('cNa').value='', document.getElementById('cPh').value='', document.getElementById('cAd').value='', document.getElementById('cNo').value='', document.getElementById('hSec').style.display='none', document.getElementById('mC').style.display='flex') : openO(null);
+const fab = () => curT === 'clients' ? (editId=null, document.getElementById('cNa').value='', document.getElementById('cPh').value='', document.getElementById('cAd').value='', document.getElementById('cNo').value='', document.getElementById('hSec').style.display='none', document.getElementById('btnDC').style.display='none', document.getElementById('mC').style.display='flex') : openO(null);
 const updateDl = () => { document.getElementById('dlC').innerHTML=clients.map(c=>`<option value="${c.name}">`).join(''); }
 async function delO() { if(confirm('Видалити?')) { await sb.from('orders').delete().eq('id', editId); closeM('mO'); sync(); } }
 async function delC() { if(confirm('Видалити?')) { await sb.from('clients').delete().eq('id', editId); closeM('mC'); sync(); } }
@@ -315,7 +383,8 @@ function renderC() { const q=document.getElementById('qc').value.toLowerCase(); 
 function openCE(id) { editId=id; const c=clients.find(x=>x.id==id); document.getElementById('cNa').value=c.name; document.getElementById('cPh').value=c.phone; document.getElementById('cAd').value=c.address; document.getElementById('cNo').value=c.notes; const h = orders.filter(o => o.client === c.name); document.getElementById('hSec').style.display = 'block'; document.getElementById('hList').innerHTML = h.map(o => `<div style="font-size:0.75rem; background:#f8fafc; padding:8px; border-radius:8px; margin-top:5px; display:flex; justify-content:space-between;" onclick="event.stopPropagation(); closeM('mC'); openO('${o.id}')"><span>${o.product}</span><b>${o.total_ttc} €</b></div>`).join('') || '<small>Замовлень немає</small>'; document.getElementById('btnDC').style.display='block'; document.getElementById('mC').style.display='flex'; }
 function updateTva() { const sel = document.getElementById('fTv'); if(sel) sel.innerHTML = TVA_OPTS[co].map(v => `<option value="${v}">${v}%</option>`).join(''); }
 function openSheet() { window.open("https://supabase.com/dashboard/project/ysctdrsxqtekxuvkjmdx/editor", "_blank"); }
-window.onload = () => { updateTva(); sync(); };
+
+window.onload = () => { initAuth(); };
 </script>
 </body>
 </html>
