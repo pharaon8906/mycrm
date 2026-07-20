@@ -504,6 +504,7 @@ async function checkUser() {
     document.body.setAttribute('data-co', co);
     document.getElementById('brd').innerText = CO_NAME[co] || 'CRM';
     document.title = CO_NAME[co] || 'CRM';
+    history.replaceState({ t: 'orders' }, '');   // базовий запис для кнопки "Назад"
     updateTva(); sync();
   } else {
     document.getElementById('loader').style.display = 'none';
@@ -750,7 +751,7 @@ const openO = id => {
     document.getElementById('btnD').style.display='none';
     document.getElementById('btnDup').style.display='none';
   }
-  tglCan(); calc(); document.getElementById('mO').style.display='flex';
+  tglCan(); calc(); showModal('mO');
 }
 
 // Дублювання: лишає клієнта/виріб/ціни, скидає дати, платежі, файли
@@ -767,19 +768,31 @@ function dupO() {
 }
 
 const fab = () => curT === 'clients'
-  ? (editId=null, ['cNa','cPh','cAd','cNo'].forEach(i=>document.getElementById(i).value=''), document.getElementById('hSec').style.display='none', document.getElementById('btnDC').style.display='none', document.getElementById('mC').style.display='flex')
+  ? (editId=null, ['cNa','cPh','cAd','cNo'].forEach(i=>document.getElementById(i).value=''), document.getElementById('hSec').style.display='none', document.getElementById('btnDC').style.display='none', showModal('mC'))
   : openO(null);
-const closeM = id => { document.getElementById(id).style.display='none'; editId=null; if(id==='mO') document.querySelector('#mO h3').textContent='Замовлення'; }
+// Показ модалки + запис в історію (щоб "Назад" її закривав)
+function showModal(id) {
+  document.getElementById(id).style.display = 'flex';
+  history.pushState({ m: id }, '');
+}
+const closeM = (id, fromPop) => {
+  document.getElementById(id).style.display='none'; editId=null;
+  if(id==='mO') document.querySelector('#mO h3').textContent='Замовлення';
+  // якщо закрили вручну — прибрати запис з історії
+  if (!fromPop && history.state && history.state.m === id) history.back();
+}
 const tglCan = () => document.getElementById('canB').style.display = document.getElementById('fSt').value === 'Скасовано' ? 'block' : 'none';
 const updateDl = () => { document.getElementById('dlC').innerHTML = clients.map(c=>`<option value="${c.name}">`).join(''); }
 const flt = (s,el) => { curS=s; document.querySelectorAll('.s-t').forEach(t=>t.classList.remove('active')); if(el) el.classList.add('active'); else { const t=document.querySelector(`[data-s='${s}']`); if(t) t.classList.add('active'); } render(); }
-const tab = t => {
+const tab = (t, fromPop) => {
   curT=t; document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
   document.getElementById('p-'+t).style.display='block';
   document.querySelectorAll('.n-i').forEach(i=>i.classList.remove('active'));
   document.getElementById('ni-'+t).classList.add('active');
   if(t==='clients') renderC(); if(t==='stats') renderStats(); if(t==='calendar') renderCal();
   document.getElementById('navS').style.display = t === 'orders' ? 'flex' : 'none';
+  // запис в історію, щоб "Назад" повертав на попередню вкладку
+  if (!fromPop && !(history.state && history.state.t === t)) history.pushState({ t }, '');
 }
 
 function renderC() {
@@ -802,7 +815,7 @@ function openCE(id) {
   document.getElementById('hSec').style.display='block';
   document.getElementById('hList').innerHTML = h.map(o=>`<div class="file-chip" onclick="event.stopPropagation(); closeM('mC'); openO('${o.id}')" style="cursor:pointer"><span>${o.product||'Замовлення'}</span><b style="font-variant-numeric:tabular-nums">${fN(o.total_ttc)} €</b></div>`).join('') || '<small style="color:var(--muted2)">Замовлень немає</small>';
   document.getElementById('btnDC').style.display='block';
-  document.getElementById('mC').style.display='flex';
+  showModal('mC');
 }
 async function delO() { if(confirm('Видалити?')) { await _sb.from('orders').delete().eq('id', editId); closeM('mO'); sync(); } }
 async function delC() { if(confirm('Видалити?')) { await _sb.from('clients').delete().eq('id', editId); closeM('mC'); sync(); } }
@@ -812,6 +825,15 @@ function updateTva() { const sel = document.getElementById('fTv'); if(sel) sel.i
 // Закриття модалки: клік поза вікном або Esc
 document.querySelectorAll('.modal-w').forEach(m => { m.addEventListener('click', e => { if (e.target === m) closeM(m.id); }); });
 document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; document.querySelectorAll('.modal-w').forEach(m => { if (m.style.display === 'flex') closeM(m.id); }); });
+
+// Кнопка "Назад": спершу закриває модалку, потім повертає на попередню вкладку
+window.addEventListener('popstate', e => {
+  const openModalEl = [...document.querySelectorAll('.modal-w')].find(m => m.style.display === 'flex');
+  if (openModalEl) { closeM(openModalEl.id, true); return; }
+  const st = e.state;
+  if (st && st.t) tab(st.t, true);
+  else tab('orders', true);
+});
 
 // PWA
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
