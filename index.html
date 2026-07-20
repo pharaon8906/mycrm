@@ -330,7 +330,7 @@ select { cursor: pointer; }
 
     <div class="sec">Основне</div>
     <div class="fg"><label>Клієнт</label><input id="fCl" list="dlC"><datalist id="dlC"></datalist></div>
-    <div class="grid"><div class="fg"><label>Виріб</label><input id="fPr"></div><div class="fg"><label>Фабрика</label><select id="fFa"><option>Eko-okna</option><option>Seharia</option><option>Ukraine</option><option>Optimedia</option></select></div></div>
+    <div class="grid"><div class="fg"><label>Виріб</label><input id="fPr"></div><div class="fg"><label>Фабрика</label><select id="fFa"><option>Eko-okna</option><option>Seharia</option><option>Ukraine</option><option>Optimedia</option><option>S.C. GERE&amp;CO S.R.L.</option></select></div></div>
     <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan()"><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
     <div id="canB" class="fg" style="display:none"><label style="color:var(--danger)">Причина скасування</label><textarea id="fCan" rows="2"></textarea></div>
 
@@ -680,7 +680,7 @@ function renderStats() {
   }).join('');
 
   let fHtml = '';
-  ['Eko-okna','Seharia','Ukraine','Optimedia'].forEach(f => {
+  ['Eko-okna','Seharia','Ukraine','Optimedia','S.C. GERE&CO S.R.L.'].forEach(f => {
     const fo = active.filter(o => o.factory === f);
     const fd = fo.reduce((s,o)=> s + (n(o.cost_price)-n(o.factory_prepay)), 0);
     fHtml += `<div class="st-box"><b style="font-size:15px">${f}</b><small>${fo.length} в роботі</small><span>Борг: ${fN(fd)} €</span></div>`;
