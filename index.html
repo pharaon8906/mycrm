@@ -464,6 +464,18 @@ const TVA_OPTS = { heimek: [0, 5.5, 20], luxwin: [0, 6, 21] };
 const n = v => parseFloat(v) || 0;
 const fN = v => n(v).toLocaleString('uk-UA');
 
+// Номер у міжнародному форматі, лише цифри (для wa.me)
+const waNum = p => {
+  let d = (p || '').replace(/\D/g, '');          // прибрати пробіли, +, дефіси, дужки
+  if (!d) return '';
+  const cc = co === 'heimek' ? '33' : '32';      // FR / BE
+  if (d.startsWith('00')) return d.slice(2);     // 0033... → 33...
+  if (d.startsWith('0'))  return cc + d.slice(1);// 06...   → 336...
+  if (d.startsWith(cc))   return d;              // вже з кодом країни
+  return cc + d;                                 // 6...    → 336...
+};
+const telNum = p => { const d = waNum(p); return d ? '+' + d : ''; };
+
 // ---- ФАЙЛИ ----
 const parseFiles = v => {
   if (!v) return [];
@@ -574,7 +586,7 @@ const render = () => {
     const cl = clients.find(x=>x.name===o.client)||{};
     const nFiles = parseFiles(o.file_url).length;
     let stCl = o.status === 'Виконано' ? 'st-done' : o.status === 'Скасовано' ? 'st-cancelled' : o.status === 'В роботі' ? 'st-inwork' : o.status === 'На складі' ? 'st-storage' : o.status === 'Перевірка' ? 'st-verify' : o.status === 'Кошторис' ? 'st-est' : '';
-    let pLink = (cl.phone||"").startsWith('0') ? `+${co==='heimek'?'33':'32'}${cl.phone.substring(1)}` : cl.phone;
+    const wa = waNum(cl.phone);
 
     return `<div class="card ${over?'over':''} ${rem?'rem':''} ${stCl}" onclick="openO('${o.id}')">
         <div class="c-row-1"><div class="c-name">${o.client||'Без імені'}</div><div class="status-badge">${o.status}</div></div>
@@ -589,8 +601,8 @@ const render = () => {
         <div class="c-foot">
           <div class="val">${fN(ttc)} €</div>
           <div style="display:flex; align-items:center; gap:8px;">
-            <a href="tel:${pLink}" onclick="event.stopPropagation()" title="Подзвонити"><i class="fa fa-phone-alt"></i></a>
-            <a href="https://wa.me/${(pLink||'').replace('+','')}" onclick="event.stopPropagation()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            ${wa ? `<a href="tel:+${wa}" onclick="event.stopPropagation()" title="Подзвонити"><i class="fa fa-phone-alt"></i></a>
+            <a href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : ''}
             <div class="debt-tag ${debt > 1 ? 'red' : 'green'}">${debt > 1 ? fN(debt)+' €' : 'OK'}</div>
           </div>
         </div>
