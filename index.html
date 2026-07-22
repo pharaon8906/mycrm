@@ -481,10 +481,14 @@ async function renderFiles() {
 
 async function openFile(i) {
   const f = curFiles[i];
-  if (f.url) return window.open(f.url, '_blank');
-  const { data, error } = await _sb.storage.from(BUCKET).createSignedUrl(f.path, 3600);
-  if (error) return alert('Помилка: ' + error.message);
-  window.open(data.signedUrl, '_blank');
+  // справжнє посилання — лише те, що починається з http(s)
+  if (f.url && /^https?:\/\//i.test(f.url)) return window.open(f.url, '_blank');
+  if (f.path) {
+    const { data, error } = await _sb.storage.from(BUCKET).createSignedUrl(f.path, 3600);
+    if (error) return alert('Помилка: ' + error.message);
+    return window.open(data.signedUrl, '_blank');
+  }
+  alert('Цей запис пошкоджений (не містить файлу). Видаліть його кошиком і прикріпіть файл заново.');
 }
 async function rmFile(i) {
   if (!confirm('Видалити файл?')) return;
