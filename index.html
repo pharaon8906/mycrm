@@ -214,9 +214,12 @@ select { cursor: pointer; }
 .pay-total { display: flex; justify-content: space-between; margin-top: 10px; padding: 11px 13px; background: var(--line-soft); border-radius: var(--r-sm); font-size: 13px; font-weight: 600; }
 .pay-total b { font-variant-numeric: tabular-nums; }
 
-.fab { position: fixed; right: 18px; bottom: 88px; width: 56px; height: 56px; border-radius: var(--r-lg); background: var(--p2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; border: none; box-shadow: var(--sh-2); z-index: 1000; cursor: pointer; transition: .18s; }
-.fab:hover { transform: translateY(-2px); }
-.fab:active { transform: scale(.92) rotate(90deg); }
+.fab-add { position: fixed; right: 18px; bottom: 88px; width: 56px; height: 56px; border-radius: var(--r-lg); background: var(--p2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; border: none; box-shadow: var(--sh-2); z-index: 1000; cursor: pointer; transition: .18s; }
+.fab-add:hover { transform: translateY(-2px); }
+.fab-add:active { transform: scale(.92) rotate(90deg); }
+/* WhatsApp-кнопка на картці */
+.c-foot a.wa-btn { background: #25d366; color: #fff; }
+.c-foot a.wa-btn:hover { background: #1eb457; }
 .btn-s { background: var(--txt); color: #fff; width: 100%; height: 50px; border: none; border-radius: var(--r-sm); font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 8px; font-family: inherit; transition: .15s; }
 .btn-s:hover { background: var(--p2); }
 .btn-alt { background: var(--surface); color: var(--txt); border: 1px solid var(--line); width: 100%; height: 46px; border-radius: var(--r-sm); font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 8px; font-family: inherit; transition: .15s; display: none; }
@@ -248,7 +251,7 @@ select { cursor: pointer; }
   .n-i.active { background: var(--p2-soft); color: var(--p2); }
   .container { padding: 24px 28px 60px; }
   .cnt-grid { grid-template-columns: repeat(4, 1fr); }
-  .fab { right: 28px; bottom: 28px; }
+  .fab-add { right: 28px; bottom: 28px; }
   .modal-w { align-items: center; padding: 32px; }
   .mbox { border-radius: var(--r-xl); max-width: 740px; max-height: 88vh; padding: 28px; }
   .modal-w[style*="flex"] .mbox { animation: popIn .24s cubic-bezier(.16,1,.3,1); }
@@ -321,7 +324,7 @@ select { cursor: pointer; }
   <button class="n-i" id="ni-stats" onclick="tab('stats')"><i class="fa fa-chart-line"></i><span>Звіт</span></button>
 </div>
 
-<button class="fab" id="fabBtn" style="display:none" onclick="fab()"><i class="fa fa-plus"></i></button>
+<button class="fab-add" id="fabBtn" style="display:none" onclick="fab()"><i class="fa fa-plus"></i></button>
 
 <!-- МОДАЛКА ЗАМОВЛЕННЯ -->
 <div id="mO" class="modal-w">
@@ -338,7 +341,7 @@ select { cursor: pointer; }
     <div class="grid"><div class="fg"><label>Ціна HT €</label><input id="fSa" type="number" oninput="calc()"></div><div class="fg"><label>Монтаж €</label><input id="fIn" type="number" oninput="calc()"></div></div>
     <div class="grid"><div class="fg"><label>TVA %</label><select id="fTv" onchange="calc()"></select></div><div class="fg"><label>Сума TTC €</label><input id="fTt" readonly style="background:#fdf8e3;color:#7a5c00;font-weight:700"></div></div>
     <div class="grid"><div class="fg"><label>Ціна Фабрики €</label><input id="fCo" type="number" oninput="calc()"></div><div class="fg"><label>Передплата ФАБРИЦІ €</label><input id="fFaPa" type="number"></div></div>
-    <div class="fg"><label>Чистий прибуток</label><input id="fMr" readonly style="background:#e8f6f1;color:#0a5c42;font-weight:700"></div>
+    <div class="grid"><div class="fg"><label>Чистий прибуток</label><input id="fMr" readonly style="background:#e8f6f1;color:#0a5c42;font-weight:700"></div><div class="fg"><label>Націнка %</label><input id="fMk" readonly style="background:#eef1ff;color:#26389e;font-weight:700"></div></div>
 
     <div class="sec">Платежі клієнта</div>
     <div class="fg">
@@ -594,7 +597,7 @@ const render = () => {
           <div class="val">${fN(ttc)} €</div>
           <div style="display:flex; align-items:center; gap:8px;">
             ${wa ? `<a href="tel:+${wa}" onclick="event.stopPropagation()" title="Подзвонити"><i class="fa fa-phone-alt"></i></a>
-            <a href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : ''}
+            <a class="wa-btn" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : ''}
             <div class="debt-tag ${debt > 1 ? 'red' : 'green'}">${debt > 1 ? fN(debt)+' €' : 'OK'}</div>
           </div>
         </div>
@@ -819,7 +822,13 @@ function openCE(id) {
 }
 async function delO() { if(confirm('Видалити?')) { await _sb.from('orders').delete().eq('id', editId); closeM('mO'); sync(); } }
 async function delC() { if(confirm('Видалити?')) { await _sb.from('clients').delete().eq('id', editId); closeM('mC'); sync(); } }
-const calc = () => { const h=n(document.getElementById('fSa').value), t=n(document.getElementById('fTv').value), c=n(document.getElementById('fCo').value), i=n(document.getElementById('fIn').value); document.getElementById('fTt').value = ((h+i)*(1+t/100)).toFixed(2); document.getElementById('fMr').value = ((h-c)+i).toFixed(2) + ' €'; }
+const calc = () => {
+  const h=n(document.getElementById('fSa').value), t=n(document.getElementById('fTv').value), c=n(document.getElementById('fCo').value), i=n(document.getElementById('fIn').value);
+  document.getElementById('fTt').value = ((h+i)*(1+t/100)).toFixed(2);
+  document.getElementById('fMr').value = ((h-c)+i).toFixed(2) + ' €';
+  // Націнка = наскільки продано дорожче за ціну фабрики (у %)
+  document.getElementById('fMk').value = c > 0 ? Math.round((h - c) / c * 100) + ' %' : '—';
+}
 function updateTva() { const sel = document.getElementById('fTv'); if(sel) sel.innerHTML = TVA_OPTS[co].map(v => `<option value="${v}">${v}%</option>`).join(''); }
 
 // Закриття модалки: клік поза вікном або Esc
