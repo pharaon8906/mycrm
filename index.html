@@ -296,7 +296,7 @@ select { cursor: pointer; }
 <div class="container" id="mainUI" style="display:none">
   <div id="p-orders" class="panel on">
     <div style="display:flex; gap:10px; margin-bottom:18px;">
-      <input type="text" id="q" placeholder="🔍 Пошук: клієнт, виріб, телефон..." oninput="render()" style="flex:1">
+      <input type="text" id="q" placeholder="🔍 Пошук: клієнт, № замовлення, телефон..." oninput="render()" style="flex:1">
       <select id="sortSel" onchange="render()" style="width:auto; font-size:13px; font-weight:600; color:var(--muted);">
         <option value="status">⇅ Статус</option>
         <option value="deadline">⇅ Дедлайн</option>
@@ -333,7 +333,7 @@ select { cursor: pointer; }
 
     <div class="sec">Основне</div>
     <div class="fg"><label>Клієнт</label><input id="fCl" list="dlC"><datalist id="dlC"></datalist></div>
-    <div class="grid"><div class="fg"><label>Виріб</label><input id="fPr"></div><div class="fg"><label>Фабрика 1</label><select id="fFa"></select></div></div>
+    <div class="grid"><div class="fg"><label>Номер замовлення</label><input id="fPr" placeholder="напр. WEB/26/0947426"></div><div class="fg"><label>Фабрика 1</label><select id="fFa"></select></div></div>
     <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan()"><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
     <div id="canB" class="fg" style="display:none"><label style="color:var(--danger)">Причина скасування</label><textarea id="fCan" rows="2"></textarea></div>
 
