@@ -180,7 +180,8 @@ header { background: var(--p); color: #fff; padding: 0 18px; height: var(--nav-h
 .fg { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
 .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
 label { font-size: 12px; font-weight: 600; color: var(--muted); }
-input, select, textarea { padding: 12px 13px; border: 1px solid var(--line); border-radius: var(--r-sm); font-size: 15px; background: var(--surface); width: 100%; font-family: inherit; color: var(--txt); transition: .14s; }
+/* 16px — щоб iOS Safari не наближав екран при фокусі на полі */
+input, select, textarea { padding: 12px 13px; border: 1px solid var(--line); border-radius: var(--r-sm); font-size: 16px; background: var(--surface); width: 100%; font-family: inherit; color: var(--txt); transition: .14s; }
 input:hover, select:hover, textarea:hover { border-color: var(--muted2); }
 input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p2); box-shadow: 0 0 0 3px color-mix(in srgb, var(--p2) 14%, transparent); }
 input[readonly] { background: var(--line-soft); color: var(--muted); }
@@ -209,7 +210,7 @@ select { cursor: pointer; }
 .pay-row i.fa-trash { color: var(--muted2); cursor: pointer; font-size: 13px; padding: 4px; }
 .pay-row i.fa-trash:hover { color: var(--danger); }
 .pay-add { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-top: 8px; }
-.pay-add input { font-size: 14px; padding: 10px 11px; }
+.pay-add input { font-size: 16px; padding: 10px 11px; }
 .pay-add button { background: var(--p2); color: #fff; border: none; border-radius: var(--r-sm); width: 46px; font-size: 16px; cursor: pointer; }
 .pay-total { display: flex; justify-content: space-between; margin-top: 10px; padding: 11px 13px; background: var(--line-soft); border-radius: var(--r-sm); font-size: 13px; font-weight: 600; }
 .pay-total b { font-variant-numeric: tabular-nums; }
@@ -297,7 +298,7 @@ select { cursor: pointer; }
   <div id="p-orders" class="panel on">
     <div style="display:flex; gap:10px; margin-bottom:18px;">
       <input type="text" id="q" placeholder="🔍 Пошук: клієнт, № замовлення, телефон..." oninput="render()" style="flex:1">
-      <select id="sortSel" onchange="render()" style="width:auto; font-size:13px; font-weight:600; color:var(--muted);">
+      <select id="sortSel" onchange="render()" style="width:auto; font-size:16px; font-weight:600; color:var(--muted);">
         <option value="status">⇅ Статус</option>
         <option value="deadline">⇅ Дедлайн</option>
         <option value="new">⇅ Нові</option>
