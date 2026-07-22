@@ -421,6 +421,10 @@ function toggleFac2(show) {
 const orderFacDebt = o => (n(o.cost_price)-n(o.factory_prepay)) + (o.factory2 ? (n(o.cost_price2)-n(o.factory_prepay2)) : 0);
 const orderCost = o => n(o.cost_price) + n(o.cost_price2);
 
+// Боржник = має борг і в активному статусі (Підтверджено / В роботі / На складі)
+const DEBT_STATUSES = ['Підтверджено','В роботі','На складі'];
+const isDebtor = o => DEBT_STATUSES.includes(o.status) && (n(o.total_ttc) - n(o.paid_amount)) > 1;
+
 let co='heimek', orders=[], clients=[], editId=null, curT='orders', curS='Усі';
 let curFiles=[], curPay=[], statPeriod='all';
 const TVA_OPTS = { heimek: [0, 5.5, 20], luxwin: [0, 6, 21] };
@@ -557,7 +561,7 @@ async function sync() {
 
 /* ================= ЛІЧИЛЬНИКИ НА ФІЛЬТРАХ ================= */
 function updateChips() {
-  const debtors = orders.filter(o => (n(o.total_ttc)-n(o.paid_amount))>1 && o.status!=='Виконано' && o.status!=='Скасовано').length;
+  const debtors = orders.filter(isDebtor).length;
   document.querySelectorAll('.s-t').forEach(el => {
     const s = el.dataset.s;
     const v = s==='Усі' ? orders.length : s==='Боржники' ? debtors : orders.filter(o=>o.status===s).length;
@@ -583,7 +587,7 @@ const render = () => {
     return qDigits.length >= 3 && ph.replace(/\D/g,'').includes(qDigits);
   });
 
-  if (curS === 'Боржники') f = f.filter(o => (n(o.total_ttc) - n(o.paid_amount)) > 1 && o.status !== 'Виконано' && o.status !== 'Скасовано');
+  if (curS === 'Боржники') f = f.filter(isDebtor);
   else if (curS!=='Усі') f = f.filter(o => o.status === curS);
 
   const stPriority = { 'В роботі':1, 'На складі':2, 'Перевірка':3, 'Підтверджено':4, 'Кошторис':5, 'Виконано':6, 'Скасовано':7 };
