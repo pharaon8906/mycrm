@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>CRM</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#101a2c">
@@ -33,7 +33,7 @@
 [data-co="luxwin"] { --p: #0b1f18; --p2: #068a63; --p2-soft: #e9f8f2; --a: #4fc79f; --conf: #068a63; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { background: var(--bg); color: var(--txt); font-family: 'Inter', system-ui, sans-serif; padding-bottom: 78px; font-size: 14px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+body { background: var(--bg); color: var(--txt); font-family: 'Inter', system-ui, sans-serif; padding-bottom: 78px; font-size: 14px; line-height: 1.45; -webkit-font-smoothing: antialiased; touch-action: manipulation; }
 ::selection { background: var(--p2); color: #fff; }
 
 header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px) 18px 0; height: calc(var(--nav-h) + env(safe-area-inset-top,0px)); box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
@@ -917,6 +917,16 @@ window.addEventListener('popstate', e => {
   if (st && st.t) tab(st.t, true);
   else tab('orders', true);
 });
+
+// Блокування зуму на iOS (Safari ігнорує user-scalable=no)
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('gesturechange', e => e.preventDefault());
+let lastTouch = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if (now - lastTouch <= 300) e.preventDefault();   // подвійний тап → без зуму
+  lastTouch = now;
+}, { passive: false });
 
 // PWA
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
