@@ -43,6 +43,9 @@ header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px
 #brd { font-weight: 700; letter-spacing: -.02em; font-size: 15px; }
 #logoutBtn { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: #fff; height: 36px; padding: 0 14px; border-radius: var(--r-sm); cursor: pointer; display: none; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; font-family: inherit; transition: .15s; }
 #logoutBtn:hover { background: rgba(255,255,255,.18); }
+.co-switch { display: flex; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); border-radius: var(--r-sm); padding: 3px; gap: 2px; }
+.co-switch button { border: none; background: none; color: rgba(255,255,255,.6); font-family: inherit; font-weight: 600; font-size: 12px; padding: 5px 11px; border-radius: 7px; cursor: pointer; transition: .14s; }
+.co-switch button.on { background: rgba(255,255,255,.22); color: #fff; }
 
 /* ============ ФІЛЬТРИ ============ */
 .nav-s { display: flex; gap: 8px; overflow-x: auto; padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: calc(var(--nav-h) + env(safe-area-inset-top,0px)); z-index: 900; scrollbar-width: none; }
@@ -321,7 +324,13 @@ select { cursor: pointer; }
 
 <header>
   <div class="brand"><span class="logo"><i class="fa fa-cubes"></i></span><div id="brd">CRM</div></div>
-  <button id="logoutBtn" onclick="doLogout()"><i class="fa fa-sign-out-alt"></i> Вихід</button>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="co-switch" id="coSwitch" style="display:none">
+      <button id="b-hmk" class="on" onclick="setCo('heimek')">Heimek</button>
+      <button id="b-lux" onclick="setCo('luxwin')">Lux Win</button>
+    </div>
+    <button id="logoutBtn" onclick="doLogout()"><i class="fa fa-sign-out-alt"></i> Вихід</button>
+  </div>
 </header>
 
 <div class="nav-s" id="navS" style="display:none">
@@ -364,6 +373,13 @@ select { cursor: pointer; }
       <div class="grid">
         <div class="fg"><label>Телефон</label><input id="qnPhone" type="tel"></div>
         <div class="fg"><label>Номер замовлення</label><input id="qnNum" placeholder="напр. WEB/26/..."></div>
+      </div>
+      <div class="fg"><label>Нотатки</label><textarea id="qnNotes" rows="2" placeholder="Що хоче клієнт, деталі звернення..."></textarea></div>
+      <div class="fg"><label>Файли (фото, замір, документ)</label>
+        <div id="qnFileList" class="file-list"></div>
+        <label class="up-btn"><i class="fa fa-paperclip"></i> <span id="qnUpTxt">Прикріпити файл</span>
+          <input type="file" multiple onchange="uploadQnFiles(this)" style="display:none">
+        </label>
       </div>
       <button class="btn-s" onclick="newRequest()">Створити заявку</button>
     </div>
@@ -586,13 +602,18 @@ async function checkUser() {
   const { data: { session } } = await _sb.auth.getSession();
   if (session) {
     const { data: prof } = await _sb.from('profiles').select('company').eq('id', session.user.id).single();
-    co = prof ? prof.company : 'heimek';
+    const company = prof ? prof.company : 'heimek';
+    const isOwner = company === 'all';          // доступ до обох компаній
+    co = isOwner ? 'heimek' : (company || 'heimek');
     document.getElementById('authScreen').style.display = 'none';
     document.getElementById('mainUI').style.display = 'block';
     document.getElementById('bottomNav').style.display = 'flex';
     document.getElementById('navS').style.display = 'flex';
     document.getElementById('fabBtn').style.display = 'flex';
     document.getElementById('logoutBtn').style.display = 'flex';
+    document.getElementById('coSwitch').style.display = isOwner ? 'flex' : 'none';
+    document.getElementById('b-hmk').classList.toggle('on', co==='heimek');
+    document.getElementById('b-lux').classList.toggle('on', co==='luxwin');
     document.body.setAttribute('data-co', co);
     document.getElementById('brd').innerText = CO_NAME[co] || 'CRM';
     document.title = CO_NAME[co] || 'CRM';
@@ -610,6 +631,18 @@ async function doLogin() {
   if (error) alert("Помилка: " + error.message); else checkUser();
 }
 async function doLogout() { await _sb.auth.signOut(); location.reload(); }
+
+// Перемикання компанії (лише для власника з доступом до обох)
+function setCo(k) {
+  if (k === co) return;
+  co = k;
+  document.body.setAttribute('data-co', co);
+  document.getElementById('brd').innerText = CO_NAME[co] || 'CRM';
+  document.title = CO_NAME[co] || 'CRM';
+  document.getElementById('b-hmk').classList.toggle('on', co==='heimek');
+  document.getElementById('b-lux').classList.toggle('on', co==='luxwin');
+  updateTva(); sync();
+}
 
 async function sync() {
   document.getElementById('loader').style.display = 'flex';
@@ -728,6 +761,45 @@ function renderCal() {
 }
 
 /* ================= НОВІ ЗАЯВКИ ================= */
+let qnFiles = [];
+async function uploadQnFiles(input) {
+  const files = [...input.files]; if (!files.length) return;
+  const txt = document.getElementById('qnUpTxt'); const orig = txt.textContent;
+  for (const f of files) {
+    txt.textContent = 'Завантаження: ' + f.name;
+    const safe = f.name.replace(/[^\w.\-]/g, '_');
+    const path = `${co}/new/${Date.now()}_${safe}`;
+    const { error } = await _sb.storage.from(BUCKET).upload(path, f);
+    if (error) { alert('Помилка завантаження: ' + error.message); continue; }
+    qnFiles.push({ name: f.name, path });
+  }
+  txt.textContent = orig; input.value = ''; renderQnFiles();
+}
+async function renderQnFiles() {
+  const box = document.getElementById('qnFileList');
+  if (!qnFiles.length) { box.innerHTML = ''; return; }
+  box.innerHTML = qnFiles.map((f, i) => {
+    const thumb = isImg(f.name) ? `<img class="thumb" id="qth${i}" onclick="openQnFile(${i})" alt="">` : `<i class="fa fa-paperclip"></i>`;
+    return `<div class="file-chip">${thumb}<span onclick="openQnFile(${i})">${f.name}</span><i class="fa fa-trash" onclick="rmQnFile(${i})"></i></div>`;
+  }).join('');
+  for (let i = 0; i < qnFiles.length; i++) {
+    const f = qnFiles[i]; const el = document.getElementById('qth' + i);
+    if (!el || !isImg(f.name)) continue;
+    const { data } = await _sb.storage.from(BUCKET).createSignedUrl(f.path, 3600);
+    if (data) el.src = data.signedUrl;
+  }
+}
+async function openQnFile(i) {
+  const { data, error } = await _sb.storage.from(BUCKET).createSignedUrl(qnFiles[i].path, 3600);
+  if (error) return alert('Помилка: ' + error.message);
+  window.open(data.signedUrl, '_blank');
+}
+async function rmQnFile(i) {
+  if (!confirm('Видалити файл?')) return;
+  if (qnFiles[i].path) await _sb.storage.from(BUCKET).remove([qnFiles[i].path]);
+  qnFiles.splice(i, 1); renderQnFiles();
+}
+
 function renderNew() {
   const box = document.getElementById('listNew');
   const f = orders.filter(o => o.status === 'Нова')
@@ -735,9 +807,10 @@ function renderNew() {
   if (!f.length) { box.innerHTML = `<div class="empty"><i class="fa fa-circle-check"></i>Немає заявок в очікуванні</div>`; return; }
   box.innerHTML = f.map(o => {
     const ph = phoneOf(o.client); const wa = waNum(ph);
+    const nFiles = parseFiles(o.file_url).length;
     return `<div class="card st-new" onclick="openO('${o.id}')">
         <div class="c-row-1"><div class="c-name">${o.client||'Без імені'}</div><div class="status-badge">Нова</div></div>
-        <div class="c-row-2">${o.product ? '№ '+o.product : 'Без номера'} · очікує прорахунку</div>
+        <div class="c-row-2">${o.product ? '№ '+o.product : 'Без номера'} · очікує прорахунку${nFiles ? ' · 📎 '+nFiles : ''}</div>
         <div class="c-foot">
           <div style="font-size:13px;color:var(--muted)">${ph || 'без телефону'}</div>
           <div style="display:flex; align-items:center; gap:8px;">
@@ -764,11 +837,13 @@ async function newRequest() {
   }
 
   // саме замовлення-заявка без прорахунку
-  const o = { id:'NEW'+Date.now(), company:co, client:name, product:num, factory:FACTORIES[0], status:'Нова' };
+  const o = { id:'NEW'+Date.now(), company:co, client:name, product:num, factory:FACTORIES[0], status:'Нова',
+              notes: document.getElementById('qnNotes').value, file_url: JSON.stringify(qnFiles) };
   const { error } = await _sb.from('orders').upsert(o);
   if (error) return alert('Помилка: ' + error.message);
 
-  ['qnClient','qnPhone','qnNum'].forEach(i => document.getElementById(i).value = '');
+  ['qnClient','qnPhone','qnNum','qnNotes'].forEach(i => document.getElementById(i).value = '');
+  qnFiles = []; renderQnFiles();
   await sync(); renderNew();
 }
 
