@@ -103,6 +103,7 @@ header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px
 .st-storage .status-badge { color: var(--store); background: #f1ecfd; }
 
 .c-row-2 { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+.c-date { font-size: 11.5px; color: var(--muted2); margin-top: 5px; display: flex; align-items: center; gap: 5px; }
 .c-steps-inline { display: flex; align-items: center; gap: 14px; font-size: 13px; color: #cfd5df; margin: 14px 0; }
 .c-steps-inline i.active { color: var(--p2); }
 .clip { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--muted); font-weight: 600; background: var(--line-soft); padding: 4px 9px; border-radius: 999px; margin-left: auto; }
@@ -351,7 +352,8 @@ select { cursor: pointer; }
     <div style="display:flex; gap:10px; margin-bottom:18px;">
       <input type="text" id="q" placeholder="🔍 Пошук: клієнт, № замовлення, телефон..." oninput="render()" style="flex:1">
       <select id="sortSel" onchange="render()" style="width:auto; font-size:16px; font-weight:600; color:var(--muted);">
-        <option value="new">⇅ За датою</option>
+        <option value="new">⇅ Спочатку нові</option>
+        <option value="old">⇅ Спочатку старі</option>
         <option value="status">⇅ Статус</option>
         <option value="deadline">⇅ Дедлайн</option>
         <option value="price">⇅ Ціна</option>
@@ -691,6 +693,7 @@ const render = () => {
   if(sort === 'status') f.sort((a,b) => (stPriority[a.status]||99) - (stPriority[b.status]||99));
   else if(sort === 'deadline') f.sort((a,b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
   else if(sort === 'new') f.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  else if(sort === 'old') f.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
   else if(sort === 'price') f.sort((a,b) => n(b.total_ttc) - n(a.total_ttc));
 
   updateChips();
@@ -708,6 +711,7 @@ const render = () => {
     return `<div class="card ${over?'over':''} ${rem?'rem':''} ${stCl}" onclick="openO('${o.id}')">
         <div class="c-row-1"><div class="c-name">${o.client||'Без імені'}</div><div class="status-badge">${o.status}</div></div>
         <div class="c-row-2">${o.factory}${o.factory2 ? ' + '+o.factory2 : ''} · ${o.product||'---'}</div>
+        ${o.created_at ? `<div class="c-date"><i class="fa fa-calendar-day"></i> ${new Date(o.created_at).toLocaleDateString('uk-UA')}</div>` : ''}
         <div class="c-steps-inline">
           <i class="fa fa-ruler-combined ${o.check_measured?'active':''}" title="Замір"></i>
           <i class="fa fa-file-signature ${o.check_ordered?'active':''}" title="Завод"></i>
