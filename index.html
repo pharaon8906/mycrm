@@ -351,9 +351,9 @@ select { cursor: pointer; }
     <div style="display:flex; gap:10px; margin-bottom:18px;">
       <input type="text" id="q" placeholder="🔍 Пошук: клієнт, № замовлення, телефон..." oninput="render()" style="flex:1">
       <select id="sortSel" onchange="render()" style="width:auto; font-size:16px; font-weight:600; color:var(--muted);">
+        <option value="new">⇅ За датою</option>
         <option value="status">⇅ Статус</option>
         <option value="deadline">⇅ Дедлайн</option>
-        <option value="new">⇅ Нові</option>
         <option value="price">⇅ Ціна</option>
       </select>
     </div>
