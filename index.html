@@ -21,6 +21,7 @@
   --p: #101a2c; --p2: #3355ff; --p2-soft: #eef1ff; --a: #7c92ff;
   --bg: #e9edf3; --surface: #ffffff; --line: #d9dfe9; --line-soft: #eaeef4;
   --txt: #0b1220; --muted: #5a6577; --muted2: #78839a;
+  --new: #db2777;
   --est: #7d8798; --conf: #3355ff; --verify: #0e8fa8; --work: #c2610a;
   --store: #6d3fd4; --done: #12805c; --canc: #c0344a;
   --success: #12805c; --danger: #c0344a; --warning: #c2610a; --violet: #6d3fd4; --cyan: #0e8fa8;
@@ -73,6 +74,10 @@ header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px
 .card.st-verify { background: #f4fcfd; }
 .card.st-storage { background: #faf8ff; }
 .card.over { border-color: var(--danger); }
+.card.st-new::before { background: var(--new); }
+.card.st-new { background: #fdf2f8; }
+.st-new .status-badge { color: var(--new); background: #fce7f3; }
+.st-new .status-badge::before { background: var(--new); }
 .card.st-est { background: #fdf4f5; }
 .card.st-est::before { background: var(--canc); }
 .card.rem { background: #fceef0; border-color: color-mix(in srgb, var(--danger) 35%, var(--line)); }
@@ -107,6 +112,10 @@ header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px
 .debt-tag.green { background: #e8f6f1; color: var(--success); }
 
 #listC { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+#listNew { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.qbox { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; box-shadow: var(--sh-1); margin-bottom: 6px; }
+.qbox .qh { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+.qbox .qs { font-size: 12.5px; color: var(--muted); margin-bottom: 16px; }
 #listC .card strong { font-size: 14.5px; font-weight: 700; }
 #listC .card small { color: var(--muted); font-size: 12.5px; }
 
@@ -317,6 +326,7 @@ select { cursor: pointer; }
 
 <div class="nav-s" id="navS" style="display:none">
   <div class="s-t active" data-s="Усі" onclick="flt('Усі',this)">Усі</div>
+  <div class="s-t" data-s="Нова" onclick="flt('Нова',this)">🆕 Нові</div>
   <div class="s-t" data-s="Боржники" onclick="flt('Боржники',this)">💸 Боржники</div>
   <div class="s-t" data-s="Кошторис" onclick="flt('Кошторис',this)">📑 Кошторис</div>
   <div class="s-t" data-s="Підтверджено" onclick="flt('Підтверджено',this)">✅ Підтверджено</div>
@@ -346,6 +356,21 @@ select { cursor: pointer; }
     <div id="listC" style="margin-top:18px"></div>
   </div>
 
+  <div id="p-new" class="panel">
+    <div class="qbox">
+      <div class="qh">Нова заявка</div>
+      <div class="qs">Швидко зафіксуйте звернення. Прорахунок зробите пізніше — статус буде «Нова», поки не переведете в «Кошторис».</div>
+      <div class="fg"><label>Клієнт</label><input id="qnClient" list="dlC" placeholder="Ім'я або компанія"></div>
+      <div class="grid">
+        <div class="fg"><label>Телефон</label><input id="qnPhone" type="tel"></div>
+        <div class="fg"><label>Номер замовлення</label><input id="qnNum" placeholder="напр. WEB/26/..."></div>
+      </div>
+      <button class="btn-s" onclick="newRequest()">Створити заявку</button>
+    </div>
+    <div class="st-h">Заявки в очікуванні прорахунку</div>
+    <div id="listNew"></div>
+  </div>
+
   <div id="p-calendar" class="panel"><div id="calDisplay"></div></div>
 
   <div id="p-stats" class="panel"><div id="statsDisplay"></div></div>
@@ -353,6 +378,7 @@ select { cursor: pointer; }
 
 <div class="bottom-nav" id="bottomNav" style="display:none">
   <button class="n-i active" id="ni-orders" onclick="tab('orders')"><i class="fa fa-list-ul"></i><span>Замовлення</span></button>
+  <button class="n-i" id="ni-new" onclick="tab('new')"><i class="fa fa-inbox"></i><span>Нові</span></button>
   <button class="n-i" id="ni-clients" onclick="tab('clients')"><i class="fa fa-users"></i><span>Клієнти</span></button>
   <button class="n-i" id="ni-calendar" onclick="tab('calendar')"><i class="fa fa-calendar-days"></i><span>Календар</span></button>
   <button class="n-i" id="ni-stats" onclick="tab('stats')"><i class="fa fa-chart-line"></i><span>Звіт</span></button>
@@ -368,7 +394,7 @@ select { cursor: pointer; }
     <div class="sec">Основне</div>
     <div class="fg"><label>Клієнт</label><input id="fCl" list="dlC"><datalist id="dlC"></datalist></div>
     <div class="grid"><div class="fg"><label>Номер замовлення</label><input id="fPr" placeholder="напр. WEB/26/0947426"></div><div class="fg"><label>Фабрика 1</label><select id="fFa"></select></div></div>
-    <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan()"><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
+    <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan()"><option>Нова</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
     <div id="canB" class="fg" style="display:none"><label style="color:var(--danger)">Причина скасування</label><textarea id="fCan" rows="2"></textarea></div>
 
     <div class="sec">Фінанси</div>
@@ -628,7 +654,7 @@ const render = () => {
   if (curS === 'Боржники') f = f.filter(isDebtor);
   else if (curS!=='Усі') f = f.filter(o => o.status === curS);
 
-  const stPriority = { 'В роботі':1, 'На складі':2, 'Перевірка':3, 'Підтверджено':4, 'Кошторис':5, 'Виконано':6, 'Скасовано':7 };
+  const stPriority = { 'Нова':0, 'В роботі':1, 'На складі':2, 'Перевірка':3, 'Підтверджено':4, 'Кошторис':5, 'Виконано':6, 'Скасовано':7 };
   if(sort === 'status') f.sort((a,b) => (stPriority[a.status]||99) - (stPriority[b.status]||99));
   else if(sort === 'deadline') f.sort((a,b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
   else if(sort === 'new') f.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
@@ -644,7 +670,7 @@ const render = () => {
     const rem = o.reminder_date && o.reminder_date <= today && o.status !== 'Виконано' && o.status !== 'Скасовано';
     const nFiles = parseFiles(o.file_url).length;
     const wa = waNum(phoneOf(o.client));
-    let stCl = o.status==='Виконано'?'st-done':o.status==='Скасовано'?'st-cancelled':o.status==='В роботі'?'st-inwork':o.status==='На складі'?'st-storage':o.status==='Перевірка'?'st-verify':o.status==='Кошторис'?'st-est':'';
+    let stCl = o.status==='Виконано'?'st-done':o.status==='Скасовано'?'st-cancelled':o.status==='В роботі'?'st-inwork':o.status==='На складі'?'st-storage':o.status==='Перевірка'?'st-verify':o.status==='Кошторис'?'st-est':o.status==='Нова'?'st-new':'';
 
     return `<div class="card ${over?'over':''} ${rem?'rem':''} ${stCl}" onclick="openO('${o.id}')">
         <div class="c-row-1"><div class="c-name">${o.client||'Без імені'}</div><div class="status-badge">${o.status}</div></div>
@@ -701,6 +727,51 @@ function renderCal() {
   }).join('');
 }
 
+/* ================= НОВІ ЗАЯВКИ ================= */
+function renderNew() {
+  const box = document.getElementById('listNew');
+  const f = orders.filter(o => o.status === 'Нова')
+                  .sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  if (!f.length) { box.innerHTML = `<div class="empty"><i class="fa fa-circle-check"></i>Немає заявок в очікуванні</div>`; return; }
+  box.innerHTML = f.map(o => {
+    const ph = phoneOf(o.client); const wa = waNum(ph);
+    return `<div class="card st-new" onclick="openO('${o.id}')">
+        <div class="c-row-1"><div class="c-name">${o.client||'Без імені'}</div><div class="status-badge">Нова</div></div>
+        <div class="c-row-2">${o.product ? '№ '+o.product : 'Без номера'} · очікує прорахунку</div>
+        <div class="c-foot">
+          <div style="font-size:13px;color:var(--muted)">${ph || 'без телефону'}</div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            ${wa ? `<a href="tel:+${wa}" onclick="event.stopPropagation()" title="Подзвонити"><i class="fa fa-phone-alt"></i></a>
+            <a class="wa-btn" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function newRequest() {
+  const name  = document.getElementById('qnClient').value.trim();
+  const phone = document.getElementById('qnPhone').value.trim();
+  const num   = document.getElementById('qnNum').value.trim();
+  if (!name) return alert('Вкажіть клієнта');
+
+  // авто-додавання клієнта, якщо новий (або дозаповнення телефону)
+  const existing = clients.find(c => (c.name||'').trim().toLowerCase() === name.toLowerCase());
+  if (!existing) {
+    await _sb.from('clients').upsert({ id:'CNEW'+Date.now(), company:co, name, phone, address:'', notes:'' });
+  } else if (phone && !existing.phone) {
+    await _sb.from('clients').update({ phone }).eq('id', existing.id);
+  }
+
+  // саме замовлення-заявка без прорахунку
+  const o = { id:'NEW'+Date.now(), company:co, client:name, product:num, factory:FACTORIES[0], status:'Нова' };
+  const { error } = await _sb.from('orders').upsert(o);
+  if (error) return alert('Помилка: ' + error.message);
+
+  ['qnClient','qnPhone','qnNum'].forEach(i => document.getElementById(i).value = '');
+  await sync(); renderNew();
+}
+
 /* ================= ЗВІТ ================= */
 const inPeriod = o => {
   if (statPeriod === 'all') return true;
@@ -732,6 +803,7 @@ function renderStats() {
   const segHtml = P.map(([k,l])=>`<button class="${statPeriod===k?'on':''}" onclick="setPeriod('${k}')">${l}</button>`).join('');
 
   const S = [
+    {k:'Нова', ic:'fa-inbox', c:'var(--new)'},
     {k:'Виконано', ic:'fa-box', c:'var(--done)'},
     {k:'В роботі', ic:'fa-gears', c:'var(--work)'},
     {k:'Перевірка', ic:'fa-magnifying-glass', c:'var(--verify)'},
@@ -865,7 +937,7 @@ const tab = (t, fromPop) => {
   document.getElementById('p-'+t).style.display='block';
   document.querySelectorAll('.n-i').forEach(i=>i.classList.remove('active'));
   document.getElementById('ni-'+t).classList.add('active');
-  if(t==='clients') renderC(); if(t==='stats') renderStats(); if(t==='calendar') renderCal();
+  if(t==='clients') renderC(); if(t==='stats') renderStats(); if(t==='calendar') renderCal(); if(t==='new') renderNew();
   document.getElementById('navS').style.display = t === 'orders' ? 'flex' : 'none';
   // запис в історію, щоб "Назад" повертав на попередню вкладку
   if (!fromPop && !(history.state && history.state.t === t)) history.pushState({ t }, '');
