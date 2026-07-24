@@ -370,7 +370,13 @@ select { cursor: pointer; }
   <div id="p-new" class="panel">
     <div class="qbox">
       <div class="qh">Нова заявка</div>
-      <div class="qs">Швидко зафіксуйте звернення. Прорахунок зробите пізніше — статус буде «Нова», поки не переведете в «Кошторис».</div>
+      <div class="qs">Швидко зафіксуйте звернення. Можна створити для іншої компанії — тоді вона зʼявиться там як нова заявка.</div>
+      <div class="fg"><label>Для компанії</label>
+        <div class="seg" id="qnCoSeg" style="margin-bottom:0">
+          <button type="button" data-co="heimek" onclick="qnSetCo('heimek')">Heimek</button>
+          <button type="button" data-co="luxwin" onclick="qnSetCo('luxwin')">Lux Win</button>
+        </div>
+      </div>
       <div class="fg"><label>Клієнт</label><input id="qnClient" list="dlC" placeholder="Ім'я або компанія"></div>
       <div class="grid">
         <div class="fg"><label>Телефон</label><input id="qnPhone" type="tel"></div>
@@ -520,6 +526,12 @@ const waNum = p => {
   return cc + d;
 };
 const phoneOf = nm => (clients.find(c => c.name === nm) || {}).phone || '';
+const orderPhone = o => o.phone || phoneOf(o.client);   // телефон із заявки або з картки клієнта
+let qnTargetCo = 'heimek';                               // для якої компанії створюється заявка
+function qnSetCo(k) {
+  qnTargetCo = k;
+  document.querySelectorAll('#qnCoSeg button').forEach(b => b.classList.toggle('on', b.dataset.co === k));
+}
 
 /* ================= ФАЙЛИ ================= */
 const parseFiles = v => { if(!v) return []; try{ const a = typeof v==='string'?JSON.parse(v):v; return Array.isArray(a)?a:[]; }catch{ return [{name:'Файл', url:v}]; } };
@@ -705,7 +717,7 @@ const render = () => {
     const over = o.deadline && o.deadline < today && o.status !== 'Виконано' && o.status !== 'Скасовано';
     const rem = o.reminder_date && o.reminder_date <= today && o.status !== 'Виконано' && o.status !== 'Скасовано';
     const nFiles = parseFiles(o.file_url).length;
-    const wa = waNum(phoneOf(o.client));
+    const wa = waNum(orderPhone(o));
     let stCl = o.status==='Виконано'?'st-done':o.status==='Скасовано'?'st-cancelled':o.status==='В роботі'?'st-inwork':o.status==='На складі'?'st-storage':o.status==='Перевірка'?'st-verify':o.status==='Кошторис'?'st-est':o.status==='Нова'?'st-new':'';
 
     return `<div class="card ${over?'over':''} ${rem?'rem':''} ${stCl}" onclick="openO('${o.id}')">
@@ -772,7 +784,7 @@ async function uploadQnFiles(input) {
   for (const f of files) {
     txt.textContent = 'Завантаження: ' + f.name;
     const safe = f.name.replace(/[^\w.\-]/g, '_');
-    const path = `${co}/new/${Date.now()}_${safe}`;
+    const path = `${qnTargetCo}/new/${Date.now()}_${safe}`;
     const { error } = await _sb.storage.from(BUCKET).upload(path, f);
     if (error) { alert('Помилка завантаження: ' + error.message); continue; }
     qnFiles.push({ name: f.name, path });
@@ -805,12 +817,13 @@ async function rmQnFile(i) {
 }
 
 function renderNew() {
+  qnSetCo(co);   // за замовчуванням — поточна компанія
   const box = document.getElementById('listNew');
   const f = orders.filter(o => o.status === 'Нова')
                   .sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
   if (!f.length) { box.innerHTML = `<div class="empty"><i class="fa fa-circle-check"></i>Немає заявок в очікуванні</div>`; return; }
   box.innerHTML = f.map(o => {
-    const ph = phoneOf(o.client); const wa = waNum(ph);
+    const ph = orderPhone(o); const wa = waNum(ph);
     const nFiles = parseFiles(o.file_url).length;
     return `<div class="card st-new" onclick="openO('${o.id}')">
         <div class="c-row-1"><div class="c-name">${o.client||'Без імені'}</div><div class="status-badge">Нова</div></div>
@@ -832,23 +845,30 @@ async function newRequest() {
   const num   = document.getElementById('qnNum').value.trim();
   if (!name) return alert('Вкажіть клієнта');
 
-  // авто-додавання клієнта, якщо новий (або дозаповнення телефону)
-  const existing = clients.find(c => (c.name||'').trim().toLowerCase() === name.toLowerCase());
-  if (!existing) {
-    await _sb.from('clients').upsert({ id:'CNEW'+Date.now(), company:co, name, phone, address:'', notes:'' });
-  } else if (phone && !existing.phone) {
-    await _sb.from('clients').update({ phone }).eq('id', existing.id);
+  const target = qnTargetCo;
+  const cross = target !== co;   // заявка для іншої компанії
+
+  // клієнта авто-додаємо ЛИШЕ у своїй компанії (в чужу RLS не пустить)
+  if (!cross) {
+    const existing = clients.find(c => (c.name||'').trim().toLowerCase() === name.toLowerCase());
+    if (!existing) {
+      await _sb.from('clients').upsert({ id:'CNEW'+Date.now(), company:co, name, phone, address:'', notes:'' });
+    } else if (phone && !existing.phone) {
+      await _sb.from('clients').update({ phone }).eq('id', existing.id);
+    }
   }
 
-  // саме замовлення-заявка без прорахунку
-  const o = { id:'NEW'+Date.now(), company:co, client:name, product:num, factory:FACTORIES[0], status:'Нова',
-              notes: document.getElementById('qnNotes').value, file_url: JSON.stringify(qnFiles) };
+  // телефон зберігаємо прямо в заявці (щоб приймаюча компанія бачила його)
+  const noteVal = (cross ? `↪ Заявка від ${CO_NAME[co]}\n` : '') + document.getElementById('qnNotes').value;
+  const o = { id:'NEW'+Date.now(), company:target, client:name, product:num, phone, factory:FACTORIES[0], status:'Нова',
+              notes: noteVal, file_url: JSON.stringify(qnFiles) };
   const { error } = await _sb.from('orders').upsert(o);
   if (error) return alert('Помилка: ' + error.message);
 
   ['qnClient','qnPhone','qnNum','qnNotes'].forEach(i => document.getElementById(i).value = '');
   qnFiles = []; renderQnFiles();
   await sync(); renderNew();
+  if (cross) alert(`Заявку надіслано в ${CO_NAME[target]}. У вашій компанії вона не зберігається.`);
 }
 
 /* ================= ЗВІТ ================= */
