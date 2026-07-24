@@ -1079,6 +1079,12 @@ document.addEventListener('touchend', e => {
   lastTouch = now;
 }, { passive: false });
 
+// Блокування зуму на ПК (Ctrl + колесо миші / Ctrl +,-,0)
+window.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
+window.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && ['+','-','=','_','0'].includes(e.key)) e.preventDefault();
+}, { passive: false });
+
 // PWA
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
 
