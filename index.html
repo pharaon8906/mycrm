@@ -422,8 +422,9 @@ select { cursor: pointer; }
     <div id="canB" class="fg" style="display:none"><label style="color:var(--danger)">Причина скасування</label><textarea id="fCan" rows="2"></textarea></div>
 
     <div class="sec">Фінанси</div>
-    <div class="grid"><div class="fg"><label>Ціна HT €</label><input id="fSa" type="number" oninput="calc()"></div><div class="fg"><label>Монтаж €</label><input id="fIn" type="number" oninput="calc()"></div></div>
-    <div class="grid"><div class="fg"><label>TVA %</label><select id="fTv" onchange="calc()"></select></div><div class="fg"><label>Сума TTC €</label><input id="fTt" readonly style="background:#fdf8e3;color:#7a5c00;font-weight:700"></div></div>
+    <div class="grid"><div class="fg"><label>Ціна HT €</label><input id="fSa" type="number" oninput="calc()"></div><div class="fg"><label>TVA %</label><select id="fTv" onchange="calc()"></select></div></div>
+    <div class="grid"><div class="fg"><label>Монтаж €</label><input id="fIn" type="number" oninput="calc()"></div><div class="fg"><label>Доставка €</label><input id="fDe" type="number" oninput="calc()"></div></div>
+    <div class="fg"><label>Сума TTC €</label><input id="fTt" readonly style="background:#fdf8e3;color:#7a5c00;font-weight:700"></div>
     <div class="grid"><div class="fg"><label>Ціна Фабрики 1 €</label><input id="fCo" type="number" oninput="calc()"></div><div class="fg"><label>Передплата фабриці 1 €</label><input id="fFaPa" type="number"></div></div>
     <div id="fac2Toggle" onclick="toggleFac2()" style="color:var(--p2);cursor:pointer;font-size:13px;font-weight:600;margin:2px 0 14px">+ Додати другу фабрику</div>
     <div id="fac2Block" style="display:none">
@@ -893,7 +894,7 @@ function renderStats() {
   const sold   = src.filter(o => ACTIVE.includes(o.status) || o.status === 'Виконано');
   const sumTTC = a => a.reduce((s,o)=> s + n(o.total_ttc), 0);
 
-  const profit  = done.reduce((s,o)=> s + (n(o.sale_price_ht)-orderCost(o)+n(o.install_cost)), 0);
+  const profit  = done.reduce((s,o)=> s + (n(o.sale_price_ht)-orderCost(o)+n(o.install_cost)+n(o.delivery)), 0);
   const doneRev = sumTTC(done);
   const clientDebt  = sold.reduce((s,o)=> s + (n(o.total_ttc)-n(o.paid_amount)), 0);
   const factoryDebt = active.reduce((s,o)=> s + orderFacDebt(o), 0);
@@ -949,8 +950,8 @@ function renderStats() {
 function exportCSV() {
   const src = orders.filter(inPeriod);
   if (!src.length) return alert('Немає даних за обраний період');
-  const cols = ['client','product','factory','cost_price','factory_prepay','factory2','cost_price2','factory_prepay2','status','deadline','sale_price_ht','tva_rate','total_ttc','install_cost','paid_amount','notes'];
-  const head = ['Клієнт','Виріб','Фабрика 1','Ціна фабрики 1','Передплата 1','Фабрика 2','Ціна фабрики 2','Передплата 2','Статус','Дедлайн','Ціна HT','TVA %','Сума TTC','Монтаж','Оплачено','Нотатки'];
+  const cols = ['client','product','factory','cost_price','factory_prepay','factory2','cost_price2','factory_prepay2','status','deadline','sale_price_ht','tva_rate','total_ttc','install_cost','delivery','paid_amount','notes'];
+  const head = ['Клієнт','Номер','Фабрика 1','Ціна фабрики 1','Передплата 1','Фабрика 2','Ціна фабрики 2','Передплата 2','Статус','Дедлайн','Ціна HT','TVA %','Сума TTC','Монтаж','Доставка','Оплачено','Нотатки'];
   const esc = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
   const csv = '﻿' + head.join(';') + '\n' + src.map(o => cols.map(c => esc(o[c])).join(';')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -962,7 +963,7 @@ function exportCSV() {
 
 /* ================= ЗБЕРЕЖЕННЯ ================= */
 async function saveO() {
-  const o = { id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value, factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value, sale_price_ht: n(document.getElementById('fSa').value), tva_rate: n(document.getElementById('fTv').value), total_ttc: n(document.getElementById('fTt').value), cost_price: n(document.getElementById('fCo').value), install_cost: n(document.getElementById('fIn').value), paid_amount: payTotal(), payments: curPay, factory_prepay: n(document.getElementById('fFaPa').value), factory2: document.getElementById('fFa2').value || null, cost_price2: n(document.getElementById('fCo2').value), factory_prepay2: n(document.getElementById('fFaPa2').value), deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value, cancel_reason: document.getElementById('fCan').value, file_url: JSON.stringify(curFiles), check_measured: document.getElementById('fChM').checked, check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked };
+  const o = { id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value, factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value, sale_price_ht: n(document.getElementById('fSa').value), tva_rate: n(document.getElementById('fTv').value), total_ttc: n(document.getElementById('fTt').value), cost_price: n(document.getElementById('fCo').value), install_cost: n(document.getElementById('fIn').value), delivery: n(document.getElementById('fDe').value), paid_amount: payTotal(), payments: curPay, factory_prepay: n(document.getElementById('fFaPa').value), factory2: document.getElementById('fFa2').value || null, cost_price2: n(document.getElementById('fCo2').value), factory_prepay2: n(document.getElementById('fFaPa2').value), deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value, cancel_reason: document.getElementById('fCan').value, file_url: JSON.stringify(curFiles), check_measured: document.getElementById('fChM').checked, check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked };
   const { error } = await _sb.from('orders').upsert(o);
   if (error) return alert('Помилка збереження: ' + error.message);
   closeM('mO'); sync();
@@ -971,7 +972,7 @@ async function saveC() { const c = { id: editId || 'CNEW'+Date.now(), company: c
 
 const openO = id => {
   editId = id; const o = id ? orders.find(x=>x.id==id) : {};
-  ['fCl','fPr','fSa','fCo','fIn','fDl','fRe','fNo','fCan','fFaPa','fCo2','fFaPa2'].forEach(i=>document.getElementById(i).value='');
+  ['fCl','fPr','fSa','fCo','fIn','fDe','fDl','fRe','fNo','fCan','fFaPa','fCo2','fFaPa2'].forEach(i=>document.getElementById(i).value='');
   ['fChM','fChO','fChS','fChI'].forEach(i=>document.getElementById(i).checked=false);
   document.getElementById('fFa').value = id ? (o.factory || FACTORIES[0]) : FACTORIES[0];
   document.getElementById('fFa2').value = id ? (o.factory2 || '') : '';
@@ -986,7 +987,7 @@ const openO = id => {
   if (id) {
     document.getElementById('fCl').value=o.client; document.getElementById('fPr').value=o.product;
     document.getElementById('fSa').value=o.sale_price_ht; document.getElementById('fTv').value=o.tva_rate;
-    document.getElementById('fCo').value=o.cost_price; document.getElementById('fIn').value=o.install_cost;
+    document.getElementById('fCo').value=o.cost_price; document.getElementById('fIn').value=o.install_cost; document.getElementById('fDe').value=o.delivery;
     document.getElementById('fDl').value=o.deadline; document.getElementById('fRe').value=o.reminder_date;
     document.getElementById('fSt').value=o.status; document.getElementById('fNo').value=o.notes;
     document.getElementById('fCan').value=o.cancel_reason; document.getElementById('fFaPa').value=o.factory_prepay;
@@ -1067,10 +1068,10 @@ function openCE(id) {
 async function delO() { if(confirm('Видалити?')) { await _sb.from('orders').delete().eq('id', editId); closeM('mO'); sync(); } }
 async function delC() { if(confirm('Видалити?')) { await _sb.from('clients').delete().eq('id', editId); closeM('mC'); sync(); } }
 const calc = () => {
-  const h=n(document.getElementById('fSa').value), t=n(document.getElementById('fTv').value), i=n(document.getElementById('fIn').value);
+  const h=n(document.getElementById('fSa').value), t=n(document.getElementById('fTv').value), i=n(document.getElementById('fIn').value), d=n(document.getElementById('fDe').value);
   const c = n(document.getElementById('fCo').value) + n(document.getElementById('fCo2').value); // обидві фабрики
-  document.getElementById('fTt').value = ((h+i)*(1+t/100)).toFixed(2);
-  document.getElementById('fMr').value = ((h-c)+i).toFixed(2) + ' €';
+  document.getElementById('fTt').value = ((h+i+d)*(1+t/100)).toFixed(2);
+  document.getElementById('fMr').value = ((h-c)+i+d).toFixed(2) + ' €';
   // Націнка = наскільки продано дорожче за ціну фабрик (у %)
   document.getElementById('fMk').value = c > 0 ? Math.round((h - c) / c * 100) + ' %' : '—';
 }
