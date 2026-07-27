@@ -863,7 +863,9 @@ async function newRequest() {
   const noteVal = (cross ? `↪ Заявка від ${CO_NAME[co]}\n` : '') + document.getElementById('qnNotes').value;
   const o = { id:'NEW'+Date.now(), company:target, client:name, product:num, phone, factory:FACTORIES[0], status:'Нова',
               notes: noteVal, file_url: JSON.stringify(qnFiles) };
-  const { error } = await _sb.from('orders').upsert(o);
+  // insert (не upsert!): це завжди новий унікальний запис; upsert додатково перевіряє
+  // USING-частину RLS-політики через ON CONFLICT DO UPDATE і блокує крос-компанійні заявки
+  const { error } = await _sb.from('orders').insert(o);
   if (error) return alert('Помилка: ' + error.message);
 
   ['qnClient','qnPhone','qnNum','qnNotes'].forEach(i => document.getElementById(i).value = '');
