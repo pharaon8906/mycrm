@@ -178,6 +178,7 @@ header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px
 .n-i { flex: 1; padding: 11px 5px; border: none; background: none; text-align: center; color: var(--muted2); font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; transition: .14s; }
 .n-i.active { color: var(--p2); }
 .n-i i { display: block; font-size: 18px; margin-bottom: 5px; }
+.nav-credit { display: none; }
 
 /* ============ МОДАЛКИ ============ */
 .modal-w { position: fixed; inset: 0; background: rgba(11,18,32,.5); backdrop-filter: blur(6px); z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
@@ -292,6 +293,7 @@ select { cursor: pointer; }
 @media (min-width: 900px) {
   body { padding-left: var(--side-w); padding-bottom: 0; }
   .bottom-nav { top: 0; left: 0; width: var(--side-w); height: 100vh; flex-direction: column; padding: 20px 12px; border-right: 1px solid var(--line); border-top: none; background: var(--surface); backdrop-filter: none; align-items: stretch; gap: 2px; }
+  .nav-credit { display: block; margin-top: auto; padding: 14px 8px 6px; font-size: 10.5px; color: var(--muted2); text-align: center; border-top: 1px solid var(--line); }
   .n-i { flex: none; text-align: left; padding: 11px 12px; font-size: 13.5px; border-radius: var(--r-xs); display: flex; align-items: center; gap: 12px; color: var(--muted); }
   .n-i:hover { background: var(--line-soft); color: var(--txt); }
   .n-i i { margin: 0; font-size: 15px; width: 20px; text-align: center; }
@@ -406,6 +408,7 @@ select { cursor: pointer; }
   <button class="n-i" id="ni-clients" onclick="tab('clients')"><i class="fa fa-users"></i><span>Клієнти</span></button>
   <button class="n-i" id="ni-calendar" onclick="tab('calendar')"><i class="fa fa-calendar-days"></i><span>Календар</span></button>
   <button class="n-i" id="ni-stats" onclick="tab('stats')"><i class="fa fa-chart-line"></i><span>Звіт</span></button>
+  <div class="nav-credit">Created by Gherman for <span id="creditCo">HEIMEK</span></div>
 </div>
 
 <button class="fab-add" id="fabBtn" style="display:none" onclick="fab()"><i class="fa fa-plus"></i></button>
@@ -632,6 +635,7 @@ async function checkUser() {
     document.body.setAttribute('data-co', co);
     document.getElementById('brd').innerText = CO_NAME[co] || 'CRM';
     document.title = CO_NAME[co] || 'CRM';
+    document.getElementById('creditCo').textContent = co.toUpperCase();
     history.replaceState({ t: 'orders' }, '');   // базовий запис для кнопки "Назад"
     fillFactories(); updateTva(); sync();
   } else {
@@ -654,6 +658,7 @@ function setCo(k) {
   document.body.setAttribute('data-co', co);
   document.getElementById('brd').innerText = CO_NAME[co] || 'CRM';
   document.title = CO_NAME[co] || 'CRM';
+  document.getElementById('creditCo').textContent = co.toUpperCase();
   document.getElementById('b-hmk').classList.toggle('on', co==='heimek');
   document.getElementById('b-lux').classList.toggle('on', co==='luxwin');
   updateTva(); sync();
