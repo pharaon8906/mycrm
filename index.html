@@ -81,6 +81,12 @@ header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px
 .card.st-new { background: #fdf2f8; }
 .st-new .status-badge { color: var(--new); background: #fce7f3; }
 .st-new .status-badge::before { background: var(--new); }
+/* Заявка, надіслана з іншої компанії — інший колір (фіолетовий) */
+.card.st-new.st-cross::before { background: var(--violet); }
+.card.st-new.st-cross { background: #f6f3ff; }
+.st-new.st-cross .status-badge { color: var(--violet); background: #ede9fe; }
+.st-new.st-cross .status-badge::before { background: var(--violet); }
+.cross-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--violet); background: #ede9fe; padding: 3px 9px; border-radius: 999px; margin-top: 6px; }
 .card.st-est { background: #fdf4f5; }
 .card.st-est::before { background: var(--canc); }
 .card.rem { background: #fceef0; border-color: color-mix(in srgb, var(--danger) 35%, var(--line)); }
@@ -833,6 +839,8 @@ async function rmQnFile(i) {
   qnFiles.splice(i, 1); renderQnFiles();
 }
 
+const crossOrigin = o => { const m = (o.notes||'').match(/^↪ Заявка від (.+)$/m); return m ? m[1] : null; };
+
 function renderNew() {
   qnSetCo(co);   // за замовчуванням — поточна компанія
   const box = document.getElementById('listNew');
@@ -842,9 +850,11 @@ function renderNew() {
   box.innerHTML = f.map(o => {
     const ph = orderPhone(o); const wa = waNum(ph);
     const nFiles = parseFiles(o.file_url).length;
-    return `<div class="card st-new" onclick="openO('${o.id}')">
+    const origin = crossOrigin(o);
+    return `<div class="card st-new ${origin?'st-cross':''}" onclick="openO('${o.id}')">
         <div class="c-row-1"><div class="c-name">${o.client||'Без імені'}</div><div class="status-badge">Нова</div></div>
         <div class="c-row-2">${o.product ? '№ '+o.product : 'Без номера'} · очікує прорахунку${nFiles ? ' · 📎 '+nFiles : ''}</div>
+        ${origin ? `<div class="cross-tag"><i class="fa fa-right-left"></i> Від ${origin}</div>` : ''}
         <div class="c-foot">
           <div style="font-size:13px;color:var(--muted)">${ph || 'без телефону'}</div>
           <div style="display:flex; align-items:center; gap:8px;">
