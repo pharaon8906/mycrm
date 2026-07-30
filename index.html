@@ -258,6 +258,7 @@ select { cursor: pointer; }
 
 /* ============ КОМПАКТНІШЕ НА ТЕЛЕФОНІ ============ */
 @media (max-width: 640px) {
+  html { zoom: .65; }   /* масштаб для великих екранів (Galaxy S25 і подібні) */
   header { height: calc(52px + env(safe-area-inset-top,0px)); padding: env(safe-area-inset-top,0px) 14px 0; }
   #brd { font-size: 14px; }
   .nav-s { padding: 8px 12px; gap: 6px; top: calc(52px + env(safe-area-inset-top,0px)); }
