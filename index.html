@@ -259,6 +259,13 @@ select { cursor: pointer; }
 /* ============ КОМПАКТНІШЕ НА ТЕЛЕФОНІ ============ */
 @media (max-width: 640px) {
   html { zoom: .65; }   /* масштаб для великих екранів (Galaxy S25 і подібні) */
+
+  /* Модалка — на весь екран */
+  .modal-w { align-items: stretch; }
+  .mbox { max-width: none; width: 100%; height: 100%; max-height: none; border-radius: 0; padding: calc(16px + env(safe-area-inset-top,0px)) 18px calc(20px + env(safe-area-inset-bottom,0px)); }
+  .modal-w[style*="flex"] .mbox { animation: fadeInFull .2s ease; }
+  @keyframes fadeInFull { from { opacity: 0; } to { opacity: 1; } }
+
   header { height: calc(52px + env(safe-area-inset-top,0px)); padding: env(safe-area-inset-top,0px) 14px 0; }
   #brd { font-size: 14px; }
   .nav-s { padding: 8px 12px; gap: 6px; top: calc(52px + env(safe-area-inset-top,0px)); }
