@@ -12,7 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.weight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.item
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -20,6 +23,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PersonOutline
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.RestaurantMenu
@@ -27,7 +31,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -35,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -57,22 +61,35 @@ import java.io.File
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onCameraClick: () -> Unit,
     onGalleryClick: () -> Unit,
+    onProfileClick: () -> Unit,
     viewModel: HomeViewModel = viewModel()
 ) {
     val entries by viewModel.entries.collectAsState()
     val selectedDate by viewModel.selectedDate.collectAsState()
+    val profile by viewModel.profile.collectAsState()
     var showSheet by remember { mutableStateOf(false) }
 
     val totalKcal = entries.sumOf { it.kcal }
+    val goalKcal = profile?.dailyCalorieGoal ?: 2000
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("CalorieCam") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("CalorieCam", fontWeight = FontWeight.Bold) },
+                actions = {
+                    IconButton(onClick = onProfileClick) {
+                        Icon(Icons.Default.PersonOutline, contentDescription = "Профіль")
+                    }
+                }
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = { showSheet = true }) {
                 Icon(Icons.Default.Add, contentDescription = "Додати їжу")
@@ -85,19 +102,43 @@ fun HomeScreen(
                 onPrevious = viewModel::previousDay,
                 onNext = viewModel::nextDay
             )
-            TotalCard(totalKcal = totalKcal)
+
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CalorieRing(consumed = totalKcal, goal = goalKcal, modifier = Modifier.padding(vertical = 12.dp))
+                    if (profile == null) {
+                        TextButton(onClick = onProfileClick) {
+                            Text("Налаштувати профіль для точної норми")
+                        }
+                    }
+                }
+            }
+
+            if (entries.isNotEmpty()) {
+                MacroRow(
+                    protein = entries.sumOf { it.protein }.roundToInt(),
+                    fat = entries.sumOf { it.fat }.roundToInt(),
+                    carbs = entries.sumOf { it.carbs }.roundToInt()
+                )
+            }
 
             if (entries.isEmpty()) {
                 EmptyState()
             } else {
+                Text(
+                    text = "Записи",
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(start = 20.dp, top = 12.dp, bottom = 4.dp)
+                )
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 96.dp)
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     items(entries, key = { it.id }) { entry ->
-                        FoodEntryRow(entry = entry, onDelete = { viewModel.delete(entry) })
-                        HorizontalDivider()
+                        FoodEntryCard(entry = entry, onDelete = { viewModel.delete(entry) })
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
+                    item { Spacer(modifier = Modifier.height(88.dp)) }
                 }
             }
         }
@@ -159,21 +200,24 @@ private fun LocalDate.formatUk(): String {
 }
 
 @Composable
-private fun TotalCard(totalKcal: Int) {
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
+private fun MacroRow(protein: Int, fat: Int, carbs: Int) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Text("КАЛОРІЙ ЗА ДЕНЬ", color = Color.White.copy(alpha = 0.75f))
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "$totalKcal ккал",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.headlineMedium
-            )
-        }
+        MacroStat(label = "Білки", value = protein, color = MaterialTheme.colorScheme.primary)
+        MacroStat(label = "Жири", value = fat, color = MaterialTheme.colorScheme.tertiary)
+        MacroStat(label = "Вуглеводи", value = carbs, color = MaterialTheme.colorScheme.secondary)
+    }
+}
+
+@Composable
+private fun MacroStat(label: String, value: Int, color: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("${value} г", fontWeight = FontWeight.Bold, color = color)
+        Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -195,9 +239,17 @@ private fun EmptyState() {
 }
 
 @Composable
-private fun FoodEntryRow(entry: FoodLogEntry, onDelete: () -> Unit) {
-    ListItem(
-        leadingContent = {
+private fun FoodEntryCard(entry: FoodLogEntry, onDelete: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             val path = entry.photoPath
             if (path != null) {
                 AsyncImage(
@@ -205,20 +257,23 @@ private fun FoodEntryRow(entry: FoodLogEntry, onDelete: () -> Unit) {
                     contentDescription = entry.foodName,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(52.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .size(60.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(entry.foodName, fontWeight = FontWeight.SemiBold)
+                Text(
+                    "${entry.grams} г",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-        },
-        headlineContent = { Text(entry.foodName) },
-        supportingContent = { Text("${entry.grams} г") },
-        trailingContent = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("${entry.kcal} ккал", fontWeight = FontWeight.SemiBold)
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = "Видалити")
-                }
+            Text("${entry.kcal} ккал", fontWeight = FontWeight.Bold)
+            IconButton(onClick = onDelete) {
+                Icon(Icons.Default.Delete, contentDescription = "Видалити")
             }
         }
-    )
+    }
 }

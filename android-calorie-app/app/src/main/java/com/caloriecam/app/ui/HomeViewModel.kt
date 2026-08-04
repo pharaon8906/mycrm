@@ -5,6 +5,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.caloriecam.app.data.AppDatabase
 import com.caloriecam.app.data.FoodLogEntry
+import com.caloriecam.app.data.UserProfile
+import com.caloriecam.app.data.UserProfileRepository
 import com.caloriecam.app.util.PhotoStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,6 +32,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             dao.observeForDay(start, end)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val profile: StateFlow<UserProfile?> = UserProfileRepository.profileFlow(application)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     fun previousDay() {
         _selectedDate.value = _selectedDate.value.minusDays(1)
