@@ -1,13 +1,20 @@
 package com.caloriecam.app.data
 
 data class Exercise(val name: String, val detail: String)
-data class WorkoutPlan(val title: String, val subtitle: String, val exercises: List<Exercise>)
-data class TipSection(val title: String, val tips: List<String>)
+data class WorkoutPlan(val emoji: String, val title: String, val subtitle: String, val exercises: List<Exercise>)
+data class TipSection(val emoji: String, val title: String, val tips: List<String>)
+data class MealFoodItem(val emoji: String, val name: String, val kcal: Int)
+data class MealSlot(val time: String, val title: String, val items: List<MealFoodItem>)
+data class DailyMenu(val goal: Goal, val meals: List<MealSlot>) {
+    val totalKcal: Int get() = meals.sumOf { slot -> slot.items.sumOf { it.kcal } }
+}
+data class FoodTip(val emoji: String, val name: String, val reason: String)
 
 /** Static, curated advice content — no network/AI calls needed. */
 object TipsContent {
 
     val weightLossTips = TipSection(
+        emoji = "🔥",
         title = "Поради для схуднення",
         tips = listOf(
             "Помірний дефіцит калорій — 300–500 ккал на день менше норми. Різкий дефіцит веде до втрати м'язів і зривів.",
@@ -22,6 +29,7 @@ object TipsContent {
     )
 
     val weightGainTips = TipSection(
+        emoji = "💪",
         title = "Поради для набору маси",
         tips = listOf(
             "Помірний профіцит калорій — 300–500 ккал понад норму. Великий надлишок веде переважно до жиру, не м'язів.",
@@ -36,6 +44,7 @@ object TipsContent {
     )
 
     val generalNutritionTips = TipSection(
+        emoji = "🥗",
         title = "Загальні поради з харчування",
         tips = listOf(
             "Овочі та фрукти — щонайменше 400 г на день, це джерело клітковини й вітамінів.",
@@ -46,8 +55,11 @@ object TipsContent {
         )
     )
 
+    val allTipSections = listOf(weightLossTips, weightGainTips, generalNutritionTips)
+
     val workoutPlans = listOf(
         WorkoutPlan(
+            emoji = "🏃",
             title = "Кардіо вдома",
             subtitle = "20 хв, без інвентаря, 3–4 рази на тиждень",
             exercises = listOf(
@@ -60,6 +72,7 @@ object TipsContent {
             )
         ),
         WorkoutPlan(
+            emoji = "🏋️",
             title = "Силові без інвентаря",
             subtitle = "30 хв, 2–3 рази на тиждень",
             exercises = listOf(
@@ -72,6 +85,7 @@ object TipsContent {
             )
         ),
         WorkoutPlan(
+            emoji = "🧘",
             title = "Розтяжка та відновлення",
             subtitle = "10–15 хв, щодня або після тренування",
             exercises = listOf(
@@ -82,5 +96,134 @@ object TipsContent {
                 Exercise("Глибоке дихання лежачи", "2 хв")
             )
         )
+    )
+
+    val weightLossMenu = DailyMenu(
+        goal = Goal.LOSE,
+        meals = listOf(
+            MealSlot(
+                "8:00", "Сніданок", listOf(
+                    MealFoodItem("🥣", "Вівсяна каша на воді з ягодами", 250),
+                    MealFoodItem("🥚", "Яйце варене", 78)
+                )
+            ),
+            MealSlot(
+                "11:00", "Перекус", listOf(
+                    MealFoodItem("🍎", "Яблуко", 78),
+                    MealFoodItem("🥜", "Мигдаль (15 г)", 87)
+                )
+            ),
+            MealSlot(
+                "14:00", "Обід", listOf(
+                    MealFoodItem("🍗", "Куряче філе гриль (150 г)", 248),
+                    MealFoodItem("🥗", "Овочевий салат (200 г)", 90),
+                    MealFoodItem("🌾", "Гречка варена (150 г)", 165)
+                )
+            ),
+            MealSlot(
+                "17:00", "Перекус", listOf(
+                    MealFoodItem("🥛", "Йогурт натуральний (150 г)", 89),
+                    MealFoodItem("🥒", "Огірок", 15)
+                )
+            ),
+            MealSlot(
+                "19:30", "Вечеря", listOf(
+                    MealFoodItem("🐟", "Лосось на грилі (120 г)", 250),
+                    MealFoodItem("🥦", "Брокколі на парі (150 г)", 51)
+                )
+            )
+        )
+    )
+
+    val maintainMenu = DailyMenu(
+        goal = Goal.MAINTAIN,
+        meals = listOf(
+            MealSlot(
+                "8:00", "Сніданок", listOf(
+                    MealFoodItem("🍳", "Омлет з 2 яєць", 277),
+                    MealFoodItem("🍞", "Хліб цільнозерновий, шматок", 130),
+                    MealFoodItem("🥑", "Авокадо (половина)", 120)
+                )
+            ),
+            MealSlot(
+                "11:00", "Перекус", listOf(
+                    MealFoodItem("🍌", "Банан", 105),
+                    MealFoodItem("🥜", "Горіхи (20 г)", 115)
+                )
+            ),
+            MealSlot(
+                "14:00", "Обід", listOf(
+                    MealFoodItem("🥩", "Яловичина стейк (150 г)", 375),
+                    MealFoodItem("🍚", "Рис варений (150 г)", 195),
+                    MealFoodItem("🥗", "Овочевий салат (150 г)", 68)
+                )
+            ),
+            MealSlot(
+                "17:00", "Перекус", listOf(
+                    MealFoodItem("🧀", "Сир кисломолочний (150 г)", 147),
+                    MealFoodItem("🍯", "Мед (1 ч.л.)", 40)
+                )
+            ),
+            MealSlot(
+                "19:30", "Вечеря", listOf(
+                    MealFoodItem("🍗", "Куряче філе (150 г)", 248),
+                    MealFoodItem("🥔", "Картопля варена (200 г)", 174),
+                    MealFoodItem("🥕", "Овочі на парі (150 г)", 50)
+                )
+            )
+        )
+    )
+
+    val weightGainMenu = DailyMenu(
+        goal = Goal.GAIN,
+        meals = listOf(
+            MealSlot(
+                "8:00", "Сніданок", listOf(
+                    MealFoodItem("🥣", "Вівсяна каша, велика порція (350 г)", 238),
+                    MealFoodItem("🍌", "Банан", 105),
+                    MealFoodItem("🥜", "Арахісове масло (30 г)", 170),
+                    MealFoodItem("🥛", "Молоко (250 мл)", 105)
+                )
+            ),
+            MealSlot(
+                "11:00", "Перекус", listOf(
+                    MealFoodItem("🥣", "Гранола (80 г)", 377),
+                    MealFoodItem("🥛", "Йогурт (150 г)", 89)
+                )
+            ),
+            MealSlot(
+                "14:00", "Обід", listOf(
+                    MealFoodItem("🥩", "Яловичина (200 г)", 500),
+                    MealFoodItem("🍚", "Рис варений (200 г)", 260),
+                    MealFoodItem("🥑", "Авокадо (половина)", 160)
+                )
+            ),
+            MealSlot(
+                "17:00", "Перекус", listOf(
+                    MealFoodItem("🥜", "Волоські горіхи (40 г)", 262),
+                    MealFoodItem("🍌", "Банан", 105)
+                )
+            ),
+            MealSlot(
+                "19:30", "Вечеря", listOf(
+                    MealFoodItem("🐟", "Лосось на грилі (200 г)", 416),
+                    MealFoodItem("🥔", "Картопля варена (250 г)", 218),
+                    MealFoodItem("🥦", "Брокколі (150 г)", 51)
+                )
+            )
+        )
+    )
+
+    val dailyMenus = listOf(weightLossMenu, maintainMenu, weightGainMenu)
+
+    val weightLossFoods = listOf(
+        FoodTip("🥦", "Брокколі", "Дуже мало калорій, багато клітковини — довго насичує"),
+        FoodTip("🍗", "Куряче філе", "Пісний білок, зберігає м'язи під час дефіциту"),
+        FoodTip("🥚", "Яйця", "Дешеве повноцінне джерело білка, насичує надовго"),
+        FoodTip("🫐", "Ягоди", "Солодкі, але низькокалорійні — заміна десертам"),
+        FoodTip("🥑", "Авокадо", "Корисні жири в невеликій порції дають ситість"),
+        FoodTip("🐟", "Риба (лосось, тунець)", "Білок + омега-3, мало вуглеводів"),
+        FoodTip("🥒", "Огірки й салат", "Майже нульова калорійність, додають об'єму їжі"),
+        FoodTip("🍵", "Зелений чай", "Без калорій, гарна альтернатива солодким напоям")
     )
 }
