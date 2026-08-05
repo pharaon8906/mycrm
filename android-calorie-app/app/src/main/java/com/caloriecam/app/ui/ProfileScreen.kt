@@ -56,12 +56,14 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.caloriecam.app.data.ActivityLevel
 import com.caloriecam.app.data.BackupManager
+import com.caloriecam.app.data.BmiCategory
 import com.caloriecam.app.data.Gender
 import com.caloriecam.app.data.Goal
 import com.caloriecam.app.data.UserProfile
 import com.caloriecam.app.data.UserProfileRepository
 import com.caloriecam.app.notify.ReminderScheduler
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,9 +89,10 @@ fun ProfileScreen(
         height != null && height in 100..250 &&
         weight != null && weight in 30.0..300.0
 
-    val previewGoal = if (valid) {
-        UserProfile(gender, age!!, height!!, weight!!, activity, goal).dailyCalorieGoal
+    val previewProfile = if (valid) {
+        UserProfile(gender, age!!, height!!, weight!!, activity, goal)
     } else null
+    val previewGoal = previewProfile?.dailyCalorieGoal
 
     Scaffold(
         topBar = {
@@ -190,6 +193,11 @@ fun ProfileScreen(
                         style = MaterialTheme.typography.headlineMedium
                     )
                 }
+            }
+
+            if (previewProfile != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                BmiCard(previewProfile)
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -383,6 +391,52 @@ private fun GenderOption(
             Icon(icon, contentDescription = label, tint = contentColor, modifier = Modifier.size(32.dp))
             Spacer(modifier = Modifier.height(6.dp))
             Text(label, color = contentColor, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal)
+        }
+    }
+}
+
+@Composable
+private fun BmiCard(profile: UserProfile) {
+    val category = profile.bmiCategory
+    val accentColor = when (category) {
+        BmiCategory.UNDERWEIGHT -> MaterialTheme.colorScheme.secondary
+        BmiCategory.NORMAL -> MaterialTheme.colorScheme.primary
+        BmiCategory.OVERWEIGHT -> MaterialTheme.colorScheme.tertiary
+        BmiCategory.OBESE -> MaterialTheme.colorScheme.error
+    }
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = accentColor.copy(alpha = 0.12f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "ІНДЕКС МАСИ ТІЛА (ІМТ)",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = accentColor,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(category.label, fontWeight = FontWeight.Bold, color = accentColor)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    category.advice,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                String.format(Locale.US, "%.1f", profile.bmi),
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineMedium,
+                color = accentColor
+            )
         }
     }
 }

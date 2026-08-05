@@ -25,6 +25,25 @@ enum class Goal(val factor: Double, val label: String) {
     GAIN(1.15, "Набір маси")
 }
 
+enum class BmiCategory(val label: String, val advice: String) {
+    UNDERWEIGHT(
+        "Недостатня вага",
+        "Варто набрати вагу. Рекомендуємо обрати ціль «Набір маси» в профілі."
+    ),
+    NORMAL(
+        "Норма",
+        "Ваша вага в межах норми — можна підтримувати поточну вагу."
+    ),
+    OVERWEIGHT(
+        "Надлишкова вага",
+        "Варто схуднути. Рекомендуємо обрати ціль «Схуднення» в профілі."
+    ),
+    OBESE(
+        "Ожиріння",
+        "Рекомендуємо схуднути та за можливості порадитись з лікарем."
+    )
+}
+
 /**
  * Daily kcal norm via Mifflin-St Jeor BMR, scaled by activity level and goal.
  */
@@ -49,6 +68,21 @@ data class UserProfile(
     /** Rough water guideline: ~30 ml per kg of body weight. */
     val dailyWaterGoalMl: Int
         get() = (weightKg * 30).roundToInt()
+
+    /** Standard body mass index: kg / m². */
+    val bmi: Double
+        get() {
+            val heightM = heightCm / 100.0
+            return weightKg / (heightM * heightM)
+        }
+
+    val bmiCategory: BmiCategory
+        get() = when {
+            bmi < 18.5 -> BmiCategory.UNDERWEIGHT
+            bmi < 25.0 -> BmiCategory.NORMAL
+            bmi < 30.0 -> BmiCategory.OVERWEIGHT
+            else -> BmiCategory.OBESE
+        }
 }
 
 /** Water goal used before a profile has been set up. */

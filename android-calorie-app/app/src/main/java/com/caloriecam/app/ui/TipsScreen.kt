@@ -203,6 +203,11 @@ private fun AdviceTab(profile: UserProfile?) {
             SectionLabel("Рекомендовані продукти для схуднення")
             Spacer(modifier = Modifier.height(12.dp))
             FoodTipGrid(TipsContent.weightLossFoods)
+        } else if (selectedIndex == 1) {
+            Spacer(modifier = Modifier.height(28.dp))
+            SectionLabel("Рекомендовані продукти для набору маси")
+            Spacer(modifier = Modifier.height(12.dp))
+            FoodTipGrid(TipsContent.weightGainFoods)
         }
         Spacer(modifier = Modifier.height(24.dp))
     }
