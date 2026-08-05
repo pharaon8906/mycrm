@@ -19,12 +19,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -82,9 +85,11 @@ fun CaptureScreen(
         if (bitmap != null) {
             val labels = FoodLabeler().label(bitmap)
             val labelTexts = labels.sortedByDescending { it.confidence }.map { it.text }
-            val matches = NutritionRepository.matchLabels(context, labelTexts)
-            suggestions = matches.take(4)
-            val best = matches.firstOrNull()
+            val specificMatches = NutritionRepository.matchLabels(context, labelTexts)
+            suggestions = NutritionRepository.suggestForLabels(context, labelTexts, limit = 6)
+            // Only auto-select on a specific match (e.g. "banana") — a broad
+            // category guess ("Fruit") is too unreliable to pre-fill silently.
+            val best = specificMatches.firstOrNull()
             if (best != null) {
                 selectedItem = best
                 gramsText = best.defaultGrams.toString()
@@ -208,6 +213,29 @@ fun CaptureScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
             Text("Обрана страва: ${foodName.ifBlank { "—" }}", fontWeight = FontWeight.SemiBold)
+
+            val infoItem = selectedItem?.takeIf { !manualMode && it.benefits.isNotBlank() }
+            if (infoItem != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(infoItem.benefits, style = MaterialTheme.typography.bodySmall)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            "Вітаміни: ${infoItem.vitamins}",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
             Text("Порція: $grams г")
             Slider(

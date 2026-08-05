@@ -26,6 +26,7 @@ import com.caloriecam.app.data.UserProfileRepository
 import com.caloriecam.app.ui.CaptureScreen
 import com.caloriecam.app.ui.HomeScreen
 import com.caloriecam.app.ui.ProfileScreen
+import com.caloriecam.app.ui.TipsScreen
 import com.caloriecam.app.ui.theme.CalorieCamTheme
 import com.caloriecam.app.util.PhotoStore
 import kotlinx.coroutines.Dispatchers
@@ -53,6 +54,7 @@ private fun CalorieCamRoot() {
     var pendingPhotoPath by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingCameraFile by remember { mutableStateOf<File?>(null) }
     var showProfile by rememberSaveable { mutableStateOf(false) }
+    var showTips by rememberSaveable { mutableStateOf(false) }
     val savedProfile by UserProfileRepository.profileFlow(context).collectAsState(initial = null)
 
     val takePictureLauncher = rememberLauncherForActivityResult(
@@ -97,6 +99,12 @@ private fun CalorieCamRoot() {
                 onCancel = { showProfile = false }
             )
         }
+        showTips -> {
+            TipsScreen(
+                profile = savedProfile,
+                onBack = { showTips = false }
+            )
+        }
         photoPath != null -> {
             CaptureScreen(
                 photoFile = File(photoPath),
@@ -120,7 +128,8 @@ private fun CalorieCamRoot() {
                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                     )
                 },
-                onProfileClick = { showProfile = true }
+                onProfileClick = { showProfile = true },
+                onTipsClick = { showTips = true }
             )
         }
     }

@@ -11,5 +11,9 @@ data class NutritionItem(
     val fat100: Double,
     val carbs100: Double,
     val defaultGrams: Int,
-    val mlLabels: List<String> = emptyList()
+    val mlLabels: List<String> = emptyList(),
+    /** Short "why it's good for you" blurb. Empty when not curated yet. */
+    val benefits: String = "",
+    /** Main vitamins/minerals, e.g. "Вітамін C, калій". Empty when not curated yet. */
+    val vitamins: String = ""
 )

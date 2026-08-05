@@ -19,7 +19,7 @@ class FoodLabeler {
 
     private val labeler = ImageLabeling.getClient(
         ImageLabelerOptions.Builder()
-            .setConfidenceThreshold(0.4f)
+            .setConfidenceThreshold(0.25f)
             .build()
     )
 

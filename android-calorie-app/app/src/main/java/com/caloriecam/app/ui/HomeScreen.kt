@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.PersonOutline
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
@@ -67,6 +68,7 @@ fun HomeScreen(
     onCameraClick: () -> Unit,
     onGalleryClick: () -> Unit,
     onProfileClick: () -> Unit,
+    onTipsClick: () -> Unit,
     viewModel: HomeViewModel = viewModel()
 ) {
     val entries by viewModel.entries.collectAsState()
@@ -82,6 +84,9 @@ fun HomeScreen(
             TopAppBar(
                 title = { Text("CalorieCam", fontWeight = FontWeight.Bold) },
                 actions = {
+                    IconButton(onClick = onTipsClick) {
+                        Icon(Icons.Default.FitnessCenter, contentDescription = "Поради та вправи")
+                    }
                     IconButton(onClick = onProfileClick) {
                         Icon(Icons.Default.PersonOutline, contentDescription = "Профіль")
                     }
