@@ -6,8 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [FoodLogEntry::class, WeightEntry::class, WaterEntry::class],
-    version = 2,
+    entities = [FoodLogEntry::class, WeightEntry::class, WaterEntry::class, ProgressPhoto::class],
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -15,6 +15,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun foodLogDao(): FoodLogDao
     abstract fun weightDao(): WeightDao
     abstract fun waterDao(): WaterDao
+    abstract fun progressPhotoDao(): ProgressPhotoDao
 
     companion object {
         @Volatile private var instance: AppDatabase? = null

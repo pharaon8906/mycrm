@@ -5,8 +5,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.caloriecam.app.data.AppDatabase
 import com.caloriecam.app.data.DailyTotal
+import com.caloriecam.app.data.ProgressPhoto
 import com.caloriecam.app.data.UserProfileRepository
 import com.caloriecam.app.data.WeightEntry
+import com.caloriecam.app.util.PhotoStore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,6 +17,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.File
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -22,6 +25,7 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val foodDao = AppDatabase.getInstance(application).foodLogDao()
     private val weightDao = AppDatabase.getInstance(application).weightDao()
+    private val progressPhotoDao = AppDatabase.getInstance(application).progressPhotoDao()
 
     private val _rangeDays = MutableStateFlow(7)
     val rangeDays: StateFlow<Int> = _rangeDays
@@ -40,6 +44,9 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     }
 
+    val progressPhotos: StateFlow<List<ProgressPhoto>> = progressPhotoDao.observeAll()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     fun setRange(days: Int) {
         _rangeDays.value = days
     }
@@ -53,6 +60,19 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
             if (current != null) {
                 UserProfileRepository.save(app, current.copy(weightKg = weightKg))
             }
+        }
+    }
+
+    fun addProgressPhoto(file: File) {
+        viewModelScope.launch {
+            progressPhotoDao.insert(ProgressPhoto(photoPath = file.absolutePath, timestamp = System.currentTimeMillis()))
+        }
+    }
+
+    fun deleteProgressPhoto(photo: ProgressPhoto) {
+        viewModelScope.launch {
+            progressPhotoDao.delete(photo)
+            PhotoStore.delete(File(photo.photoPath))
         }
     }
 }

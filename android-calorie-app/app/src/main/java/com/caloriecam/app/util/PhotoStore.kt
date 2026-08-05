@@ -19,16 +19,16 @@ object PhotoStore {
     }
 
     /** New empty file for the system camera to write into. */
-    fun newCameraFile(context: Context): File =
-        File(photosDir(context), "IMG_${System.currentTimeMillis()}.jpg")
+    fun newCameraFile(context: Context, prefix: String = "IMG"): File =
+        File(photosDir(context), "${prefix}_${System.currentTimeMillis()}.jpg")
 
     /** Content Uri usable by other apps (e.g. the camera Intent). */
     fun contentUriFor(context: Context, file: File): Uri =
         FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
 
     /** Copies a picked gallery image into app-private storage. */
-    fun copyToInternal(context: Context, source: Uri): File {
-        val dest = File(photosDir(context), "IMG_${System.currentTimeMillis()}.jpg")
+    fun copyToInternal(context: Context, source: Uri, prefix: String = "IMG"): File {
+        val dest = File(photosDir(context), "${prefix}_${System.currentTimeMillis()}.jpg")
         context.contentResolver.openInputStream(source)?.use { input ->
             dest.outputStream().use { output -> input.copyTo(output) }
         }

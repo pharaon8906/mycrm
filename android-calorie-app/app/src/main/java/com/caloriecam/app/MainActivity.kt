@@ -9,11 +9,24 @@ import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.PersonOutline
+import androidx.compose.material.icons.filled.ShowChart
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -48,15 +61,22 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+private data class BottomTab(val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
+
+private val bottomTabs = listOf(
+    BottomTab("Головна", Icons.Default.Home),
+    BottomTab("Прогрес", Icons.Default.ShowChart),
+    BottomTab("Поради", Icons.Default.FitnessCenter),
+    BottomTab("Профіль", Icons.Default.PersonOutline)
+)
+
 @Composable
 private fun CalorieCamRoot() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var pendingPhotoPath by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingCameraFile by remember { mutableStateOf<File?>(null) }
-    var showProfile by rememberSaveable { mutableStateOf(false) }
-    var showTips by rememberSaveable { mutableStateOf(false) }
-    var showStats by rememberSaveable { mutableStateOf(false) }
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     val savedProfile by UserProfileRepository.profileFlow(context).collectAsState(initial = null)
 
     val takePictureLauncher = rememberLauncherForActivityResult(
@@ -93,50 +113,54 @@ private fun CalorieCamRoot() {
     }
 
     val photoPath = pendingPhotoPath
-    when {
-        showProfile -> {
-            ProfileScreen(
-                initial = savedProfile,
-                onDone = { showProfile = false },
-                onCancel = { showProfile = false }
-            )
-        }
-        showTips -> {
-            TipsScreen(
-                profile = savedProfile,
-                onBack = { showTips = false }
-            )
-        }
-        showStats -> {
-            StatsScreen(onBack = { showStats = false })
-        }
-        photoPath != null -> {
-            CaptureScreen(
-                photoFile = File(photoPath),
-                onDone = { pendingPhotoPath = null },
-                onDiscard = {
-                    PhotoStore.delete(File(photoPath))
-                    pendingPhotoPath = null
-                }
-            )
-        }
-        else -> {
-            HomeScreen(
-                onCameraClick = {
-                    val granted = ContextCompat.checkSelfPermission(
-                        context, Manifest.permission.CAMERA
-                    ) == PackageManager.PERMISSION_GRANTED
-                    if (granted) launchCamera() else cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                },
-                onGalleryClick = {
-                    pickMediaLauncher.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+    if (photoPath != null) {
+        CaptureScreen(
+            photoFile = File(photoPath),
+            onDone = { pendingPhotoPath = null },
+            onDiscard = {
+                PhotoStore.delete(File(photoPath))
+                pendingPhotoPath = null
+            }
+        )
+        return
+    }
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                bottomTabs.forEachIndexed { index, tab ->
+                    NavigationBarItem(
+                        selected = selectedTab == index,
+                        onClick = { selectedTab = index },
+                        icon = { Icon(tab.icon, contentDescription = tab.label) },
+                        label = { Text(tab.label) }
                     )
-                },
-                onProfileClick = { showProfile = true },
-                onTipsClick = { showTips = true },
-                onStatsClick = { showStats = true }
-            )
+                }
+            }
+        }
+    ) { padding ->
+        Box(modifier = Modifier.padding(padding)) {
+            when (selectedTab) {
+                0 -> HomeScreen(
+                    onCameraClick = {
+                        val granted = ContextCompat.checkSelfPermission(
+                            context, Manifest.permission.CAMERA
+                        ) == PackageManager.PERMISSION_GRANTED
+                        if (granted) launchCamera() else cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                    },
+                    onGalleryClick = {
+                        pickMediaLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    }
+                )
+                1 -> StatsScreen()
+                2 -> TipsScreen(profile = savedProfile)
+                else -> ProfileScreen(
+                    initial = savedProfile,
+                    onDone = { selectedTab = 0 }
+                )
+            }
         }
     }
 }

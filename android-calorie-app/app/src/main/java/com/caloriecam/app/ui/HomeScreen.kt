@@ -21,14 +21,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.LocalDrink
-import androidx.compose.material.icons.filled.PersonOutline
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.RestaurantMenu
-import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,7 +38,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -72,9 +68,6 @@ import kotlin.math.roundToInt
 fun HomeScreen(
     onCameraClick: () -> Unit,
     onGalleryClick: () -> Unit,
-    onProfileClick: () -> Unit,
-    onTipsClick: () -> Unit,
-    onStatsClick: () -> Unit,
     viewModel: HomeViewModel = viewModel()
 ) {
     val entries by viewModel.entries.collectAsState()
@@ -90,20 +83,7 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("CalorieCam", fontWeight = FontWeight.Bold) },
-                actions = {
-                    IconButton(onClick = onStatsClick) {
-                        Icon(Icons.Default.ShowChart, contentDescription = "Прогрес")
-                    }
-                    IconButton(onClick = onTipsClick) {
-                        Icon(Icons.Default.FitnessCenter, contentDescription = "Поради та вправи")
-                    }
-                    IconButton(onClick = onProfileClick) {
-                        Icon(Icons.Default.PersonOutline, contentDescription = "Профіль")
-                    }
-                }
-            )
+            TopAppBar(title = { Text("CalorieCam", fontWeight = FontWeight.Bold) })
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showSheet = true }) {
@@ -122,9 +102,11 @@ fun HomeScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     CalorieRing(consumed = totalKcal, goal = goalKcal, modifier = Modifier.padding(vertical = 12.dp))
                     if (profile == null) {
-                        TextButton(onClick = onProfileClick) {
-                            Text("Налаштувати профіль для точної норми")
-                        }
+                        Text(
+                            "Заповніть вкладку «Профіль» для точної норми",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
