@@ -172,11 +172,12 @@ private fun AdviceTab(profile: UserProfile?) {
         else -> 2
     }
     var selectedIndex by remember { mutableStateOf(defaultIndex) }
-    val chipLabels = listOf("Схуднення", "Набір маси", "Загальні")
+    val chipLabels = listOf("Схуднення", "Набір маси", "Загальні", "Спорт. харчування")
     val accentColors = listOf(
         MaterialTheme.colorScheme.error,
         MaterialTheme.colorScheme.primary,
-        MaterialTheme.colorScheme.tertiary
+        MaterialTheme.colorScheme.tertiary,
+        MaterialTheme.colorScheme.secondary
     )
 
     Column(

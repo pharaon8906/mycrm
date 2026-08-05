@@ -21,16 +21,22 @@ Android-застосунок: фотографуєте страву — заст
 - **Резервне копіювання** — експорт усіх даних (профіль, журнал їжі, вага, вода) у JSON-файл через системний вибір файлу та імпорт назад (наприклад, при зміні телефону). Фото до бекапу не входять — лише метадані записів.
 - **Фото прогресу** — на екрані "Прогрес" можна фотографувати себе (камера/галерея) і зберігати знімки з датою в стрічці, щоб візуально бачити зміни з часом; фото зберігаються локально й до бекапу не входять.
 - **Нижня навігація** — Головна / Прогрес / Поради / Профіль постійно доступні знизу екрана (Material 3 NavigationBar), а не сховані в іконках зверху.
+- **Сканування штрихкодів** — кнопка "Сканувати штрихкод" на головному екрані: фото штрихкоду → ML Kit розпізнає код на пристрої → запит до безкоштовної бази [Open Food Facts](https://openfoodfacts.org) → показує назву, Nutri-Score, рівень обробки (NOVA), склад, харчові добавки (E-номери) і простий вердикт "гарний вибір / помірно корисний / краще обмежити". Потребує інтернету; база сильна для європейських/міжнародних брендів, слабша для суто локальних українських товарів без запису в базі.
+- **Health Connect** — підключається в профілі: показує кроки та спалені активністю калорії за сьогодні на головному екрані (дані з Google Fit, Samsung Health та інших застосунків, які пишуть у Health Connect), і записує вагу з екрана "Прогрес" у Health Connect, щоб інші застосунки її бачили.
+- **Спортивне харчування** — четверта категорія в "Порадах": протеїн, креатин, тайминг їжі навколо тренувань, BCAA/EAA, кофеїн, гідратація.
 
 ## Структура проєкту
 
 ```
 app/src/main/java/com/caloriecam/app/
-  data/        Room (FoodLogEntry/WeightEntry/WaterEntry + DAO, AppDatabase), NutritionRepository,
-               UserProfile(+Repository), TipsContent, BackupData/BackupManager
-  ml/          FoodLabeler — обгортка над ML Kit Image Labeling
+  data/        Room (FoodLogEntry/WeightEntry/WaterEntry/ProgressPhoto + DAO, AppDatabase),
+               NutritionRepository, UserProfile(+Repository), TipsContent, BackupData/BackupManager,
+               OffModels/OpenFoodFactsApi (Open Food Facts клієнт)
+  health/      HealthConnectManager — кроки/калорії/вага через androidx.health.connect
+  ml/          FoodLabeler, BarcodeReader — обгортки над ML Kit
   notify/      NotificationHelper, ReminderWorker/Scheduler — щоденні нагадування (WorkManager)
-  ui/          Compose-екрани: HomeScreen, CaptureScreen, ProfileScreen, StatsScreen, TipsScreen
+  ui/          Compose-екрани: HomeScreen, CaptureScreen, BarcodeScanScreen, ProfileScreen,
+               StatsScreen, TipsScreen
   util/        PhotoStore (зберігання фото), BitmapUtils (декодування з урахуванням EXIF)
 app/src/main/assets/nutrition_uk.json   Локальна база 136 продуктів (ккал/Б/Ж/В на 100 г,
                                           для ~55 — користь і вітаміни)
@@ -38,7 +44,7 @@ app/src/main/assets/nutrition_uk.json   Локальна база 136 проду
 
 ## Стек
 
-Kotlin, Jetpack Compose (Material 3), Room, DataStore Preferences, WorkManager, ML Kit Image Labeling (bundled/offline), Coil, kotlinx.serialization. `minSdk 26`, `targetSdk/compileSdk 34`.
+Kotlin, Jetpack Compose (Material 3), Room, DataStore Preferences, WorkManager, ML Kit (Image Labeling + Barcode Scanning, bundled/offline), Health Connect, Coil, kotlinx.serialization. `minSdk 26`, `targetSdk/compileSdk 34`.
 
 ## Збірка
 
@@ -56,3 +62,6 @@ Kotlin, Jetpack Compose (Material 3), Room, DataStore Preferences, WorkManager, 
 - Дозвіл на камеру запитується під час першого використання; для галереї дозволи не потрібні (Photo Picker). Дозвіл на сповіщення (Android 13+) запитується лише при вмиканні нагадувань у профілі.
 - Нагадування реалізовані через самопланований ланцюжок WorkManager (без `SCHEDULE_EXACT_ALARM`), тому час спрацювання може відхилятись на кілька хвилин.
 - База даних версії 3 (додано таблиці ваги/води/фото прогресу) використовує `fallbackToDestructiveMigration()` — якщо застосунок вже стоїть на пристрої зі старою версією БД, локальні дані буде очищено при першому оновленні. На нових встановленнях це не стосується.
+- Сканування штрихкодів вимагає інтернету (запит до Open Food Facts) і не має власного API-ключа — це відкрита спільнотна база, тож деяких товарів, особливо суто локальних, там може не бути.
+- Health Connect — окремий застосунок Google, має бути встановлений на пристрої (Play Store); без нього кнопка підключення покаже підказку встановити його. Пряма інтеграція з конкретними виробниками (Fitbit, Garmin тощо) неможлива без власних API-ключів розробника кожного з них — Health Connect є єдиним практичним шляхом синхронізації без реєстрації в кожного вендора окремо.
+- Залежність `androidx.health.connect:connect-client` станом на зараз усе ще в статусі alpha — якщо Android Studio запропонує оновити версію при синхронізації Gradle, це нормально, можна оновити.

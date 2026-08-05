@@ -40,6 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +62,8 @@ import com.caloriecam.app.data.Gender
 import com.caloriecam.app.data.Goal
 import com.caloriecam.app.data.UserProfile
 import com.caloriecam.app.data.UserProfileRepository
+import com.caloriecam.app.health.HealthConnectAvailability
+import com.caloriecam.app.health.HealthConnectManager
 import com.caloriecam.app.notify.ReminderScheduler
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -226,6 +229,69 @@ fun ProfileScreen(
             HorizontalDivider()
             Spacer(modifier = Modifier.height(20.dp))
             BackupSection()
+
+            Spacer(modifier = Modifier.height(28.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(20.dp))
+            HealthConnectSection()
+        }
+    }
+}
+
+@Composable
+private fun HealthConnectSection() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val availability = remember { HealthConnectManager.availability(context) }
+    var granted by remember { mutableStateOf(false) }
+
+    LaunchedEffect(availability) {
+        if (availability == HealthConnectAvailability.AVAILABLE) {
+            granted = HealthConnectManager.hasAllPermissions(context)
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        HealthConnectManager.permissionRequestContract()
+    ) {
+        scope.launch { granted = HealthConnectManager.hasAllPermissions(context) }
+    }
+
+    Text("Health Connect", fontWeight = FontWeight.SemiBold)
+    Spacer(modifier = Modifier.height(4.dp))
+    Text(
+        "Синхронізація кроків, спалених калорій і ваги з фітнес-трекерами (Google Fit, Samsung Health та іншими) через стандартний агрегатор Android.",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    Spacer(modifier = Modifier.height(10.dp))
+    when (availability) {
+        HealthConnectAvailability.AVAILABLE -> {
+            if (granted) {
+                Text(
+                    "✓ Підключено — кроки й спалені калорії показуються на головному екрані.",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold
+                )
+            } else {
+                OutlinedButton(onClick = { permissionLauncher.launch(HealthConnectManager.permissions) }) {
+                    Text("Підключити Health Connect")
+                }
+            }
+        }
+        HealthConnectAvailability.NOT_INSTALLED -> {
+            Text(
+                "Встановіть застосунок Health Connect з Google Play, щоб увімкнути синхронізацію.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        HealthConnectAvailability.UNSUPPORTED -> {
+            Text(
+                "Health Connect недоступний на цьому пристрої.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

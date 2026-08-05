@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.caloriecam.app.data.UserProfileRepository
+import com.caloriecam.app.ui.BarcodeScanScreen
 import com.caloriecam.app.ui.CaptureScreen
 import com.caloriecam.app.ui.HomeScreen
 import com.caloriecam.app.ui.ProfileScreen
@@ -70,11 +71,14 @@ private val bottomTabs = listOf(
     BottomTab("Профіль", Icons.Default.PersonOutline)
 )
 
+private enum class PhotoPurpose { FOOD, BARCODE }
+
 @Composable
 private fun CalorieCamRoot() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var pendingPhotoPath by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingPurpose by rememberSaveable { mutableStateOf(PhotoPurpose.FOOD) }
     var pendingCameraFile by remember { mutableStateOf<File?>(null) }
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     val savedProfile by UserProfileRepository.profileFlow(context).collectAsState(initial = null)
@@ -90,8 +94,10 @@ private fun CalorieCamRoot() {
         pendingCameraFile = null
     }
 
-    fun launchCamera() {
-        val file = PhotoStore.newCameraFile(context)
+    fun launchCamera(purpose: PhotoPurpose) {
+        pendingPurpose = purpose
+        val prefix = if (purpose == PhotoPurpose.BARCODE) "BARCODE" else "IMG"
+        val file = PhotoStore.newCameraFile(context, prefix)
         val uri: Uri = PhotoStore.contentUriFor(context, file)
         pendingCameraFile = file
         takePictureLauncher.launch(uri)
@@ -99,7 +105,7 @@ private fun CalorieCamRoot() {
 
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { granted -> if (granted) launchCamera() }
+    ) { granted -> if (granted) launchCamera(pendingPurpose) }
 
     val pickMediaLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
@@ -112,16 +118,34 @@ private fun CalorieCamRoot() {
         }
     }
 
+    fun requestCamera(purpose: PhotoPurpose) {
+        pendingPurpose = purpose
+        val granted = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+        if (granted) launchCamera(purpose) else cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+    }
+
     val photoPath = pendingPhotoPath
     if (photoPath != null) {
-        CaptureScreen(
-            photoFile = File(photoPath),
-            onDone = { pendingPhotoPath = null },
-            onDiscard = {
-                PhotoStore.delete(File(photoPath))
-                pendingPhotoPath = null
-            }
-        )
+        when (pendingPurpose) {
+            PhotoPurpose.FOOD -> CaptureScreen(
+                photoFile = File(photoPath),
+                onDone = { pendingPhotoPath = null },
+                onDiscard = {
+                    PhotoStore.delete(File(photoPath))
+                    pendingPhotoPath = null
+                }
+            )
+            PhotoPurpose.BARCODE -> BarcodeScanScreen(
+                photoFile = File(photoPath),
+                onDone = { pendingPhotoPath = null },
+                onDiscard = {
+                    PhotoStore.delete(File(photoPath))
+                    pendingPhotoPath = null
+                }
+            )
+        }
         return
     }
 
@@ -142,17 +166,14 @@ private fun CalorieCamRoot() {
         Box(modifier = Modifier.padding(padding)) {
             when (selectedTab) {
                 0 -> HomeScreen(
-                    onCameraClick = {
-                        val granted = ContextCompat.checkSelfPermission(
-                            context, Manifest.permission.CAMERA
-                        ) == PackageManager.PERMISSION_GRANTED
-                        if (granted) launchCamera() else cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                    },
+                    onCameraClick = { requestCamera(PhotoPurpose.FOOD) },
                     onGalleryClick = {
+                        pendingPurpose = PhotoPurpose.FOOD
                         pickMediaLauncher.launch(
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                         )
-                    }
+                    },
+                    onScanBarcodeClick = { requestCamera(PhotoPurpose.BARCODE) }
                 )
                 1 -> StatsScreen()
                 2 -> TipsScreen(profile = savedProfile)

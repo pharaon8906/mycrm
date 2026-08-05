@@ -8,6 +8,7 @@ import com.caloriecam.app.data.DailyTotal
 import com.caloriecam.app.data.ProgressPhoto
 import com.caloriecam.app.data.UserProfileRepository
 import com.caloriecam.app.data.WeightEntry
+import com.caloriecam.app.health.HealthConnectManager
 import com.caloriecam.app.util.PhotoStore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,6 +61,8 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
             if (current != null) {
                 UserProfileRepository.save(app, current.copy(weightKg = weightKg))
             }
+            // Best-effort: silently no-ops if Health Connect isn't installed/authorized.
+            HealthConnectManager.writeWeight(app, weightKg)
         }
     }
 

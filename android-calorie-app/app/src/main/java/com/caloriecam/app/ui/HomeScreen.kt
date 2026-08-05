@@ -21,9 +21,12 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.LocalDrink
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.RestaurantMenu
 import androidx.compose.material3.Card
@@ -41,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,12 +55,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.caloriecam.app.data.DEFAULT_WATER_GOAL_ML
 import com.caloriecam.app.data.FoodLogEntry
+import com.caloriecam.app.health.HealthConnectAvailability
+import com.caloriecam.app.health.HealthConnectManager
+import com.caloriecam.app.health.TodayActivity
 import java.io.File
 import java.time.LocalDate
 import java.time.format.TextStyle
@@ -68,13 +76,24 @@ import kotlin.math.roundToInt
 fun HomeScreen(
     onCameraClick: () -> Unit,
     onGalleryClick: () -> Unit,
+    onScanBarcodeClick: () -> Unit,
     viewModel: HomeViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     val entries by viewModel.entries.collectAsState()
     val selectedDate by viewModel.selectedDate.collectAsState()
     val profile by viewModel.profile.collectAsState()
     val todayWater by viewModel.todayWater.collectAsState()
     var showSheet by remember { mutableStateOf(false) }
+    var healthActivity by remember { mutableStateOf<TodayActivity?>(null) }
+
+    LaunchedEffect(Unit) {
+        if (HealthConnectManager.availability(context) == HealthConnectAvailability.AVAILABLE &&
+            HealthConnectManager.hasAllPermissions(context)
+        ) {
+            healthActivity = HealthConnectManager.readTodayActivity(context)
+        }
+    }
 
     val totalKcal = entries.sumOf { it.kcal }
     val goalKcal = profile?.dailyCalorieGoal ?: 2000
@@ -126,6 +145,10 @@ fun HomeScreen(
                 onRemoveLast = { viewModel.removeLastWater() }
             )
 
+            healthActivity?.let { activity ->
+                HealthActivityCard(activity)
+            }
+
             if (entries.isEmpty()) {
                 EmptyState()
             } else {
@@ -166,6 +189,15 @@ fun HomeScreen(
                     modifier = Modifier.clickable {
                         showSheet = false
                         onGalleryClick()
+                    }
+                )
+                ListItem(
+                    headlineContent = { Text("Сканувати штрихкод") },
+                    supportingContent = { Text("Склад, Nutri-Score, добавки") },
+                    leadingContent = { Icon(Icons.Default.QrCodeScanner, contentDescription = null) },
+                    modifier = Modifier.clickable {
+                        showSheet = false
+                        onScanBarcodeClick()
                     }
                 )
             }
@@ -261,6 +293,34 @@ private fun WaterCard(consumedMl: Int, goalMl: Int, onAdd: () -> Unit, onRemoveL
                 FilledTonalButton(onClick = onAdd) {
                     Text("+ склянка")
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HealthActivityCard(activity: TodayActivity) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.DirectionsWalk, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("${activity.steps} кроків")
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.LocalFireDepartment, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("${activity.activeCaloriesBurned} ккал спалено")
             }
         }
     }
