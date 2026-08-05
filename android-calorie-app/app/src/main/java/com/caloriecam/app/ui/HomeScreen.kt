@@ -22,13 +22,17 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.LocalDrink
 import androidx.compose.material.icons.filled.PersonOutline
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.RestaurantMenu
+import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,6 +59,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.caloriecam.app.data.DEFAULT_WATER_GOAL_ML
 import com.caloriecam.app.data.FoodLogEntry
 import java.io.File
 import java.time.LocalDate
@@ -69,21 +74,28 @@ fun HomeScreen(
     onGalleryClick: () -> Unit,
     onProfileClick: () -> Unit,
     onTipsClick: () -> Unit,
+    onStatsClick: () -> Unit,
     viewModel: HomeViewModel = viewModel()
 ) {
     val entries by viewModel.entries.collectAsState()
     val selectedDate by viewModel.selectedDate.collectAsState()
     val profile by viewModel.profile.collectAsState()
+    val todayWater by viewModel.todayWater.collectAsState()
     var showSheet by remember { mutableStateOf(false) }
 
     val totalKcal = entries.sumOf { it.kcal }
     val goalKcal = profile?.dailyCalorieGoal ?: 2000
+    val waterMl = todayWater.sumOf { it.amountMl }
+    val waterGoalMl = profile?.dailyWaterGoalMl ?: DEFAULT_WATER_GOAL_ML
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("CalorieCam", fontWeight = FontWeight.Bold) },
                 actions = {
+                    IconButton(onClick = onStatsClick) {
+                        Icon(Icons.Default.ShowChart, contentDescription = "Прогрес")
+                    }
                     IconButton(onClick = onTipsClick) {
                         Icon(Icons.Default.FitnessCenter, contentDescription = "Поради та вправи")
                     }
@@ -124,6 +136,13 @@ fun HomeScreen(
                     carbs = entries.sumOf { it.carbs }.roundToInt()
                 )
             }
+
+            WaterCard(
+                consumedMl = waterMl,
+                goalMl = waterGoalMl,
+                onAdd = { viewModel.addWater() },
+                onRemoveLast = { viewModel.removeLastWater() }
+            )
 
             if (entries.isEmpty()) {
                 EmptyState()
@@ -221,6 +240,47 @@ private fun MacroStat(label: String, value: Int, color: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("${value} г", fontWeight = FontWeight.Bold, color = color)
         Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun WaterCard(consumedMl: Int, goalMl: Int, onAdd: () -> Unit, onRemoveLast: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.LocalDrink, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
+                Spacer(modifier = Modifier.width(10.dp))
+                Column {
+                    Text("Вода", fontWeight = FontWeight.SemiBold)
+                    Text(
+                        "$consumedMl / $goalMl мл",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (consumedMl > 0) {
+                    IconButton(onClick = onRemoveLast) {
+                        Icon(Icons.Default.Remove, contentDescription = "Скасувати останню склянку")
+                    }
+                }
+                FilledTonalButton(onClick = onAdd) {
+                    Text("+ склянка")
+                }
+            }
+        }
     }
 }
 

@@ -5,15 +5,9 @@ import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Entity(tableName = "food_log")
-data class FoodLogEntry(
+@Entity(tableName = "weight_log")
+data class WeightEntry(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val photoPath: String?,
-    val foodName: String,
-    val grams: Int,
-    val kcal: Int,
-    val protein: Double,
-    val fat: Double,
-    val carbs: Double,
+    val weightKg: Double,
     val timestamp: Long
 )

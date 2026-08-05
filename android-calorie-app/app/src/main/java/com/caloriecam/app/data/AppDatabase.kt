@@ -5,10 +5,16 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [FoodLogEntry::class], version = 1, exportSchema = false)
+@Database(
+    entities = [FoodLogEntry::class, WeightEntry::class, WaterEntry::class],
+    version = 2,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun foodLogDao(): FoodLogDao
+    abstract fun weightDao(): WeightDao
+    abstract fun waterDao(): WaterDao
 
     companion object {
         @Volatile private var instance: AppDatabase? = null
@@ -19,7 +25,10 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "caloriecam.db"
-                ).build().also { instance = it }
+                )
+                    // Pre-release app, no migration history to preserve yet.
+                    .fallbackToDestructiveMigration()
+                    .build().also { instance = it }
             }
     }
 }

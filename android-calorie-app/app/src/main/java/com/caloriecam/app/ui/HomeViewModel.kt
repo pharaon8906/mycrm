@@ -7,6 +7,7 @@ import com.caloriecam.app.data.AppDatabase
 import com.caloriecam.app.data.FoodLogEntry
 import com.caloriecam.app.data.UserProfile
 import com.caloriecam.app.data.UserProfileRepository
+import com.caloriecam.app.data.WaterEntry
 import com.caloriecam.app.util.PhotoStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,6 +22,7 @@ import java.time.ZoneId
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     private val dao = AppDatabase.getInstance(application).foodLogDao()
+    private val waterDao = AppDatabase.getInstance(application).waterDao()
 
     private val _selectedDate = MutableStateFlow(LocalDate.now())
     val selectedDate: StateFlow<LocalDate> = _selectedDate
@@ -35,6 +37,26 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     val profile: StateFlow<UserProfile?> = UserProfileRepository.profileFlow(application)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    // Water tracking always reflects today, regardless of which day's food log is being browsed.
+    val todayWater: StateFlow<List<WaterEntry>> = run {
+        val (start, end) = dayRangeMillis(LocalDate.now())
+        waterDao.observeForDay(start, end)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    }
+
+    fun addWater(amountMl: Int = 250) {
+        viewModelScope.launch {
+            waterDao.insert(WaterEntry(amountMl = amountMl, timestamp = System.currentTimeMillis()))
+        }
+    }
+
+    fun removeLastWater() {
+        viewModelScope.launch {
+            val last = todayWater.value.firstOrNull() ?: return@launch
+            waterDao.delete(last)
+        }
+    }
 
     fun previousDay() {
         _selectedDate.value = _selectedDate.value.minusDays(1)

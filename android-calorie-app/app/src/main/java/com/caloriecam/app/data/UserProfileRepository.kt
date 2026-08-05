@@ -1,6 +1,7 @@
 package com.caloriecam.app.data
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -20,6 +21,7 @@ object UserProfileRepository {
         val WEIGHT = doublePreferencesKey("weight_kg")
         val ACTIVITY = stringPreferencesKey("activity_level")
         val GOAL = stringPreferencesKey("goal")
+        val REMINDERS_ENABLED = booleanPreferencesKey("reminders_enabled")
     }
 
     /** Null until the user saves a profile for the first time. */
@@ -46,5 +48,12 @@ object UserProfileRepository {
             prefs[Keys.ACTIVITY] = profile.activityLevel.name
             prefs[Keys.GOAL] = profile.goal.name
         }
+    }
+
+    fun remindersEnabledFlow(context: Context): Flow<Boolean> =
+        context.userProfileStore.data.map { prefs -> prefs[Keys.REMINDERS_ENABLED] ?: false }
+
+    suspend fun setRemindersEnabled(context: Context, enabled: Boolean) {
+        context.userProfileStore.edit { prefs -> prefs[Keys.REMINDERS_ENABLED] = enabled }
     }
 }

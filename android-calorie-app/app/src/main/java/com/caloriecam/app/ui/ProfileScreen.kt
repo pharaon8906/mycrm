@@ -1,5 +1,12 @@
 package com.caloriecam.app.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,40 +14,51 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.caloriecam.app.data.ActivityLevel
+import com.caloriecam.app.data.BackupManager
 import com.caloriecam.app.data.Gender
 import com.caloriecam.app.data.Goal
 import com.caloriecam.app.data.UserProfile
 import com.caloriecam.app.data.UserProfileRepository
+import com.caloriecam.app.notify.ReminderScheduler
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -189,7 +207,152 @@ fun ProfileScreen(
             ) {
                 Text(if (saving) "Збереження…" else "Зберегти")
             }
+
+            Spacer(modifier = Modifier.height(28.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(20.dp))
+            RemindersSection()
+
+            Spacer(modifier = Modifier.height(28.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(20.dp))
+            BackupSection()
         }
+    }
+}
+
+@Composable
+private fun BackupSection() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var showImportConfirm by remember { mutableStateOf(false) }
+    var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val ok = BackupManager.export(context, uri)
+                Toast.makeText(
+                    context,
+                    if (ok) "Дані експортовано" else "Не вдалося експортувати",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    val importPickerLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            pendingImportUri = uri
+            showImportConfirm = true
+        }
+    }
+
+    Text("Резервне копіювання", fontWeight = FontWeight.SemiBold)
+    Spacer(modifier = Modifier.height(4.dp))
+    Text(
+        "Збережіть дані перед зміною телефону або відновіть їх на новому пристрої. Фото у файл бекапу не входять.",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    Spacer(modifier = Modifier.height(12.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        OutlinedButton(
+            modifier = Modifier.weight(1f),
+            onClick = { exportLauncher.launch("caloriecam_backup_${System.currentTimeMillis()}.json") }
+        ) { Text("Експортувати") }
+        OutlinedButton(
+            modifier = Modifier.weight(1f),
+            onClick = { importPickerLauncher.launch(arrayOf("application/json")) }
+        ) { Text("Імпортувати") }
+    }
+
+    if (showImportConfirm) {
+        AlertDialog(
+            onDismissRequest = { showImportConfirm = false },
+            title = { Text("Імпортувати дані?") },
+            text = {
+                Text("Це замінить усі поточні записи їжі, ваги, води та профіль даними з обраного файлу. Дію не можна скасувати.")
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val uri = pendingImportUri
+                    showImportConfirm = false
+                    if (uri != null) {
+                        scope.launch {
+                            val ok = BackupManager.import(context, uri)
+                            Toast.makeText(
+                                context,
+                                if (ok) "Дані відновлено" else "Не вдалося імпортувати",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }) { Text("Замінити") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showImportConfirm = false }) { Text("Скасувати") }
+            }
+        )
+    }
+}
+
+@Composable
+private fun RemindersSection() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val remindersEnabled by UserProfileRepository.remindersEnabledFlow(context).collectAsState(initial = false)
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        scope.launch { UserProfileRepository.setRemindersEnabled(context, granted) }
+        if (granted) ReminderScheduler.scheduleAll(context)
+    }
+
+    fun enableReminders() {
+        val needsPermission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(
+                context, Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        if (needsPermission) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            scope.launch { UserProfileRepository.setRemindersEnabled(context, true) }
+            ReminderScheduler.scheduleAll(context)
+        }
+    }
+
+    Text("Нагадування", fontWeight = FontWeight.SemiBold)
+    Spacer(modifier = Modifier.height(8.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text("Нагадувати про прийоми їжі")
+            Text(
+                "Сніданок 8:00 · обід 13:00 · вечеря 19:00",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Switch(
+            checked = remindersEnabled,
+            onCheckedChange = { enabled ->
+                if (enabled) {
+                    enableReminders()
+                } else {
+                    scope.launch { UserProfileRepository.setRemindersEnabled(context, false) }
+                    ReminderScheduler.cancelAll(context)
+                }
+            }
+        )
     }
 }
 
