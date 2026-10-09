@@ -776,6 +776,23 @@ const waNum = p => {
   if (d.startsWith(cc))   return d;
   return cc + d;
 };
+// ---- Пошук без урахування пробілів, дефісів, дужок, «+» та регістру ----
+// «2280» знаходить «+33 6 34 90 22 80»; «0612345678» знаходить «+33 6 12 34 56 78»
+const normS = s => String(s ?? '').toLowerCase().replace(/[\s .,\-–—()+]+/g, '');
+function makeMatcher(raw) {
+  const q = String(raw || '').trim().toLowerCase();
+  if (!q) return null;                                    // порожній запит — показати все
+  const numeric = /^[\d\s+\-().]+$/.test(q);              // запит схожий на номер
+  const tokens = numeric ? [normS(q)] : q.split(/\s+/).map(normS).filter(Boolean);
+  const waQ = numeric && tokens[0].length >= 7 ? waNum(q) : '';   // для довгих номерів — ще й у міжнародному вигляді
+  return (fields, phones) => {
+    const f = fields.map(normS);
+    const p = (phones || []).filter(Boolean).flatMap(x => [normS(x), waNum(x)]);
+    const hit = t => f.some(x => x.includes(t)) || p.some(x => x.includes(t));
+    return tokens.every(hit) || (!!waQ && p.some(x => x.includes(waQ)));
+  };
+}
+
 const phoneOf = nm => (clients.find(c => c.name === nm) || {}).phone || '';
 // Клієнт замовлення: спершу за id (не ламається при перейменуванні), для старих записів — за іменем
 const clientOf = o => (o.client_id && clients.find(c => c.id === o.client_id)) || clients.find(c => (c.name || '') === (o.client || '')) || null;
@@ -1010,18 +1027,11 @@ function updateChips() {
 
 /* ================= СПИСОК ЗАМОВЛЕНЬ ================= */
 const render = () => {
-  const q = document.getElementById('q').value.toLowerCase().trim();
-  const qDigits = q.replace(/\D/g,'');
+  const match = makeMatcher(document.getElementById('q').value);
   const sort = document.getElementById('sortSel').value;
   const list = document.getElementById('list'); const today = new Date().toISOString().split('T')[0];
 
-  let f = orders.filter(o => {
-    if (!q) return true;
-    const ph = orderPhone(o);
-    const hay = ((o.client||'') + ' ' + (o.product||'') + ' ' + (o.factory||'') + ' ' + (o.factory2||'') + ' ' + ph).toLowerCase();
-    if (hay.includes(q)) return true;
-    return qDigits.length >= 3 && ph.replace(/\D/g,'').includes(qDigits);
-  });
+  let f = !match ? orders.slice() : orders.filter(o => match([o.client, (clientOf(o) || {}).name, o.product, o.factory, o.factory2], [orderPhone(o), o.client]));
 
   if (curS === 'Боржники') f = f.filter(isDebtor);
   else if (curS === 'Нагадування') f = f.filter(isRem);
@@ -1510,13 +1520,8 @@ const tab = (t, fromPop) => {
 }
 
 function renderC() {
-  const q = document.getElementById('qc').value.toLowerCase().trim();
-  const qd = q.replace(/\D/g,'');
-  const f = clients.filter(c => {
-    if (!q) return true;
-    if ((c.name||'').toLowerCase().includes(q)) return true;
-    return qd.length >= 3 && (c.phone||'').replace(/\D/g,'').includes(qd);
-  });
+  const match = makeMatcher(document.getElementById('qc').value);
+  const f = !match ? clients.slice() : clients.filter(c => match([c.name, c.address], [c.phone, c.name]));
   document.getElementById('listC').innerHTML = f.length
     ? f.map(c=>`<div class="card cl" data-id="${esc(c.id)}" onclick="openCE(this.dataset.id)">${avatarHtml(c.name)}<div class="c-id"><div class="c-name"><span class="nm">${esc(c.name||'Без імені')}</span></div><div class="c-sub">${esc(c.phone||'—')}</div></div><i class="fa fa-chevron-right cl-arrow"></i></div>`).join('')
     : `<div class="empty"><i class="fa fa-user-slash"></i>Клієнтів не знайдено</div>`;
