@@ -63,28 +63,18 @@ header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px
 
 /* ============ КАРТКА ============ */
 .card { background: var(--surface); border-radius: var(--r); padding: 16px; border: 1px solid var(--line); box-shadow: var(--sh-1); position: relative; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .15s; }
-.card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--est); }
+/* Спокійні картки: біле тло, колір лише там, де він щось означає (бічна смужка) */
+.card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: transparent; }
 .card:hover { border-color: var(--muted2); box-shadow: var(--sh-2); transform: translateY(-1px); }
 .card:active { transform: scale(.995); }
-.card.st-done::before { background: var(--done); }
-.card.st-cancelled::before { background: var(--canc); }
-.card.st-inwork::before { background: var(--work); }
-.card.st-verify::before { background: var(--verify); }
-.card.st-storage::before { background: var(--store); }
-.card.st-done { background: #f5fdfa; }
-.card.st-cancelled { background: #fdf7f8; opacity: .72; }
-.card.st-inwork { background: #fffaf4; }
-.card.st-verify { background: #f4fcfd; }
-.card.st-storage { background: #faf8ff; }
-.card.over { border-color: var(--danger); }
+.card.st-cancelled { opacity: .68; }
+.card.over { border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger), var(--sh-1); }
 .card.st-new::before { background: var(--new); }
-.card.st-new { background: #fdf2f8; }
-.st-new .status-badge { color: var(--new); background: #fce7f3; }
+.card.st-new { background: #fff7fb; }
 .st-new .status-badge::before { background: var(--new); }
 /* Заявка, надіслана з іншої компанії — інший колір (фіолетовий) */
 .card.st-new.st-cross::before { background: var(--violet); }
-.card.st-new.st-cross { background: #f6f3ff; }
-.st-new.st-cross .status-badge { color: var(--violet); background: #ede9fe; }
+.card.st-new.st-cross { background: #f8f6ff; }
 .st-new.st-cross .status-badge::before { background: var(--violet); }
 .cross-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--violet); background: #ede9fe; padding: 3px 9px; border-radius: 999px; margin-top: 6px; }
 .card.st-est { background: #fdf4f5; }
@@ -94,19 +84,15 @@ header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px
 .card.rem::after { content: "⏰"; position: absolute; top: 14px; right: 14px; font-size: 12px; }
 
 .c-row-1 { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-.c-name { font-size: 15px; font-weight: 700; color: var(--txt); letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: var(--muted); background: var(--line-soft); border-radius: 999px; padding: 4px 10px 4px 8px; white-space: nowrap; flex-shrink: 0; }
-.status-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--est); }
+.c-name { font-size: 16px; font-weight: 700; color: var(--txt); letter-spacing: -.015em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Статус: нейтральний чип + кольорова крапка */
+.status-badge { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: var(--txt); background: var(--line-soft); border-radius: 999px; padding: 4px 11px 4px 9px; white-space: nowrap; flex-shrink: 0; }
+.status-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--est); }
 .st-done .status-badge::before { background: var(--done); }
 .st-cancelled .status-badge::before { background: var(--canc); }
 .st-inwork .status-badge::before { background: var(--work); }
 .st-verify .status-badge::before { background: var(--verify); }
 .st-storage .status-badge::before { background: var(--store); }
-.st-done .status-badge { color: var(--done); background: #e8f6f1; }
-.st-cancelled .status-badge { color: var(--canc); background: #fbecef; }
-.st-inwork .status-badge { color: var(--work); background: #fdf1e5; }
-.st-verify .status-badge { color: var(--verify); background: #e6f6f9; }
-.st-storage .status-badge { color: var(--store); background: #f1ecfd; }
 
 .c-row-2 { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
 .c-date { font-size: 11.5px; color: var(--muted2); margin-top: 5px; display: flex; align-items: center; gap: 5px; }
@@ -114,7 +100,21 @@ header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px
 .c-steps-inline i.active { color: var(--p2); }
 .clip { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--muted); font-weight: 600; background: var(--line-soft); padding: 4px 9px; border-radius: 999px; margin-left: auto; }
 .c-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid var(--line-soft); }
-.val { font-size: 19px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.val { font-size: 21px; font-weight: 700; letter-spacing: -.035em; font-variant-numeric: tabular-nums; }
+
+/* Панель-підсумок угорі «Замовлень» */
+.sum-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+.sum-tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; cursor: pointer; box-shadow: var(--sh-1); transition: .14s; min-width: 0; }
+.sum-tile:hover { border-color: var(--muted2); box-shadow: var(--sh-2); }
+.sum-tile .sn { font-size: 22px; font-weight: 700; letter-spacing: -.03em; line-height: 1.1; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sum-tile .sl { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 4px; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.sum-tile .sl::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--dot, var(--est)); flex-shrink: 0; }
+.sum-tile.alert .sn { color: var(--danger); }
+@media (max-width: 640px) { .sum-strip { grid-template-columns: repeat(2, 1fr); gap: 8px; } .sum-tile { padding: 10px 12px; } .sum-tile .sn { font-size: 19px; } }
+
+/* Підпис внизу застосунку */
+.credit { text-align: center; font-size: 11.5px; color: var(--muted2); padding: 28px 0 8px; letter-spacing: .02em; }
+.credit b { color: var(--muted); font-weight: 700; }
 .c-foot a { width: 36px; height: 36px; border-radius: var(--r-xs); display: grid; place-items: center; background: var(--line-soft); color: var(--muted); transition: .14s; }
 .c-foot a:hover { background: var(--line); }
 .debt-tag { font-size: 12px; font-weight: 700; padding: 5px 9px; border-radius: var(--r-xs); font-variant-numeric: tabular-nums; }
@@ -184,7 +184,6 @@ header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px
 .n-i { flex: 1; padding: 11px 5px; border: none; background: none; text-align: center; color: var(--muted2); font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; transition: .14s; }
 .n-i.active { color: var(--p2); }
 .n-i i { display: block; font-size: 18px; margin-bottom: 5px; }
-.nav-credit { display: none; }
 
 /* ============ МОДАЛКИ ============ */
 .modal-w { position: fixed; inset: 0; background: rgba(11,18,32,.5); backdrop-filter: blur(6px); z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
@@ -251,17 +250,10 @@ select { cursor: pointer; }
 .empty { text-align: center; padding: 48px 20px; color: var(--muted2); grid-column: 1/-1; }
 .empty i { font-size: 32px; opacity: .4; display: block; margin-bottom: 12px; }
 
-/* Зебра на телефоні */
+/* Ледь помітна зебра на телефоні — лише для звичайних карток; кольорові стани не чіпаємо */
 @media (max-width: 640px) {
-  #list .card:nth-child(even) { background: #f3f6fa; }
-  #list .card.st-done:nth-child(even) { background: #ecf9f3; }
-  #list .card.st-cancelled:nth-child(even) { background: #fbf0f2; }
-  #list .card.st-inwork:nth-child(even) { background: #fdf4e9; }
-  #list .card.st-verify:nth-child(even) { background: #ecf7f9; }
-  #list .card.st-storage:nth-child(even) { background: #f4f0fd; }
-  #list .card.st-est:nth-child(even) { background: #fbeaec; }
-  #list .card.rem:nth-child(even) { background: #fae2e6; }
-  #listC .card:nth-child(even) { background: #f3f6fa; }
+  #list .card:nth-child(even):not(.st-est):not(.rem):not(.st-new) { background: #f6f8fb; }
+  #listC .card:nth-child(even) { background: #f6f8fb; }
 }
 
 /* ============ КОМПАКТНІШЕ НА ТЕЛЕФОНІ ============ */
@@ -312,7 +304,6 @@ select { cursor: pointer; }
 @media (min-width: 900px) {
   body { padding-left: var(--side-w); padding-bottom: 0; }
   .bottom-nav { top: 0; left: 0; width: var(--side-w); height: 100vh; flex-direction: column; padding: 20px 12px; border-right: 1px solid var(--line); border-top: none; background: var(--surface); backdrop-filter: none; align-items: stretch; gap: 2px; }
-  .nav-credit { display: block; margin-top: auto; padding: 14px 8px 6px; font-size: 10.5px; color: var(--muted2); text-align: center; border-top: 1px solid var(--line); }
   .n-i { flex: none; text-align: left; padding: 11px 12px; font-size: 13.5px; border-radius: var(--r-xs); display: flex; align-items: center; gap: 12px; color: var(--muted); }
   .n-i:hover { background: var(--line-soft); color: var(--txt); }
   .n-i i { margin: 0; font-size: 15px; width: 20px; text-align: center; }
@@ -358,6 +349,7 @@ select { cursor: pointer; }
 <div class="nav-s" id="navS" style="display:none">
   <div class="s-t active" data-s="Усі" onclick="flt('Усі',this)">Усі</div>
   <div class="s-t" data-s="Нова" onclick="flt('Нова',this)">🆕 Нові</div>
+  <div class="s-t" data-s="Нагадування" onclick="flt('Нагадування',this)">⏰ Дзвінки</div>
   <div class="s-t" data-s="Боржники" onclick="flt('Боржники',this)">💸 Боржники</div>
   <div class="s-t" data-s="Кошторис" onclick="flt('Кошторис',this)">📑 Кошторис</div>
   <div class="s-t" data-s="Підтверджено" onclick="flt('Підтверджено',this)">✅ Підтверджено</div>
@@ -370,6 +362,7 @@ select { cursor: pointer; }
 
 <div class="container" id="mainUI" style="display:none">
   <div id="p-orders" class="panel on">
+    <div class="sum-strip" id="sumStrip"></div>
     <div style="display:flex; gap:10px; margin-bottom:18px;">
       <input type="text" id="q" placeholder="🔍 Пошук: клієнт, № замовлення, телефон..." oninput="render()" style="flex:1">
       <select id="sortSel" onchange="render()" style="width:auto; font-size:16px; font-weight:600; color:var(--muted);">
@@ -421,6 +414,8 @@ select { cursor: pointer; }
   <div id="p-calendar" class="panel"><div id="calDisplay"></div></div>
 
   <div id="p-stats" class="panel"><div id="statsDisplay"></div></div>
+
+  <div class="credit">Created by <b>GHERMAN</b> for <b id="creditCo">HEIMEK</b></div>
 </div>
 
 <div class="bottom-nav" id="bottomNav" style="display:none">
@@ -429,7 +424,6 @@ select { cursor: pointer; }
   <button class="n-i" id="ni-clients" onclick="tab('clients')"><i class="fa fa-users"></i><span>Клієнти</span></button>
   <button class="n-i" id="ni-calendar" onclick="tab('calendar')"><i class="fa fa-calendar-days"></i><span>Календар</span></button>
   <button class="n-i" id="ni-stats" onclick="tab('stats')"><i class="fa fa-chart-line"></i><span>Звіт</span></button>
-  <div class="nav-credit">Created by Gherman for <span id="creditCo">HEIMEK</span></div>
 </div>
 
 <button class="fab-add" id="fabBtn" style="display:none" onclick="fab()"><i class="fa fa-plus"></i></button>
@@ -534,6 +528,8 @@ const orderCost = o => n(o.cost_price) + n(o.cost_price2);
 // Боржник = має борг і в активному статусі (Підтверджено / В роботі / На складі)
 const DEBT_STATUSES = ['Підтверджено','В роботі','На складі'];
 const isDebtor = o => DEBT_STATUSES.includes(o.status) && (n(o.total_ttc) - n(o.paid_amount)) > 1;
+// Нагадування «передзвонити» настало (сьогодні або раніше), замовлення ще не закрите
+const isRem = o => !!o.reminder_date && o.reminder_date <= new Date().toISOString().split('T')[0] && o.status !== 'Виконано' && o.status !== 'Скасовано';
 
 let co='heimek', orders=[], clients=[], editId=null, curT='orders', curS='Усі';
 let curFiles=[], curPay=[], statPeriod='all';
@@ -748,11 +744,30 @@ async function sync() {
 }
 
 /* ================= ЛІЧИЛЬНИКИ НА ФІЛЬТРАХ ================= */
+// Панель-підсумок: що вимагає уваги просто зараз
+function renderSummary() {
+  const box = document.getElementById('sumStrip'); if (!box) return;
+  const waiting = orders.filter(o => o.status === 'Нова').length;
+  const inWork  = orders.filter(o => o.status === 'В роботі').length;
+  const calls   = orders.filter(isRem).length;
+  const debt    = orders.filter(isDebtor).reduce((s,o) => s + (n(o.total_ttc) - n(o.paid_amount)), 0);
+  const tiles = [
+    { s:'Нова',        n: waiting,                 l:'Чекають прорахунку', dot:'var(--new)',  alert: waiting > 0 },
+    { s:'В роботі',    n: inWork,                  l:'В роботі',           dot:'var(--work)' },
+    { s:'Нагадування', n: calls,                   l:'Дзвінки',            dot:'var(--canc)', alert: calls > 0 },
+    { s:'Боржники',    n: fN(Math.round(debt)) + ' €', l:'Борги клієнтів', dot:'var(--danger)', alert: debt > 1 }
+  ];
+  box.innerHTML = tiles.map(t =>
+    `<div class="sum-tile ${t.alert?'alert':''}" style="--dot:${t.dot}" onclick="flt('${t.s}', document.querySelector('[data-s=\\'${t.s}\\']'))"><div class="sn">${t.n}</div><div class="sl">${t.l}</div></div>`
+  ).join('');
+}
+
 function updateChips() {
   const debtors = orders.filter(isDebtor).length;
+  const calls = orders.filter(isRem).length;
   document.querySelectorAll('.s-t').forEach(el => {
     const s = el.dataset.s;
-    const v = s==='Усі' ? orders.length : s==='Боржники' ? debtors : orders.filter(o=>o.status===s).length;
+    const v = s==='Усі' ? orders.length : s==='Боржники' ? debtors : s==='Нагадування' ? calls : orders.filter(o=>o.status===s).length;
     let b = el.querySelector('.chip-n');
     if (!b) { b = document.createElement('span'); b.className = 'chip-n'; el.appendChild(b); }
     b.textContent = v;
@@ -776,6 +791,7 @@ const render = () => {
   });
 
   if (curS === 'Боржники') f = f.filter(isDebtor);
+  else if (curS === 'Нагадування') f = f.filter(isRem);
   else if (curS!=='Усі') f = f.filter(o => o.status === curS);
 
   const stPriority = { 'Нова':0, 'В роботі':1, 'На складі':2, 'Перевірка':3, 'Підтверджено':4, 'Кошторис':5, 'Виконано':6, 'Скасовано':7 };
@@ -788,13 +804,14 @@ const render = () => {
   else if(sort === 'debt') f.sort((a,b) => (n(b.total_ttc)-n(b.paid_amount)) - (n(a.total_ttc)-n(a.paid_amount)));
 
   updateChips();
+  renderSummary();
 
   if (!f.length) { list.innerHTML = `<div class="empty"><i class="fa fa-inbox"></i>Замовлень не знайдено</div>`; return; }
 
   list.innerHTML = f.map(o=>{
     const ttc = n(o.total_ttc), paid = n(o.paid_amount), debt = ttc - paid;
     const over = o.deadline && o.deadline < today && o.status !== 'Виконано' && o.status !== 'Скасовано';
-    const rem = o.reminder_date && o.reminder_date <= today && o.status !== 'Виконано' && o.status !== 'Скасовано';
+    const rem = isRem(o);
     const nFiles = parseFiles(o.file_url).length;
     const wa = waNum(orderPhone(o));
     let stCl = o.status==='Виконано'?'st-done':o.status==='Скасовано'?'st-cancelled':o.status==='В роботі'?'st-inwork':o.status==='На складі'?'st-storage':o.status==='Перевірка'?'st-verify':o.status==='Кошторис'?'st-est':o.status==='Нова'?'st-new':'';
