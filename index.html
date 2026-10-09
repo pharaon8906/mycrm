@@ -72,46 +72,71 @@ header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px
 #list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
 
 /* ============ КАРТКА ============ */
-.card { background: var(--surface); border-radius: var(--r); padding: 16px; border: 1px solid var(--line); box-shadow: var(--sh-1); position: relative; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .15s; }
-/* Спокійні картки: біле тло, колір лише там, де він щось означає (бічна смужка) */
-.card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: transparent; }
-.card:hover { border-color: var(--muted2); box-shadow: var(--sh-2); transform: translateY(-1px); }
+:root { --sh-card: 0 1px 2px rgba(11,18,32,.04), 0 12px 28px -16px rgba(11,18,32,.20); --sh-card-h: 0 2px 4px rgba(11,18,32,.05), 0 20px 38px -16px rgba(11,18,32,.30); }
+.card { background: var(--surface); border-radius: 16px; padding: 12px 14px 10px; border: 1px solid color-mix(in srgb, var(--line) 55%, transparent); box-shadow: var(--sh-card); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: box-shadow .18s, transform .18s, border-color .18s; }
+/* Кольорова «вставка» зліва — лише для станів, що потребують уваги */
+.card::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; border-radius: 0 3px 3px 0; background: transparent; }
+.card:hover { box-shadow: var(--sh-card-h); transform: translateY(-2px); }
 .card:active { transform: scale(.995); }
-.card.st-cancelled { opacity: .68; }
-.card.over { border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger), var(--sh-1); }
+.card.st-cancelled { opacity: .66; }
+.card.over { border-color: color-mix(in srgb, var(--danger) 60%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--danger) 55%, transparent), var(--sh-card); }
 .card.st-new::before { background: var(--new); }
-.card.st-new { background: #fff7fb; }
-.st-new .status-badge::before { background: var(--new); }
-/* Заявка, надіслана з іншої компанії — інший колір (фіолетовий) */
+.card.st-new { background: linear-gradient(180deg, color-mix(in srgb, var(--new) 8%, var(--surface)), var(--surface) 65%); }
+/* Заявка, надіслана з іншої компанії — фіолетова */
 .card.st-new.st-cross::before { background: var(--violet); }
-.card.st-new.st-cross { background: #f8f6ff; }
-.st-new.st-cross .status-badge::before { background: var(--violet); }
-.cross-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--violet); background: #ede9fe; padding: 3px 9px; border-radius: 999px; margin-top: 6px; }
-.card.st-est { background: #fdf4f5; }
+.card.st-new.st-cross { background: linear-gradient(180deg, color-mix(in srgb, var(--violet) 9%, var(--surface)), var(--surface) 65%); }
 .card.st-est::before { background: var(--canc); }
-.card.rem { background: #fceef0; border-color: color-mix(in srgb, var(--danger) 35%, var(--line)); }
+.card.st-est { background: linear-gradient(180deg, color-mix(in srgb, var(--canc) 8%, var(--surface)), var(--surface) 65%); }
 .card.rem::before { background: var(--canc); }
+.card.rem { background: linear-gradient(180deg, color-mix(in srgb, var(--canc) 13%, var(--surface)), var(--surface) 70%); border-color: color-mix(in srgb, var(--canc) 35%, transparent); }
+/* Колір статусу для чипа (--sc) */
+.st-conf { --sc: var(--conf); } .st-done { --sc: var(--done); } .st-cancelled { --sc: var(--est); } .st-inwork { --sc: var(--work); }
+.st-verify { --sc: var(--verify); } .st-storage { --sc: var(--store); } .st-new { --sc: var(--new); } .st-new.st-cross { --sc: var(--violet); } .st-est { --sc: var(--est); }
 
-.c-row-1 { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-.c-lead { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; }
-.c-lead .c-name { min-width: 0; }
-.c-name { font-size: 16px; font-weight: 700; color: var(--txt); letter-spacing: -.015em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* Статус: нейтральний чип + кольорова крапка */
-.status-badge { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: var(--txt); background: var(--line-soft); border-radius: 999px; padding: 4px 11px 4px 9px; white-space: nowrap; flex-shrink: 0; }
-.status-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--est); }
-.st-done .status-badge::before { background: var(--done); }
-.st-cancelled .status-badge::before { background: var(--canc); }
-.st-inwork .status-badge::before { background: var(--work); }
-.st-verify .status-badge::before { background: var(--verify); }
-.st-storage .status-badge::before { background: var(--store); }
+/* Верх: аватар · клієнт і номер · статус */
+.c-top { display: flex; align-items: center; gap: 10px; }
+.avatar { flex-shrink: 0; width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; font-weight: 700; font-size: 12px; letter-spacing: .02em; background: hsl(var(--h, 220) 80% 93%); color: hsl(var(--h, 220) 55% 32%); }
+.c-id { min-width: 0; flex: 1; }
+.c-name { display: flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 700; color: var(--txt); letter-spacing: -.01em; min-width: 0; line-height: 1.25; }
+.c-name .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.c-sub { font-size: 11.5px; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Статус: кольорова «таблетка» */
+.status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--sc, var(--est)); background: color-mix(in srgb, var(--sc, var(--est)) 13%, var(--surface)); border-radius: 999px; padding: 3px 9px; white-space: nowrap; flex-shrink: 0; }
+.status-badge::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 
-.c-row-2 { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
-.c-date { font-size: 11.5px; color: var(--muted2); margin-top: 5px; display: flex; align-items: center; gap: 5px; }
-.c-steps-inline { display: flex; align-items: center; gap: 14px; font-size: 13px; color: #cfd5df; margin: 14px 0; }
-.c-steps-inline i.active { color: var(--p2); }
-.clip { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--muted); font-weight: 600; background: var(--line-soft); padding: 4px 9px; border-radius: 999px; margin-left: auto; }
-.c-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid var(--line-soft); }
-.val { font-size: 21px; font-weight: 700; letter-spacing: -.035em; font-variant-numeric: tabular-nums; }
+/* Прогрес етапів: 4 сегменти з підписами */
+.c-prog { display: flex; gap: 5px; }
+.ps { flex: 1; min-width: 0; }
+.ps i { display: block; height: 4px; border-radius: 99px; background: var(--line-soft); }
+.ps.on i { background: var(--p2); }
+.ps span { display: block; margin-top: 4px; font-size: 10px; font-weight: 600; color: var(--muted2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ps.on span { color: var(--txt); }
+
+/* Сума й оплата */
+.c-pay { display: flex; flex-direction: column; gap: 6px; }
+.c-money { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.val { font-size: 16px; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.val small { font-size: 11px; font-weight: 600; color: var(--muted2); letter-spacing: 0; margin-left: 3px; }
+.val .dash { font-size: 12px; font-weight: 500; color: var(--muted2); letter-spacing: 0; }
+.paybar { height: 3px; border-radius: 99px; background: var(--line-soft); overflow: hidden; }
+.paybar i { display: block; height: 100%; border-radius: 99px; background: var(--p2); }
+.paybar.full i { background: var(--success); }
+
+/* Низ: чипи й кнопки зв'язку */
+.c-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 9px; border-top: 1px solid var(--line-soft); margin-top: auto; min-height: 40px; }
+.c-chips { display: flex; flex-wrap: wrap; gap: 5px; min-width: 0; }
+.chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--muted); background: var(--line-soft); padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
+.chip.late { color: var(--danger); background: color-mix(in srgb, var(--danger) 13%, var(--surface)); }
+.chip.soon, .chip.warn { color: var(--warning); background: color-mix(in srgb, var(--warning) 14%, var(--surface)); }
+.chip.cross { color: var(--violet); background: color-mix(in srgb, var(--violet) 13%, var(--surface)); }
+.c-acts { display: flex; gap: 6px; flex-shrink: 0; }
+.c-acts a { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--line-soft); color: var(--muted); font-size: 12px; transition: .14s; }
+.c-acts a:hover { background: var(--line); }
+.c-acts a.wa-btn { background: #25d366; color: #fff; }
+.c-acts a.wa-btn:hover { background: #1eb457; }
+/* Картка клієнта */
+.card.cl { flex-direction: row; align-items: center; gap: 12px; padding: 12px 14px; }
+.card.cl .cl-arrow { color: var(--muted2); font-size: 12px; }
 
 /* Панель-підсумок угорі «Замовлень» */
 .sum-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
@@ -126,19 +151,15 @@ header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px
 /* Підпис внизу застосунку */
 .credit { text-align: center; font-size: 11.5px; color: var(--muted2); padding: 28px 0 8px; letter-spacing: .02em; }
 .credit b { color: var(--muted); font-weight: 700; }
-.c-foot a { width: 36px; height: 36px; border-radius: var(--r-xs); display: grid; place-items: center; background: var(--line-soft); color: var(--muted); transition: .14s; }
-.c-foot a:hover { background: var(--line); }
-.debt-tag { font-size: 12px; font-weight: 700; padding: 5px 9px; border-radius: var(--r-xs); font-variant-numeric: tabular-nums; }
-.debt-tag.red { background: #fbecef; color: var(--danger); }
-.debt-tag.green { background: #e8f6f1; color: var(--success); }
+.debt-tag { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.debt-tag.red { color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, var(--surface)); }
+.debt-tag.green { color: var(--success); background: color-mix(in srgb, var(--success) 13%, var(--surface)); }
 
 #listC { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
 #listNew { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
 .qbox { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; box-shadow: var(--sh-1); margin-bottom: 6px; }
 .qbox .qh { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
 .qbox .qs { font-size: 12.5px; color: var(--muted); margin-bottom: 16px; }
-#listC .card strong { font-size: 14.5px; font-weight: 700; }
-#listC .card small { color: var(--muted); font-size: 12.5px; }
 
 /* ============ ВХІД ============ */
 #authScreen { position: fixed; inset: 0; background: var(--p); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 24px; }
@@ -251,8 +272,6 @@ select { cursor: pointer; }
 .fab-add:hover { transform: translateY(-2px); }
 .fab-add:active { transform: scale(.92) rotate(90deg); }
 /* WhatsApp-кнопка на картці */
-.c-foot a.wa-btn { background: #25d366; color: #fff; }
-.c-foot a.wa-btn:hover { background: #1eb457; }
 .btn-s { background: var(--txt); color: #fff; width: 100%; height: 50px; border: none; border-radius: var(--r-sm); font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 8px; font-family: inherit; transition: .15s; }
 .btn-s:hover { background: var(--p2); }
 .btn-alt { background: var(--surface); color: var(--txt); border: 1px solid var(--line); width: 100%; height: 46px; border-radius: var(--r-sm); font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 8px; font-family: inherit; transition: .15s; display: none; }
@@ -261,11 +280,6 @@ select { cursor: pointer; }
 .empty { text-align: center; padding: 48px 20px; color: var(--muted2); grid-column: 1/-1; }
 .empty i { font-size: 32px; opacity: .4; display: block; margin-bottom: 12px; }
 
-/* Ледь помітна зебра на телефоні — лише для звичайних карток; кольорові стани не чіпаємо */
-@media (max-width: 640px) {
-  #list .card:nth-child(even):not(.st-est):not(.rem):not(.st-new) { background: #f6f8fb; }
-  #listC .card:nth-child(even) { background: #f6f8fb; }
-}
 
 /* ============ КОМПАКТНІШЕ НА ТЕЛЕФОНІ ============ */
 /* Тільки Galaxy S25 (базова) і подібні за шириною екрана — НЕ Ultra, НЕ інші телефони */
@@ -285,13 +299,13 @@ select { cursor: pointer; }
   .nav-s { padding: 8px 12px; gap: 6px; top: calc(52px + env(safe-area-inset-top,0px)); }
   .s-t { height: 32px; padding: 0 11px; font-size: 12px; }
   .container { padding: 12px 12px 14px; }
-  #list { gap: 10px; }
-  .card { padding: 12px 13px; }
+  #list, #listNew, #listC { gap: 10px; }
+  .card { padding: 11px 12px 9px; gap: 9px; border-radius: 15px; }
+  .avatar { width: 32px; height: 32px; border-radius: 10px; font-size: 11.5px; }
   .c-name { font-size: 14px; }
-  .val { font-size: 17px; }
-  .c-steps-inline { margin: 11px 0; gap: 12px; }
-  .c-foot { padding-top: 11px; }
-  .c-foot a { width: 34px; height: 34px; }
+  .val { font-size: 16px; }
+  .c-foot { padding-top: 8px; min-height: 38px; }
+  .c-acts a { width: 30px; height: 30px; }
   /* поля: шрифт лишається 16px, менша висота */
   input, select, textarea { padding: 10px 12px; }
   .mbox { padding: 20px 16px 24px; }
@@ -358,7 +372,6 @@ body.sel-mode .fab-add { display: none; }
 .bulk-x { background: var(--line-soft); color: var(--txt); }
 @media (min-width: 900px) { .bulk-bar { left: var(--side-w); bottom: 0; } }
 
-.low-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; color: var(--warning); background: color-mix(in srgb, var(--warning) 14%, var(--surface)); padding: 3px 9px; border-radius: 999px; margin-top: 6px; }
 
 /* Поля, що рахуються (замість інлайн-кольорів — щоб працювала темна тема) */
 input.ro-yel { background: #fdf8e3; color: #7a5c00; font-weight: 700; }
@@ -414,23 +427,14 @@ html.dark .s-t.active, html.dark .seg button.on { color: #0b101c; }
 html.dark .s-t.active .chip-n { background: rgba(11,16,28,.16); color: #0b101c; }
 html.dark .btn-s { color: #0b101c; }
 html.dark .btn-s:hover { color: #fff; }
-html.dark .card.st-new { background: #2a1626; }
-html.dark .card.st-new.st-cross { background: #211c3b; }
-html.dark .card.st-est { background: #2c1a20; }
-html.dark .card.rem { background: #351b23; }
-html.dark .cross-tag { background: #2c2452; }
-html.dark .debt-tag.red, html.dark .cal-rel.late { background: #3b1c26; }
-html.dark .debt-tag.green { background: #133428; }
+html.dark { --sh-card: 0 1px 2px rgba(0,0,0,.4), 0 14px 30px -16px rgba(0,0,0,.65); --sh-card-h: 0 2px 4px rgba(0,0,0,.45), 0 22px 40px -16px rgba(0,0,0,.8); }
+html.dark .avatar { background: hsl(var(--h, 220) 38% 24%); color: hsl(var(--h, 220) 85% 82%); }
+html.dark .cal-rel.late { background: #3b1c26; }
 html.dark .bottom-nav { background: rgba(21,28,46,.94); }
-html.dark .c-steps-inline { color: #3b4660; }
 html.dark input.ro-yel { background: #3a3316; color: #f1d36a; }
 html.dark input.ro-grn { background: #133428; color: #6fe0b5; }
 html.dark input.ro-blu { background: #1d2650; color: #a9b9ff; }
 html.dark .st-main { border: 1px solid var(--line); }
-@media (max-width: 640px) {
-  html.dark #list .card:nth-child(even):not(.st-est):not(.rem):not(.st-new) { background: #19213a; }
-  html.dark #listC .card:nth-child(even) { background: #19213a; }
-}
 </style>
 </head>
 <body>
@@ -729,6 +733,34 @@ const orderTs = o => {
 const fmtDate = ts => new Date(ts).toLocaleDateString('uk-UA');
 const fmtDateTime = ts => new Date(ts).toLocaleString('uk-UA', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
 
+// ---- Елементи картки ----
+// Коротка дата: «08.10», а для іншого року — «08.10.25»
+const fmtShort = ts => { const d = new Date(ts), y = d.getFullYear() !== new Date().getFullYear(); return d.toLocaleDateString('uk-UA', y ? { day:'2-digit', month:'2-digit', year:'2-digit' } : { day:'2-digit', month:'2-digit' }); };
+// Аватар з ініціалами; колір стабільно залежить від імені
+const hueOf = nm => { let h = 0; for (const c of String(nm || '')) h = (h * 31 + c.charCodeAt(0)) % 360; return h; };
+// Ініціали — лише з літер (цифри й символи пропускаємо)
+const initialsOf = nm => { const w = String(nm || '').split(/\s+/).map(x => (x.match(/\p{L}/u) || [''])[0]).filter(Boolean); return ((w[0] || '?') + (w[1] || '')).toUpperCase(); };
+const avatarHtml = nm => /\p{L}/u.test(String(nm || ''))
+  ? `<span class="avatar" style="--h:${hueOf(nm)}">${esc(initialsOf(nm))}</span>`
+  : `<span class="avatar" style="--h:215"><i class="fa fa-user"></i></span>`;
+// Етапи виконання
+const STEPS = [['check_measured', 'Замір'], ['check_ordered', 'Завод'], ['check_storage', 'Склад'], ['check_installed', 'Монтаж']];
+const PROG_STATUSES = ['Підтверджено', 'Перевірка', 'В роботі', 'На складі', 'Виконано'];
+const showProg = o => STEPS.some(([k]) => o[k]) || PROG_STATUSES.includes(o.status);
+const progHtml = o => `<div class="c-prog">${STEPS.map(([k, l]) => `<div class="ps ${o[k] ? 'on' : ''}"><i></i><span>${l}</span></div>`).join('')}</div>`;
+// Чип дедлайну: червоний, якщо прострочено; жовтий, якщо ≤ 3 днів
+function deadlineChip(o) {
+  if (!o.deadline) return '';
+  const t = Date.parse(o.deadline + 'T00:00:00'); if (isNaN(t)) return '';
+  const open = o.status !== 'Виконано' && o.status !== 'Скасовано';
+  const left = Math.round((t - new Date().setHours(0, 0, 0, 0)) / 864e5);
+  const cls = open && left < 0 ? 'late' : open && left <= 3 ? 'soon' : '';
+  const hint = open && left < 0 ? `Прострочено на ${-left} дн.` : open && left === 0 ? 'Дедлайн сьогодні' : 'Дедлайн';
+  return `<span class="chip ${cls}" title="${hint}"><i class="fa fa-flag"></i> ${fmtShort(t)}</span>`;
+}
+// Кнопки зв'язку
+const actsHtml = wa => wa ? `<a href="tel:+${wa}" onclick="event.stopPropagation()" title="Подзвонити"><i class="fa fa-phone-alt"></i></a><a class="wa-btn" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : '';
+
 // Поле автоматично росте за текстом
 const autoGrow = el => { el.style.height = 'auto'; if (el.scrollHeight) el.style.height = el.scrollHeight + 'px'; };
 const growAll = () => document.querySelectorAll('textarea').forEach(autoGrow);
@@ -1023,30 +1055,41 @@ const render = () => {
     const rem = isRem(o);
     const nFiles = parseFiles(o.file_url).length;
     const wa = waNum(orderPhone(o));
-    let stCl = o.status==='Виконано'?'st-done':o.status==='Скасовано'?'st-cancelled':o.status==='В роботі'?'st-inwork':o.status==='На складі'?'st-storage':o.status==='Перевірка'?'st-verify':o.status==='Кошторис'?'st-est':o.status==='Нова'?'st-new':'';
+    let stCl = o.status==='Виконано'?'st-done':o.status==='Скасовано'?'st-cancelled':o.status==='В роботі'?'st-inwork':o.status==='На складі'?'st-storage':o.status==='Перевірка'?'st-verify':o.status==='Кошторис'?'st-est':o.status==='Нова'?'st-new':o.status==='Підтверджено'?'st-conf':'';
     const sel = selMode && selIds.has(o.id);
     const mk = markupOf(o), thr = LOW_MK();
     const low = !isMgr() && thr > 0 && mk !== null && mk < thr && o.status !== 'Скасовано' && o.status !== 'Нова';
+    const pct = ttc > 0 ? Math.max(0, Math.min(100, Math.round(paid / ttc * 100))) : 0;
+    const payOn = ttc > 0 && PROG_STATUSES.includes(o.status);   // борг має сенс лише після підтвердження (кошторис/нова/скасовано — без нього)
+    const ts = orderTs(o);
+    const chips = [
+      ts ? `<span class="chip" title="Створено ${fmtDateTime(ts)}"><i class="fa fa-calendar-day"></i> ${fmtShort(ts)}</span>` : '',
+      deadlineChip(o),
+      nFiles ? `<span class="chip"><i class="fa fa-paperclip"></i> ${nFiles}</span>` : '',
+      low ? `<span class="chip warn" title="Націнка нижча за поріг ${thr}%"><i class="fa fa-triangle-exclamation"></i> ${Math.round(mk)}%</span>` : ''
+    ].join('');
 
     return `<div class="card ${over?'over':''} ${rem?'rem':''} ${stCl} ${sel?'sel':''}" data-id="${esc(o.id)}" onclick="cardClick(this)">
-        <div class="c-row-1"><div class="c-lead">${selMode ? '<span class="sel-box"></span>' : ''}<div class="c-name">${esc(o.client||'Без імені')}</div>${rem ? '<span title="Передзвонити">⏰</span>' : ''}</div><div class="status-badge">${esc(o.status)}</div></div>
-        <div class="c-row-2">${esc(o.factory)}${o.factory2 ? ' + '+esc(o.factory2) : ''} · ${esc(o.product||'---')}</div>
-        ${low ? `<div class="low-tag"><i class="fa fa-triangle-exclamation"></i> Низька націнка ${Math.round(mk)}%</div>` : ''}
-        ${orderTs(o) ? `<div class="c-date"><i class="fa fa-calendar-day"></i> ${fmtDate(orderTs(o))}</div>` : ''}
-        <div class="c-steps-inline">
-          <i class="fa fa-ruler-combined ${o.check_measured?'active':''}" title="Замір"></i>
-          <i class="fa fa-file-signature ${o.check_ordered?'active':''}" title="Завод"></i>
-          <i class="fa fa-warehouse ${o.check_storage?'active':''}" title="Склад"></i>
-          <i class="fa fa-tools ${o.check_installed?'active':''}" title="Монтаж"></i>
-          ${nFiles ? `<span class="clip"><i class="fa fa-paperclip"></i>${nFiles}</span>` : ''}
+        <div class="c-top">
+          ${selMode ? '<span class="sel-box"></span>' : ''}
+          ${avatarHtml(o.client)}
+          <div class="c-id">
+            <div class="c-name"><span class="nm">${esc(o.client||'Без імені')}</span>${rem ? '<span title="Передзвонити">⏰</span>' : ''}</div>
+            <div class="c-sub">${esc(o.product||'—')} · ${esc(o.factory||'—')}${o.factory2 ? ' + '+esc(o.factory2) : ''}</div>
+          </div>
+          <div class="status-badge">${esc(o.status)}</div>
+        </div>
+        ${showProg(o) ? progHtml(o) : ''}
+        <div class="c-pay">
+          <div class="c-money">
+            <div class="val">${ttc > 0 ? fN(ttc) + '<small>€</small>' : '<span class="dash">Суму не вказано</span>'}</div>
+            ${payOn ? `<div class="debt-tag ${debt > 1 ? 'red' : 'green'}">${debt > 1 ? 'Борг ' + fN(debt) + ' €' : 'Сплачено'}</div>` : ''}
+          </div>
+          ${payOn ? `<div class="paybar ${pct >= 100 ? 'full' : ''}" title="Оплачено ${pct}%"><i style="width:${pct}%"></i></div>` : ''}
         </div>
         <div class="c-foot">
-          <div class="val">${fN(ttc)} €</div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            ${wa ? `<a href="tel:+${wa}" onclick="event.stopPropagation()" title="Подзвонити"><i class="fa fa-phone-alt"></i></a>
-            <a class="wa-btn" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : ''}
-            <div class="debt-tag ${debt > 1 ? 'red' : 'green'}">${debt > 1 ? fN(debt)+' €' : 'OK'}</div>
-          </div>
+          <div class="c-chips">${chips}</div>
+          <div class="c-acts">${actsHtml(wa)}</div>
         </div>
       </div>`}).join('');
 }
@@ -1139,15 +1182,21 @@ function renderNew() {
     const nFiles = parseFiles(o.file_url).length;
     const origin = crossOrigin(o);
     return `<div class="card st-new ${origin?'st-cross':''}" data-id="${esc(o.id)}" onclick="openO(this.dataset.id)">
-        <div class="c-row-1"><div class="c-lead"><div class="c-name">${esc(o.client||'Без імені')}</div></div><div class="status-badge">Нова</div></div>
-        <div class="c-row-2">${o.product ? '№ '+esc(o.product) : 'Без номера'} · очікує прорахунку${nFiles ? ' · 📎 '+nFiles : ''}</div>
-        ${origin ? `<div class="cross-tag"><i class="fa fa-right-left"></i> Від ${esc(origin)}</div>` : ''}
-        <div class="c-foot">
-          <div style="font-size:13px;color:var(--muted)">${esc(ph) || 'без телефону'}</div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            ${wa ? `<a href="tel:+${wa}" onclick="event.stopPropagation()" title="Подзвонити"><i class="fa fa-phone-alt"></i></a>
-            <a class="wa-btn" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : ''}
+        <div class="c-top">
+          ${avatarHtml(o.client)}
+          <div class="c-id">
+            <div class="c-name"><span class="nm">${esc(o.client||'Без імені')}</span></div>
+            <div class="c-sub">${o.product ? '№ ' + esc(o.product) : 'Без номера'} · очікує прорахунку</div>
           </div>
+          <div class="status-badge">Нова</div>
+        </div>
+        <div class="c-foot">
+          <div class="c-chips">
+            ${origin ? `<span class="chip cross"><i class="fa fa-right-left"></i> Від ${esc(origin)}</span>` : ''}
+            <span class="chip"><i class="fa fa-phone"></i> ${esc(ph) || 'без телефону'}</span>
+            ${nFiles ? `<span class="chip"><i class="fa fa-paperclip"></i> ${nFiles}</span>` : ''}
+          </div>
+          <div class="c-acts">${actsHtml(wa)}</div>
         </div>
       </div>`;
   }).join('');
@@ -1469,7 +1518,7 @@ function renderC() {
     return qd.length >= 3 && (c.phone||'').replace(/\D/g,'').includes(qd);
   });
   document.getElementById('listC').innerHTML = f.length
-    ? f.map(c=>`<div class="card" data-id="${esc(c.id)}" onclick="openCE(this.dataset.id)"><strong>${esc(c.name||'Без імені')}</strong><br><small>${esc(c.phone||'—')}</small></div>`).join('')
+    ? f.map(c=>`<div class="card cl" data-id="${esc(c.id)}" onclick="openCE(this.dataset.id)">${avatarHtml(c.name)}<div class="c-id"><div class="c-name"><span class="nm">${esc(c.name||'Без імені')}</span></div><div class="c-sub">${esc(c.phone||'—')}</div></div><i class="fa fa-chevron-right cl-arrow"></i></div>`).join('')
     : `<div class="empty"><i class="fa fa-user-slash"></i>Клієнтів не знайдено</div>`;
 }
 function openCE(id) {
