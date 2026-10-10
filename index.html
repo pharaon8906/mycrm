@@ -357,17 +357,24 @@ select { cursor: pointer; }
 .flt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
 .flt-grid .fg { margin-bottom: 0; }
 .flt-grid .wide { grid-column: 1 / -1; }
-@media (min-width: 900px) { .flt-grid { grid-template-columns: 1.4fr 1fr 1fr; } .flt-grid .wide { grid-column: auto; } }
+@media (min-width: 900px) { .flt-grid { grid-template-columns: repeat(4, 1fr); } .flt-grid .wide { grid-column: auto; } }
+/* Мітка відповідального: колір залежить від імені */
+.chip.as { color: hsl(var(--h, 220) 55% 32%); background: hsl(var(--h, 220) 80% 93%); }
+html.dark .chip.as { color: hsl(var(--h, 220) 85% 82%); background: hsl(var(--h, 220) 38% 24%); }
+#meSeg { flex-wrap: wrap; } #meSeg button { flex: 1 1 auto; padding: 0 12px; }
+.file-chip span.avatar { flex: 0 0 auto; color: hsl(var(--h, 220) 55% 32%); cursor: default; }
+html.dark .file-chip span.avatar { color: hsl(var(--h, 220) 85% 82%); }
 
 .card.sel { border-color: var(--p2); box-shadow: 0 0 0 2px var(--p2), var(--sh-1); }
 .sel-box { flex-shrink: 0; width: 22px; height: 22px; border-radius: 7px; border: 2px solid var(--muted2); background: var(--surface); display: grid; place-items: center; }
 .card.sel .sel-box { background: var(--p2); border-color: var(--p2); }
 .card.sel .sel-box::after { content: "✓"; color: #fff; font-size: 14px; font-weight: 800; line-height: 1; }
 body.sel-mode .fab-add { display: none; }
-.bulk-bar { position: fixed; left: 0; right: 0; bottom: calc(64px + env(safe-area-inset-bottom, 0px)); z-index: 1100; display: none; align-items: center; gap: 8px; padding: 10px 12px; background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -8px 24px -10px rgba(0,0,0,.3); }
+.bulk-bar { position: fixed; left: 0; right: 0; bottom: calc(64px + env(safe-area-inset-bottom, 0px)); z-index: 1100; display: none; flex-direction: column; align-items: stretch; gap: 8px; padding: 10px 12px; background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -8px 24px -10px rgba(0,0,0,.3); }
+.bulk-row { display: flex; align-items: center; gap: 8px; }
 .bulk-bar select { flex: 1; min-width: 0; }
 .bulk-bar b { white-space: nowrap; font-size: 13px; }
-.bulk-bar button { height: 46px; border: none; border-radius: var(--r-sm); padding: 0 14px; font-weight: 600; cursor: pointer; font-family: inherit; font-size: 14px; }
+.bulk-bar button { height: 42px; border: none; border-radius: var(--r-sm); padding: 0 14px; font-weight: 600; cursor: pointer; font-family: inherit; font-size: 14px; white-space: nowrap; }
 .bulk-ok { background: var(--p2); color: #fff; }
 .bulk-x { background: var(--line-soft); color: var(--txt); }
 @media (min-width: 900px) { .bulk-bar { left: var(--side-w); bottom: 0; } }
@@ -466,6 +473,7 @@ html.dark .st-main { border: 1px solid var(--line); }
 <div class="nav-s" id="navS" style="display:none">
   <div class="s-t active" data-s="Усі" onclick="flt('Усі',this)">Усі</div>
   <div class="s-t" data-s="Нова" onclick="flt('Нова',this)">🆕 Нові</div>
+  <div class="s-t" data-s="Мої" onclick="flt('Мої',this)" style="display:none">👤 Мої</div>
   <div class="s-t" data-s="Нагадування" onclick="flt('Нагадування',this)">⏰ Дзвінки</div>
   <div class="s-t" data-s="Боржники" onclick="flt('Боржники',this)">💸 Боржники</div>
   <div class="s-t" data-s="Кошторис" onclick="flt('Кошторис',this)">📑 Кошторис</div>
@@ -497,6 +505,7 @@ html.dark .st-main { border: 1px solid var(--line); }
     <div class="flt-panel" id="fltPanel">
       <div class="flt-grid">
         <div class="fg wide"><label>Фабрика</label><select id="fltFac" onchange="render()"><option value="">Усі фабрики</option></select></div>
+        <div class="fg wide"><label>Відповідальний</label><select id="fltAs" onchange="render()"></select></div>
         <div class="fg"><label>Створено від</label><input type="date" id="fltFrom" onchange="render()"></div>
         <div class="fg"><label>Створено до</label><input type="date" id="fltTo" onchange="render()"></div>
       </div>
@@ -525,6 +534,7 @@ html.dark .st-main { border: 1px solid var(--line); }
         <div class="fg"><label>Телефон</label><input id="qnPhone" type="tel"></div>
         <div class="fg"><label>Номер замовлення</label><input id="qnNum" placeholder="напр. WEB/26/..."></div>
       </div>
+      <div class="fg"><label>Відповідальний (хто робить прорахунок)</label><select id="qnAs"></select></div>
       <div class="fg"><label>Нотатки</label><textarea id="qnNotes" rows="2" placeholder="Що хоче клієнт, деталі звернення..."></textarea></div>
       <div class="fg"><label>Файли (фото, замір, документ)</label>
         <div id="qnFileList" class="file-list"></div>
@@ -554,13 +564,18 @@ html.dark .st-main { border: 1px solid var(--line); }
 </div>
 
 <div class="bulk-bar" id="bulkBar">
-  <b>Вибрано: <span id="bulkCnt">0</span></b>
-  <select id="bulkSt">
-    <option>Нова</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option>
-    <option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option>
-  </select>
-  <button class="bulk-ok" onclick="applyBulk()">Застосувати</button>
-  <button class="bulk-x" onclick="toggleSel(false)" title="Скасувати вибір">✕</button>
+  <div class="bulk-row"><b>Вибрано: <span id="bulkCnt">0</span></b><span style="flex:1"></span><button class="bulk-x" onclick="toggleSel(false)" title="Скасувати вибір">✕</button></div>
+  <div class="bulk-row">
+    <select id="bulkSt">
+      <option>Нова</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option>
+      <option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option>
+    </select>
+    <button class="bulk-ok" onclick="applyBulk()">Змінити статус</button>
+  </div>
+  <div class="bulk-row">
+    <select id="bulkAs"></select>
+    <button class="bulk-ok" onclick="applyBulkAs()">Призначити</button>
+  </div>
 </div>
 
 <button class="fab-add" id="fabBtn" style="display:none" onclick="fab()"><i class="fa fa-plus"></i></button>
@@ -575,6 +590,7 @@ html.dark .st-main { border: 1px solid var(--line); }
     <div class="fg"><label>Клієнт</label><input id="fCl" list="dlC"><datalist id="dlC"></datalist></div>
     <div class="grid"><div class="fg"><label>Номер замовлення</label><input id="fPr" placeholder="напр. WEB/26/0947426"></div><div class="fg"><label>Фабрика 1</label><select id="fFa"></select></div></div>
     <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan()"><option>Нова</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
+    <div class="fg"><label>Відповідальний</label><select id="fAs"></select></div>
     <div id="canB" class="fg" style="display:none"><label style="color:var(--danger)">Причина скасування</label><textarea id="fCan" rows="2"></textarea></div>
 
     <div class="sec">Фінанси</div>
@@ -661,6 +677,16 @@ html.dark .st-main { border: 1px solid var(--line); }
         <button type="button" onclick="stepScale(-1)">−</button>
         <button type="button" onclick="stepScale(1)">+</button>
         <button type="button" onclick="resetScale()">Авто</button>
+      </div>
+    </div>
+
+    <div class="sec">Команда</div>
+    <div class="fg"><label>Я працюю як (для фільтра «Мої»)</label><div class="seg" id="meSeg" style="margin-bottom:0"></div></div>
+    <div class="fg fin-only"><label>Співробітники <small id="teamNote" style="color:var(--warning);font-weight:500"></small></label>
+      <div id="teamList" class="file-list"></div>
+      <div class="pay-add" style="grid-template-columns:1fr auto">
+        <input id="teamNew" placeholder="Імʼя нового співробітника" onkeydown="if(event.key==='Enter'){event.preventDefault();addMember()}">
+        <button type="button" onclick="addMember()" title="Додати"><i class="fa fa-plus"></i></button>
       </div>
     </div>
 
@@ -798,13 +824,90 @@ const phoneOf = nm => (clients.find(c => c.name === nm) || {}).phone || '';
 const clientOf = o => (o.client_id && clients.find(c => c.id === o.client_id)) || clients.find(c => (c.name || '') === (o.client || '')) || null;
 const orderPhone = o => o.phone || (clientOf(o) || {}).phone || '';   // телефон із заявки або з картки клієнта
 
-// Запис замовлення. Якщо в базі ще немає колонки client_id (SQL не виконано) — повторюємо без неї, щоб збереження не ламалось
+// Запис замовлення. Якщо в базі ще немає нової колонки (client_id, assignee — SQL не виконано), повторюємо без неї, щоб збереження не ламалось
 async function writeOrder(o, mode) {
   const run = row => mode === 'insert' ? _sb.from('orders').insert(row) : _sb.from('orders').upsert(row);
-  let r = await run(o);
-  if (r.error && /client_id/.test(r.error.message || '')) { const o2 = { ...o }; delete o2.client_id; r = await run(o2); }
+  const row = { ...o }, dropped = [];
+  let r = await run(row);
+  for (let i = 0; i < 3 && r.error; i++) {
+    const m = /\b(client_id|assignee)\b/.exec(r.error.message || '');
+    if (!m || !(m[1] in row)) break;
+    dropped.push(m[1]); delete row[m[1]]; r = await run(row);
+  }
+  if (!r.error && dropped.includes('assignee') && o.assignee) alert('Замовлення збережено, але відповідального НЕ збережено: у базі немає колонки assignee. Виконайте SQL з інструкції.');
   return r;
 }
+
+/* ================= КОМАНДА (відповідальні) ================= */
+const DEFAULT_TEAM = ['Олексій', 'Денис', 'Марія', 'Надя'];
+const NONE = '__none';                          // значення фільтра «без відповідального»
+let TEAM = DEFAULT_TEAM.slice(), TEAM_DB = false, qnAsInit = false;
+const ME = () => LS.get('crm_me', '');          // хто працює на цьому пристрої (для фільтра «Мої»)
+const isOpen = o => o.status !== 'Виконано' && o.status !== 'Скасовано';
+
+// Вибір значення в списку; якщо людини вже немає в команді — додаємо її як варіант, щоб значення не загубилось
+function setAs(id, val) {
+  const el = document.getElementById(id); if (!el) return;
+  if (val && val !== NONE && !TEAM.includes(val) && ![...el.options].some(x => x.value === val)) {
+    const op = document.createElement('option'); op.value = val; op.textContent = val; el.appendChild(op);
+  }
+  el.value = val || '';
+}
+function fillSel(id, first) {
+  const el = document.getElementById(id); if (!el) return;
+  const cur = el.value, names = [...TEAM];
+  if (cur && cur !== NONE && !names.includes(cur)) names.push(cur);
+  el.innerHTML = first + names.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  el.value = cur;
+}
+function fillTeam() {
+  fillSel('fAs', '<option value="">— не призначено —</option>');
+  fillSel('qnAs', '<option value="">— не призначено —</option>');
+  fillSel('fltAs', '<option value="">Усі</option><option value="__none">Без відповідального</option>');
+  fillSel('bulkAs', '<option value="">— зняти відповідального —</option>');
+  renderTeamSettings();
+}
+async function loadTeam() {
+  let list = null;
+  try {
+    const r = await _sb.from('team_members').select('name').eq('company', co).order('id');
+    if (!r.error && r.data) { list = r.data.map(x => x.name); TEAM_DB = true; }
+  } catch (e) {}
+  if (!list) {      // таблиці ще немає — працюємо локально (лише на цьому пристрої)
+    TEAM_DB = false;
+    try { list = JSON.parse(LS.get('crm_team_' + co, 'null')); } catch (e) {}
+    if (!Array.isArray(list)) list = DEFAULT_TEAM.slice();
+  }
+  TEAM = list; fillTeam();
+  if (!qnAsInit) { setAs('qnAs', ME()); qnAsInit = true; }
+}
+async function addMember() {
+  const inp = document.getElementById('teamNew'), name = inp.value.trim();
+  if (!name) return;
+  if (TEAM.some(t => t.toLowerCase() === name.toLowerCase())) return alert('Такий співробітник уже є');
+  if (TEAM_DB) { const { error } = await _sb.from('team_members').insert({ company: co, name }); if (error) return alert('Помилка: ' + error.message); }
+  else LS.set('crm_team_' + co, JSON.stringify([...TEAM, name]));
+  inp.value = ''; await loadTeam();
+}
+async function removeMember(i) {
+  const name = TEAM[i]; if (name === undefined) return;
+  if (!confirm(`Прибрати «${name}» зі списку? Уже призначені йому замовлення збережуть це імʼя.`)) return;
+  if (TEAM_DB) { const { error } = await _sb.from('team_members').delete().eq('company', co).eq('name', name); if (error) return alert('Помилка: ' + error.message); }
+  else LS.set('crm_team_' + co, JSON.stringify(TEAM.filter((_, k) => k !== i)));
+  if (ME() === name) LS.del('crm_me');
+  await loadTeam(); render();
+}
+function setMe(v) { if (v) LS.set('crm_me', v); else LS.del('crm_me'); renderTeamSettings(); render(); }
+function renderTeamSettings() {
+  const box = document.getElementById('teamList'); if (!box) return;
+  box.innerHTML = TEAM.length
+    ? TEAM.map((t, i) => `<div class="file-chip">${avatarHtml(t)}<span style="color:var(--txt);cursor:default">${esc(t)}</span><i class="fa fa-trash" data-i="${i}" onclick="removeMember(+this.dataset.i)" title="Прибрати"></i></div>`).join('')
+    : '<small style="color:var(--muted2)">Список порожній — додайте співробітників</small>';
+  document.getElementById('teamNote').textContent = TEAM_DB ? '' : '(зберігається лише на цьому пристрої: виконайте SQL)';
+  document.getElementById('meSeg').innerHTML = ['', ...TEAM].map(t => `<button type="button" class="${ME() === t ? 'on' : ''}" data-n="${esc(t)}" onclick="setMe(this.dataset.n)">${t ? esc(t) : 'Ніхто'}</button>`).join('');
+}
+// Мітка відповідального на картці
+const asChip = o => o.assignee ? `<span class="chip as" style="--h:${hueOf(o.assignee)}" title="Відповідальний"><i class="fa fa-user"></i> ${esc(o.assignee)}</span>` : '';
 
 // Націнка замовлення, % (від ціни фабрик); null — якщо собівартість не вказана
 const markupOf = o => { const c = orderCost(o), s = n(o.sale_price_ht); return c > 0 && s > 0 ? (s - c) / c * 100 : null; };
@@ -986,6 +1089,7 @@ async function sync() {
   orders = oData || [];
   const { data: cData } = await _sb.from('clients').select('*').eq('company', co);
   clients = cData || [];
+  await loadTeam();
   selIds.forEach(id => { if (!orders.some(o => o.id === id)) selIds.delete(id); });
   updateDl(); render(); updateBulk();
   if (curT==='stats') renderStats();
@@ -1017,7 +1121,8 @@ function updateChips() {
   const calls = orders.filter(isRem).length;
   document.querySelectorAll('.s-t').forEach(el => {
     const s = el.dataset.s;
-    const v = s==='Усі' ? orders.length : s==='Боржники' ? debtors : s==='Нагадування' ? calls : orders.filter(o=>o.status===s).length;
+    if (s === 'Мої') el.style.display = ME() ? '' : 'none';   // показуємо, лише якщо в налаштуваннях вибрано «Я працюю як»
+    const v = s==='Усі' ? orders.length : s==='Боржники' ? debtors : s==='Нагадування' ? calls : s==='Мої' ? orders.filter(o => ME() && o.assignee === ME() && isOpen(o)).length : orders.filter(o=>o.status===s).length;
     let b = el.querySelector('.chip-n');
     if (!b) { b = document.createElement('span'); b.className = 'chip-n'; el.appendChild(b); }
     b.textContent = v;
@@ -1031,16 +1136,19 @@ const render = () => {
   const sort = document.getElementById('sortSel').value;
   const list = document.getElementById('list'); const today = new Date().toISOString().split('T')[0];
 
-  let f = !match ? orders.slice() : orders.filter(o => match([o.client, (clientOf(o) || {}).name, o.product, o.factory, o.factory2], [orderPhone(o), o.client]));
+  let f = !match ? orders.slice() : orders.filter(o => match([o.client, (clientOf(o) || {}).name, o.product, o.factory, o.factory2, o.assignee], [orderPhone(o), o.client]));
 
   if (curS === 'Боржники') f = f.filter(isDebtor);
   else if (curS === 'Нагадування') f = f.filter(isRem);
+  else if (curS === 'Мої') f = ME() ? f.filter(o => o.assignee === ME() && isOpen(o)) : f;
   else if (curS!=='Усі') f = f.filter(o => o.status === curS);
 
   // Додаткові фільтри: фабрика та діапазон дат створення
   const fac = document.getElementById('fltFac').value;
   const dFrom = document.getElementById('fltFrom').value, dTo = document.getElementById('fltTo').value;
   if (fac) f = f.filter(o => o.factory === fac || o.factory2 === fac);
+  const asF = document.getElementById('fltAs').value;
+  if (asF === NONE) f = f.filter(o => !o.assignee); else if (asF) f = f.filter(o => o.assignee === asF);
   if (dFrom) { const t0 = Date.parse(dFrom + 'T00:00:00'); f = f.filter(o => orderTs(o) >= t0); }
   if (dTo)   { const t1 = Date.parse(dTo + 'T23:59:59');   f = f.filter(o => orderTs(o) <= t1); }
   updateFltBtn();
@@ -1073,6 +1181,7 @@ const render = () => {
     const payOn = ttc > 0 && PROG_STATUSES.includes(o.status);   // борг має сенс лише після підтвердження (кошторис/нова/скасовано — без нього)
     const ts = orderTs(o);
     const chips = [
+      asChip(o),
       ts ? `<span class="chip" title="Створено ${fmtDateTime(ts)}"><i class="fa fa-calendar-day"></i> ${fmtShort(ts)}</span>` : '',
       deadlineChip(o),
       nFiles ? `<span class="chip"><i class="fa fa-paperclip"></i> ${nFiles}</span>` : '',
@@ -1130,7 +1239,7 @@ function renderCal() {
       const isRem = t === 'rem';
       return `<div class="cal-item" data-id="${esc(o.id)}" onclick="openO(this.dataset.id)">
         <div class="ci" style="background:${isRem ? 'var(--danger)' : 'var(--p2)'}"><i class="fa ${isRem ? 'fa-phone' : 'fa-screwdriver-wrench'}"></i></div>
-        <div><div class="cn">${esc(o.client||'Без імені')}</div><div class="cs">${isRem ? 'Передзвонити' : 'Дедлайн'} · ${esc(o.product||'---')} · ${esc(o.status)}</div></div>
+        <div><div class="cn">${esc(o.client||'Без імені')}</div><div class="cs">${isRem ? 'Передзвонити' : 'Дедлайн'} · ${esc(o.product||'---')} · ${esc(o.status)}${o.assignee ? ' · ' + esc(o.assignee) : ''}</div></div>
         <div class="cv">${fN(o.total_ttc)} €</div>
       </div>`;
     }).join('');
@@ -1202,6 +1311,7 @@ function renderNew() {
         </div>
         <div class="c-foot">
           <div class="c-chips">
+            ${asChip(o)}
             ${origin ? `<span class="chip cross"><i class="fa fa-right-left"></i> Від ${esc(origin)}</span>` : ''}
             <span class="chip"><i class="fa fa-phone"></i> ${esc(ph) || 'без телефону'}</span>
             ${nFiles ? `<span class="chip"><i class="fa fa-paperclip"></i> ${nFiles}</span>` : ''}
@@ -1236,7 +1346,7 @@ async function newRequest() {
 
   // телефон зберігаємо прямо в заявці (щоб приймаюча компанія бачила його)
   const noteVal = (cross ? `↪ Заявка від ${CO_NAME[co]}\n` : '') + document.getElementById('qnNotes').value;
-  const o = { id:'NEW'+Date.now(), created_at:new Date().toISOString(), company:target, client:name, client_id:clientId, product:num, phone, factory:FACTORIES[0], status:'Нова',
+  const o = { id:'NEW'+Date.now(), created_at:new Date().toISOString(), company:target, client:name, client_id:clientId, product:num, phone, factory:FACTORIES[0], status:'Нова', assignee: document.getElementById('qnAs').value || null,
               notes: noteVal, file_url: JSON.stringify(qnFiles) };
   // insert (не upsert!): це завжди новий унікальний запис; upsert додатково перевіряє
   // USING-частину RLS-політики через ON CONFLICT DO UPDATE і блокує крос-компанійні заявки
@@ -1246,6 +1356,7 @@ async function newRequest() {
 
   ['qnClient','qnPhone','qnNum','qnNotes'].forEach(i => document.getElementById(i).value = '');
   LS.del('crm_draft_qn_' + co);
+  setAs('qnAs', ME());
   autoGrow(document.getElementById('qnNotes'));
   qnFiles = []; renderQnFiles();
   await sync(); renderNew();
@@ -1324,6 +1435,7 @@ function renderStats() {
     </div>
     <h4 class="st-h"><span>Замовлення за статусами</span>${mgr ? '' : '<button class="btn-ghost" onclick="exportCSV()"><i class="fa fa-file-export"></i> Експорт CSV</button>'}</h4>
     <div class="cnt-grid">${cHtml}</div>
+    ${teamStats(src, mgr)}
     ${mgr ? '' : `
     <h4 class="st-h">Прибуток по місяцях</h4>
     <div class="chart-box">${monthlyChart()}<div class="chart-note">Лише виконані замовлення; місяць — за датою створення замовлення.</div></div>
@@ -1331,6 +1443,24 @@ function renderStats() {
     <div class="chart-box">${factoryBars(sold)}<div class="chart-note">Скільки вже закуплено у кожної фабрики (активні й виконані замовлення за обраний період).</div></div>
     <h4 class="st-h">Борг по фабриках (в роботі)</h4>
     <div class="st-grid">${fHtml}</div>`}`;
+}
+
+// Підсумок по співробітниках: скільки чекає, у роботі, виконано. Прибуток бачить лише власник
+function teamStats(src, mgr) {
+  const by = {}; src.forEach(o => { (by[o.assignee || ''] = by[o.assignee || ''] || []).push(o); });
+  const names = [...TEAM, ...Object.keys(by).filter(k => k && !TEAM.includes(k))];
+  if (by['']) names.push('');
+  const ACT = ['Підтверджено', 'Перевірка', 'В роботі', 'На складі'];
+  const rows = names.map(nm => {
+    const g = by[nm] || []; if (!g.length) return '';
+    const wait = g.filter(o => o.status === 'Нова' || o.status === 'Кошторис').length;
+    const act = g.filter(o => ACT.includes(o.status));
+    const dn = g.filter(o => o.status === 'Виконано');
+    const rev = [...act, ...dn].reduce((s, o) => s + n(o.total_ttc), 0);
+    const pr = dn.reduce((s, o) => s + n(o.sale_price_ht) - orderCost(o) + n(o.install_cost) + n(o.delivery), 0);
+    return `<div class="st-box" data-n="${esc(nm)}" onclick="goAs(this.dataset.n)"><b style="font-size:15px;display:flex;align-items:center;gap:8px">${nm ? avatarHtml(nm) : ''}${nm ? esc(nm) : 'Без відповідального'}</b><small>${wait} чекають · ${act.length} в роботі · ${dn.length} виконано</small><span>Обіг: ${fN(rev)} €${mgr ? '' : ' · Прибуток: ' + fN(pr) + ' €'}</span></div>`;
+  }).join('');
+  return rows ? `<h4 class="st-h">По співробітниках</h4><div class="st-grid">${rows}</div>` : '';
 }
 
 // Стовпчики: прибуток виконаних замовлень за останні 6 місяців
@@ -1371,8 +1501,8 @@ function exportCSV() {
   if (isMgr()) return;   // експорт містить собівартість
   const src = orders.filter(inPeriod);
   if (!src.length) return alert('Немає даних за обраний період');
-  const cols = ['client','product','factory','cost_price','factory_prepay','factory2','cost_price2','factory_prepay2','status','deadline','sale_price_ht','tva_rate','total_ttc','install_cost','delivery','paid_amount','notes'];
-  const head = ['Клієнт','Номер','Фабрика 1','Ціна фабрики 1','Передплата 1','Фабрика 2','Ціна фабрики 2','Передплата 2','Статус','Дедлайн','Ціна HT','TVA %','Сума TTC','Монтаж','Доставка','Оплачено','Нотатки'];
+  const cols = ['client','product','factory','cost_price','factory_prepay','factory2','cost_price2','factory_prepay2','status','deadline','sale_price_ht','tva_rate','total_ttc','install_cost','delivery','paid_amount','assignee','notes'];
+  const head = ['Клієнт','Номер','Фабрика 1','Ціна фабрики 1','Передплата 1','Фабрика 2','Ціна фабрики 2','Передплата 2','Статус','Дедлайн','Ціна HT','TVA %','Сума TTC','Монтаж','Доставка','Оплачено','Відповідальний','Нотатки'];
   const esc = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
   const csv = '﻿' + head.join(';') + '\n' + src.map(o => cols.map(c => esc(o[c])).join(';')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -1384,7 +1514,7 @@ function exportCSV() {
 
 /* ================= ЗБЕРЕЖЕННЯ ================= */
 async function saveO() {
-  const o = { id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value, factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value, sale_price_ht: n(document.getElementById('fSa').value), tva_rate: n(document.getElementById('fTv').value), total_ttc: n(document.getElementById('fTt').value), cost_price: n(document.getElementById('fCo').value), install_cost: n(document.getElementById('fIn').value), delivery: n(document.getElementById('fDe').value), paid_amount: payTotal(), payments: curPay, factory_prepay: n(document.getElementById('fFaPa').value), factory2: document.getElementById('fFa2').value || null, cost_price2: n(document.getElementById('fCo2').value), factory_prepay2: n(document.getElementById('fFaPa2').value), deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value, cancel_reason: document.getElementById('fCan').value, file_url: JSON.stringify(curFiles), check_measured: document.getElementById('fChM').checked, check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked };
+  const o = { id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value, factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value, assignee: document.getElementById('fAs').value || null, sale_price_ht: n(document.getElementById('fSa').value), tva_rate: n(document.getElementById('fTv').value), total_ttc: n(document.getElementById('fTt').value), cost_price: n(document.getElementById('fCo').value), install_cost: n(document.getElementById('fIn').value), delivery: n(document.getElementById('fDe').value), paid_amount: payTotal(), payments: curPay, factory_prepay: n(document.getElementById('fFaPa').value), factory2: document.getElementById('fFa2').value || null, cost_price2: n(document.getElementById('fCo2').value), factory_prepay2: n(document.getElementById('fFaPa2').value), deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value, cancel_reason: document.getElementById('fCan').value, file_url: JSON.stringify(curFiles), check_measured: document.getElementById('fChM').checked, check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked };
   // Дата створення виставляється автоматично: нове замовлення — зараз; наявне — зберігаємо стару
   // (якщо в старого запису її немає — відновлюємо з часу в id, інакше ставимо зараз)
   const prev = editId ? orders.find(x => x.id == editId) : null;
@@ -1464,6 +1594,7 @@ const openO = id => {
     document.getElementById('btnD').style.display='none';
     document.getElementById('btnDup').style.display='none';
   }
+  setAs('fAs', id ? o.assignee : ME());     // нове замовлення за замовчуванням призначається на мене
   // Історія змін — лише для наявного замовлення; вантажиться, коли розгорнути
   const hb = document.getElementById('histBox');
   hb.open = false; hb.style.display = id ? 'block' : 'none';
@@ -1574,6 +1705,22 @@ function cardClick(el) {
   el.classList.toggle('sel', selIds.has(id));
   updateBulk();
 }
+async function applyBulkAs() {
+  const ids = [...selIds];
+  if (!ids.length) return alert('Спершу виберіть замовлення');
+  const as = document.getElementById('bulkAs').value;
+  if (!confirm(as ? `Призначити «${as}» на ${ids.length} замовл.?` : `Зняти відповідального з ${ids.length} замовл.?`)) return;
+  const { error } = await _sb.from('orders').update({ assignee: as || null }).in('id', ids);
+  if (error) return alert(/assignee/.test(error.message || '') ? 'У базі немає колонки assignee. Виконайте SQL з інструкції.' : 'Помилка: ' + error.message);
+  ids.forEach(id => { const o = orders.find(x => x.id === id); if (o && (o.assignee || '') !== as) logHistory(id, o.company, 'updated', { assignee: [o.assignee || '', as] }); });
+  toggleSel(false); await sync();
+}
+// Перехід зі звіту: усі замовлення обраного співробітника
+function goAs(name) {
+  tab('orders'); flt('Усі', document.querySelector('[data-s="Усі"]'));
+  setAs('fltAs', name || NONE);
+  document.getElementById('fltPanel').style.display = 'block'; render();
+}
 function updateBulk() { const c = document.getElementById('bulkCnt'); if (c) c.textContent = selIds.size; }
 async function applyBulk() {
   const st = document.getElementById('bulkSt').value;
@@ -1587,17 +1734,17 @@ async function applyBulk() {
 }
 
 /* ================= ФІЛЬТРИ: фабрика, дати ================= */
-const fltActive = () => !!(document.getElementById('fltFac').value || document.getElementById('fltFrom').value || document.getElementById('fltTo').value);
+const fltActive = () => !!(document.getElementById('fltFac').value || document.getElementById('fltAs').value || document.getElementById('fltFrom').value || document.getElementById('fltTo').value);
 function updateFltBtn() {
   const open = document.getElementById('fltPanel').style.display === 'block';
   document.getElementById('fltBtn').classList.toggle('on', open || fltActive());
   document.querySelector('#fltBtn span').textContent = fltActive() ? 'Фільтри •' : 'Фільтри';
 }
 function toggleFlt() { const p = document.getElementById('fltPanel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; updateFltBtn(); }
-function resetFlt() { ['fltFac','fltFrom','fltTo'].forEach(i => document.getElementById(i).value = ''); render(); }
+function resetFlt() { ['fltFac','fltAs','fltFrom','fltTo'].forEach(i => document.getElementById(i).value = ''); render(); }
 
 /* ================= ІСТОРІЯ ЗМІН ================= */
-const HIST_LBL = { status:'Статус', client:'Клієнт', factory:'Фабрика', factory2:'Фабрика 2', deadline:'Дедлайн', reminder_date:'Нагадування', sale_price_ht:'Ціна HT', total_ttc:'Сума TTC', paid_amount:'Оплачено' };
+const HIST_LBL = { status:'Статус', assignee:'Відповідальний', client:'Клієнт', factory:'Фабрика', factory2:'Фабрика 2', deadline:'Дедлайн', reminder_date:'Нагадування', sale_price_ht:'Ціна HT', total_ttc:'Сума TTC', paid_amount:'Оплачено' };
 const HIST_NUM = new Set(['sale_price_ht', 'total_ttc', 'paid_amount']);
 async function logHistory(orderId, orderCo, action, details) {
   try { await _sb.from('order_history').insert({ order_id: orderId, company: orderCo, user_email: USER_EMAIL, action, details }); } catch (e) {}
@@ -1620,7 +1767,7 @@ async function loadHistory(id) {
 }
 
 /* ================= ЧЕРНЕТКИ (щоб не губити введене) ================= */
-const DRAFT_IDS = ['fCl','fPr','fFa','fFa2','fSt','fDl','fSa','fTv','fIn','fDe','fCo','fFaPa','fCo2','fFaPa2','fRe','fNo','fCan'];
+const DRAFT_IDS = ['fCl','fPr','fFa','fFa2','fSt','fAs','fDl','fSa','fTv','fIn','fDe','fCo','fFaPa','fCo2','fFaPa2','fRe','fNo','fCan'];
 const DRAFT_CHK = ['fChM','fChO','fChS','fChI'];
 const draftKey = () => 'crm_draft_o_' + co;
 let draftTimer = null;
@@ -1643,6 +1790,7 @@ function tryRestoreDraft() {
   DRAFT_IDS.forEach(i => { if (d[i] !== undefined) document.getElementById(i).value = d[i]; });
   DRAFT_CHK.forEach(i => { document.getElementById(i).checked = !!d[i]; });
   curPay = Array.isArray(d.pay) ? d.pay : [];
+  if (d.fAs) setAs('fAs', d.fAs);
   if (d.fFa2) toggleFac2(true);
 }
 document.getElementById('mO').addEventListener('input', saveDraft);
@@ -1681,6 +1829,7 @@ function resetScale() { LS.del('crm_zoom'); applyScale(); renderSettings(); }
 function setMinMk(v) { LS.set('crm_min_markup', String(Math.max(0, parseFloat(v) || 0))); render(); }
 function openSettings() { renderSettings(); showModal('mS'); }
 function renderSettings() {
+  renderTeamSettings();
   const pref = LS.get('crm_theme', 'auto');
   document.querySelectorAll('#themeSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === pref));
   const z = parseFloat(LS.get('crm_zoom', ''));
