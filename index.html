@@ -442,6 +442,44 @@ html.dark input.ro-yel { background: #3a3316; color: #f1d36a; }
 html.dark input.ro-grn { background: #133428; color: #6fe0b5; }
 html.dark input.ro-blu { background: #1d2650; color: #a9b9ff; }
 html.dark .st-main { border: 1px solid var(--line); }
+
+/* ============ КАНБАН ============ */
+.view-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.view-bar .seg { margin-bottom: 0; flex: 1; max-width: 300px; }
+.view-bar .seg button i { margin-right: 6px; }
+#kanban { display: none; gap: 12px; overflow-x: auto; align-items: flex-start; padding: 2px 16px 14px; margin: 0 -16px; scroll-snap-type: x proximity; scroll-padding: 0 16px; -webkit-overflow-scrolling: touch; }
+body.board-mode #list { display: none; }
+body.board-mode #kanban { display: flex; }
+body.board-mode #selBtn, body.board-mode .s-t.st-only { display: none; }
+.kb-col { flex: 0 0 292px; min-width: 0; scroll-snap-align: start; }
+.kb-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 34px; padding: 0 24px 0 14px; background: var(--c); color: #fff; font-weight: 700; font-size: 12.5px; border-radius: 6px 0 0 6px; clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%); }
+.kb-head span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kb-head b { background: rgba(255,255,255,.25); border-radius: 999px; padding: 1px 8px; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.kb-sum { font-size: 17px; font-weight: 700; letter-spacing: -.02em; text-align: center; padding: 10px 0 8px; font-variant-numeric: tabular-nums; }
+.kb-body { display: flex; flex-direction: column; gap: 8px; background: color-mix(in srgb, var(--line) 38%, transparent); border-radius: 14px; padding: 8px; min-height: 90px; max-height: 68vh; overflow-y: auto; outline: 2px dashed transparent; outline-offset: -2px; transition: background .15s, outline-color .15s; }
+.kb-col.over .kb-body { background: var(--p2-soft); outline-color: var(--p2); }
+.kb-empty { text-align: center; color: var(--muted2); font-size: 12px; padding: 22px 0; }
+.kb-more { border: 1px dashed var(--line); background: var(--surface); color: var(--muted); border-radius: 10px; height: 36px; font-weight: 600; font-size: 12px; cursor: pointer; font-family: inherit; flex-shrink: 0; }
+.kc { background: var(--surface); border-radius: 12px; padding: 10px 11px 9px; box-shadow: var(--sh-1); border: 1px solid color-mix(in srgb, var(--line) 60%, transparent); cursor: grab; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+.kc:hover { box-shadow: var(--sh-2); }
+.kc.rem { background: color-mix(in srgb, var(--canc) 9%, var(--surface)); }
+.kc.over { border-color: var(--danger); }
+.kc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.kc-name { font-size: 13.5px; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
+.kc-ic { display: flex; gap: 9px; flex-shrink: 0; }
+.kc-ic a { color: var(--p2); font-size: 13px; } .kc-ic a.wa { color: #25d366; }
+.kc-sum { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kc-sub { font-size: 11.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kc-as { margin-top: 3px; } .kc-as > span { display: block; color: var(--muted2); font-size: 10.5px; margin-bottom: 3px; }
+.kc-as > div { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: var(--p2); }
+.kc .avatar { width: 22px; height: 22px; border-radius: 8px; font-size: 9.5px; }
+.kc-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 4px; padding-top: 7px; border-top: 1px solid var(--line-soft); font-size: 11px; color: var(--muted2); }
+.kc-foot .chip { margin-left: auto; }
+.kc-dragging { opacity: .35; }
+.kc-ghost { position: fixed; z-index: 9000; pointer-events: none; transform: rotate(2deg); box-shadow: var(--sh-3); margin: 0; }
+body.kb-dragging, body.kb-dragging * { cursor: grabbing !important; user-select: none !important; }
+body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше автопрокрутка «прилипає» назад до колонки */
+@media (max-width: 640px) { .kb-col { flex-basis: 80vw; max-width: 300px; } .view-bar .seg { max-width: none; } }
 </style>
 </head>
 <body>
@@ -487,6 +525,12 @@ html.dark .st-main { border: 1px solid var(--line); }
 
 <div class="container" id="mainUI" style="display:none">
   <div id="p-orders" class="panel on">
+    <div class="view-bar">
+      <div class="seg" id="viewSeg">
+        <button type="button" data-v="list" class="on" onclick="setView('list')"><i class="fa fa-list-ul"></i>Список</button>
+        <button type="button" data-v="board" onclick="setView('board')"><i class="fa fa-table-columns"></i>Канбан</button>
+      </div>
+    </div>
     <div class="sum-strip" id="sumStrip"></div>
     <div class="tool-row">
       <input type="text" id="q" placeholder="🔍 Пошук: клієнт, № замовлення, телефон..." oninput="render()">
@@ -512,6 +556,7 @@ html.dark .st-main { border: 1px solid var(--line); }
       <button class="btn-ghost" onclick="resetFlt()"><i class="fa fa-rotate-left"></i> Скинути фільтри</button>
     </div>
     <div id="list"></div>
+    <div id="kanban"></div>
   </div>
 
   <div id="p-clients" class="panel">
@@ -1056,7 +1101,7 @@ async function checkUser() {
     document.title = CO_NAME[co] || 'CRM';
     document.getElementById('creditCo').textContent = co.toUpperCase();
     history.replaceState({ t: 'orders' }, '');   // базовий запис для кнопки "Назад"
-    fillFactories(); updateTva(); sync();
+    fillFactories(); updateTva(); applyView(); sync();
   } else {
     document.getElementById('loader').style.display = 'none';
     document.getElementById('authScreen').style.display = 'flex';
@@ -1165,6 +1210,8 @@ const render = () => {
   updateChips();
   renderSummary();
 
+  if (document.body.classList.contains('board-mode')) { renderBoard(f); return; }   // канбан замість списку
+
   if (!f.length) { list.innerHTML = `<div class="empty"><i class="fa fa-inbox"></i>Замовлень не знайдено</div>`; return; }
 
   list.innerHTML = f.map(o=>{
@@ -1212,6 +1259,134 @@ const render = () => {
         </div>
       </div>`}).join('');
 }
+
+/* ================= КАНБАН ================= */
+const BOARD_ST = [
+  { k: 'Нова', c: '--new' }, { k: 'Кошторис', c: '--est' }, { k: 'Підтверджено', c: '--conf' }, { k: 'Перевірка', c: '--verify' },
+  { k: 'В роботі', c: '--work' }, { k: 'На складі', c: '--store' }, { k: 'Виконано', c: '--done' }, { k: 'Скасовано', c: '--canc' }
+];
+const KB_PAGE = 25;                 // скільки карток показуємо в колонці (кошторисів сотні — решту підвантажує кнопка)
+const kbLimit = {};
+let kbDrag = null, kbBlock = 0;
+
+function applyView() {
+  const v = LS.get('crm_view', 'list') === 'board' ? 'board' : 'list';
+  document.body.classList.toggle('board-mode', v === 'board');
+  document.querySelectorAll('#viewSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  // у дошці колонки вже є статусами, тож чипи статусів ховаємо; лишаються Усі / Мої / Дзвінки / Боржники
+  document.querySelectorAll('.s-t').forEach(el => { if (!['Усі', 'Мої', 'Нагадування', 'Боржники'].includes(el.dataset.s)) el.classList.add('st-only'); });
+  if (v === 'board') {
+    if (selMode) toggleSel(false);
+    if (document.querySelector('.s-t.st-only.active')) flt('Усі', document.querySelector('[data-s="Усі"]'));
+  }
+}
+function setView(v) { LS.set('crm_view', v); applyView(); render(); }
+function kbMore(st) { kbLimit[st] = (kbLimit[st] || KB_PAGE) + KB_PAGE; render(); }
+function kcClick(el) { if (Date.now() - kbBlock < 400) return; openO(el.dataset.id); }   // після перетягування клік ігноруємо
+
+function kcHtml(o) {
+  const today = new Date().toISOString().split('T')[0];
+  const ttc = n(o.total_ttc), debt = ttc - n(o.paid_amount);
+  const rem = isRem(o), over = !!o.deadline && o.deadline < today && isOpen(o);
+  const wa = waNum(orderPhone(o)), ts = orderTs(o), nFiles = parseFiles(o.file_url).length;
+  const payOn = ttc > 0 && PROG_STATUSES.includes(o.status);
+  return `<div class="kc ${rem ? 'rem' : ''} ${over ? 'over' : ''}" data-id="${esc(o.id)}" onclick="kcClick(this)" oncontextmenu="return false">
+    <div class="kc-top"><div class="kc-name">${esc(o.client || 'Без імені')}${rem ? ' ⏰' : ''}</div>${wa ? `<span class="kc-ic"><a href="tel:+${wa}" onclick="event.stopPropagation()" title="Подзвонити"><i class="fa fa-phone-alt"></i></a><a class="wa" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a></span>` : ''}</div>
+    <div class="kc-sum">${ttc > 0 ? fN(ttc) + ' €' : '<span style="color:var(--muted2);font-weight:500">без суми</span>'}${payOn ? `<span class="debt-tag ${debt > 1 ? 'red' : 'green'}">${debt > 1 ? 'Борг ' + fN(debt) : 'Сплачено'}</span>` : ''}</div>
+    <div class="kc-sub">${esc(o.product || '—')} · ${esc(o.factory || '—')}${o.factory2 ? ' + ' + esc(o.factory2) : ''}</div>
+    ${o.assignee ? `<div class="kc-as"><span>Відповідальний</span><div>${avatarHtml(o.assignee)}${esc(o.assignee)}</div></div>` : ''}
+    <div class="kc-foot">${ts ? `<span>${fmtShort(ts)}</span>` : ''}${nFiles ? `<span><i class="fa fa-paperclip"></i> ${nFiles}</span>` : ''}${deadlineChip(o)}</div>
+  </div>`;
+}
+
+function renderBoard(f) {
+  const box = document.getElementById('kanban');
+  const keepX = box.scrollLeft, keepY = {};
+  box.querySelectorAll('.kb-col').forEach(c => { keepY[c.dataset.st] = c.querySelector('.kb-body').scrollTop; });
+  const cols = BOARD_ST.map(s => ({ ...s, list: [] })), other = { k: 'Без статусу', c: '--muted2', list: [] };
+  f.forEach(o => (cols.find(c => c.k === o.status) || other).list.push(o));
+  if (other.list.length) cols.push(other);
+  box.innerHTML = cols.map(c => {
+    const sum = c.list.reduce((s, o) => s + n(o.total_ttc), 0), lim = kbLimit[c.k] || KB_PAGE;
+    const more = c.list.length > lim ? `<button class="kb-more" data-st="${esc(c.k)}" onclick="kbMore(this.dataset.st)">Показати ще ${Math.min(KB_PAGE, c.list.length - lim)} з ${c.list.length - lim}</button>` : '';
+    return `<div class="kb-col" data-st="${esc(c.k)}"><div class="kb-head" style="--c:var(${c.c})"><span>${esc(c.k)}</span><b>${c.list.length}</b></div><div class="kb-sum">${sum > 0 ? fN(Math.round(sum)) + ' €' : '—'}</div><div class="kb-body">${c.list.slice(0, lim).map(kcHtml).join('') || '<div class="kb-empty">Порожньо</div>'}${more}</div></div>`;
+  }).join('');
+  box.scrollLeft = keepX;
+  box.querySelectorAll('.kb-col').forEach(c => { if (keepY[c.dataset.st]) c.querySelector('.kb-body').scrollTop = keepY[c.dataset.st]; });
+}
+
+// Зміна статусу перетягуванням: одразу в інтерфейсі, потім у базі; при помилці — повертаємо назад
+async function moveOrder(o, st) {
+  const prev = o.status, prevReason = o.cancel_reason;
+  const upd = { status: st };
+  if (st === 'Скасовано') {
+    const r = prompt('Причина скасування (можна залишити порожньою):', o.cancel_reason || '');
+    if (r === null) return;
+    upd.cancel_reason = r; o.cancel_reason = r;
+  }
+  o.status = st; render();
+  const { error } = await _sb.from('orders').update(upd).eq('id', o.id);
+  if (error) { o.status = prev; o.cancel_reason = prevReason; render(); return alert('Не вдалося змінити статус: ' + error.message); }
+  logHistory(o.id, o.company, 'updated', { status: [prev, st] });
+  if (curT === 'stats') renderStats();
+}
+
+// Перетягування: мишею (потягнути) і пальцем (довгий дотик ~0,3 с; рух раніше — це звичайна прокрутка)
+function kbDown(e) {
+  if (kbDrag || e.target.closest('a,button')) return;
+  const card = e.target.closest('.kc'); if (!card) return;
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  kbDrag = { id: card.dataset.id, card, x: e.clientX, y: e.clientY, touch: e.pointerType !== 'mouse', active: false, col: null, timer: null, ghost: null, edge: 0, tick: null };
+  if (kbDrag.touch) kbDrag.timer = setTimeout(kbStart, 300);
+}
+function kbStart() {
+  const d = kbDrag; if (!d || d.active) return; d.active = true;
+  const r = d.card.getBoundingClientRect();
+  const g = d.card.cloneNode(true); g.removeAttribute('onclick'); g.classList.add('kc-ghost'); g.style.visibility = 'hidden'; g.style.left = '100px'; g.style.top = '100px';
+  document.body.appendChild(g);
+  d.f = (g.getBoundingClientRect().left / 100) || 1;       // поправка на масштаб сторінки (zoom), щоб привид не «тікав» від пальця
+  g.style.width = (r.width / d.f) + 'px'; g.style.visibility = '';
+  d.ox = d.x - r.left; d.oy = d.y - r.top; d.ghost = g;
+  d.card.classList.add('kc-dragging'); document.body.classList.add('kb-dragging');
+  d.tick = setInterval(() => { if (d.edge) document.getElementById('kanban').scrollLeft += d.edge * 14; }, 16);
+  if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+  kbPlace(d.x, d.y);
+}
+function kbPlace(x, y) {
+  const d = kbDrag; if (!d || !d.active) return;
+  d.ghost.style.left = ((x - d.ox) / d.f) + 'px'; d.ghost.style.top = ((y - d.oy) / d.f) + 'px';
+  document.querySelectorAll('.kb-col.over').forEach(c => c.classList.remove('over'));
+  const el = document.elementFromPoint(x, y), col = el && el.closest('.kb-col');
+  d.col = null;
+  if (col && BOARD_ST.some(s => s.k === col.dataset.st)) { col.classList.add('over'); d.col = col.dataset.st; }
+  const br = document.getElementById('kanban').getBoundingClientRect();
+  d.edge = x < br.left + 50 ? -1 : x > br.right - 50 ? 1 : 0;    // край дошки — автопрокрутка
+}
+function kbMove(e) {
+  const d = kbDrag; if (!d) return;
+  if (!d.active) {
+    const m = Math.hypot(e.clientX - d.x, e.clientY - d.y);
+    if (d.touch) { if (m > 10) { clearTimeout(d.timer); kbDrag = null; } return; }
+    if (m < 6) return;
+    kbStart();
+  }
+  kbPlace(e.clientX, e.clientY);
+}
+async function kbUp(e) {
+  const d = kbDrag; if (!d) return; kbDrag = null; clearTimeout(d.timer);
+  if (!d.active) return;                          // звичайний клік — його обробляє kcClick
+  clearInterval(d.tick); d.ghost.remove();
+  d.card.classList.remove('kc-dragging'); document.body.classList.remove('kb-dragging');
+  document.querySelectorAll('.kb-col.over').forEach(c => c.classList.remove('over'));
+  kbBlock = Date.now();
+  const o = orders.find(x => x.id === d.id), st = e.type === 'pointercancel' ? null : d.col;
+  if (st && o && o.status !== st) await moveOrder(o, st);
+}
+document.getElementById('kanban').addEventListener('pointerdown', kbDown);
+document.addEventListener('pointermove', kbMove);
+document.addEventListener('pointerup', kbUp);
+document.addEventListener('pointercancel', kbUp);
+document.addEventListener('touchmove', e => { if (kbDrag && kbDrag.active) e.preventDefault(); }, { passive: false });   // під час перетягування сторінка не прокручується
 
 /* ================= КАЛЕНДАР ================= */
 function renderCal() {
