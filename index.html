@@ -479,6 +479,19 @@ body.board-mode #selBtn, body.board-mode .s-t.st-only { display: none; }
 .kc-ghost { position: fixed; z-index: 9000; pointer-events: none; transform: rotate(2deg); box-shadow: var(--sh-3); margin: 0; }
 body.kb-dragging, body.kb-dragging * { cursor: grabbing !important; user-select: none !important; }
 body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше автопрокрутка «прилипає» назад до колонки */
+
+/* Шаблони повідомлень, дублікати, порівняння місяців */
+.tpl-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.tpl { border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 999px; padding: 6px 11px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.tpl.sug { color: var(--txt); } .tpl.on { background: var(--p2); border-color: var(--p2); color: #fff; }
+.dup-opt { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; margin-bottom: 6px; cursor: pointer; }
+.dup-opt input { width: auto; padding: 0; accent-color: var(--p2); }
+.cmp { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.cmp th { text-align: left; font-size: 11px; color: var(--muted2); font-weight: 700; padding: 0 8px 8px 0; white-space: nowrap; }
+.cmp td { padding: 8px 8px 8px 0; border-top: 1px solid var(--line-soft); white-space: nowrap; vertical-align: top; }
+.cmp td:first-child { font-weight: 600; text-transform: capitalize; }
+.cmp .dl { display: block; font-size: 10.5px; font-weight: 700; } .cmp .up { color: var(--success); } .cmp .dn { color: var(--danger); }
+#waSend:disabled { opacity: .5; }
 @media (max-width: 640px) { .kb-col { flex-basis: 80vw; max-width: 300px; } .view-bar .seg { max-width: none; } }
 </style>
 </head>
@@ -513,6 +526,7 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
   <div class="s-t" data-s="Нова" onclick="flt('Нова',this)">🆕 Нові</div>
   <div class="s-t" data-s="Мої" onclick="flt('Мої',this)" style="display:none">👤 Мої</div>
   <div class="s-t" data-s="Нагадування" onclick="flt('Нагадування',this)">⏰ Дзвінки</div>
+  <div class="s-t" data-s="Затримка" onclick="flt('Затримка',this)">🚚 Затримки</div>
   <div class="s-t" data-s="Боржники" onclick="flt('Боржники',this)">💸 Боржники</div>
   <div class="s-t" data-s="Кошторис" onclick="flt('Кошторис',this)">📑 Кошторис</div>
   <div class="s-t" data-s="Підтверджено" onclick="flt('Підтверджено',this)">✅ Підтверджено</div>
@@ -634,7 +648,8 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
     <div class="fg"><label>Дата створення</label><input id="fCr" readonly></div>
     <div class="fg"><label>Клієнт</label><input id="fCl" list="dlC"><datalist id="dlC"></datalist></div>
     <div class="grid"><div class="fg"><label>Номер замовлення</label><input id="fPr" placeholder="напр. WEB/26/0947426"></div><div class="fg"><label>Фабрика 1</label><select id="fFa"></select></div></div>
-    <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan()"><option>Нова</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
+    <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan(); autoOnStatus()"><option>Нова</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
+    <div id="autoHint" style="font-size:12px;color:var(--p2);margin:-6px 0 10px"></div>
     <div class="fg"><label>Відповідальний</label><select id="fAs"></select></div>
     <div id="canB" class="fg" style="display:none"><label style="color:var(--danger)">Причина скасування</label><textarea id="fCan" rows="2"></textarea></div>
 
@@ -671,6 +686,7 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
         <label title="Змонтовано"><input type="checkbox" id="fChI"> 🏠 Монтаж</label>
       </div>
     </div>
+    <div class="grid"><div class="fg"><label>Замовлено на фабриці (дата)</label><input id="fOr" type="date"></div><div class="fg"><label>Очікується з фабрики (ETA)</label><input id="fEta" type="date"></div></div>
     <div class="fg"><label>Файли (договір, фото, замір)</label>
       <div id="fList" class="file-list"></div>
       <label class="up-btn"><i class="fa fa-paperclip"></i> <span id="upTxt">Прикріпити файл</span>
@@ -680,12 +696,23 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
     <div class="fg"><label>Передзвонити ⏰</label><input id="fRe" type="date"></div>
     <div class="fg"><label>Нотатки</label><textarea id="fNo" rows="2"></textarea></div>
 
+    <div id="logWrap" style="display:none">
+      <div class="sec">Журнал спілкування</div>
+      <div class="pay-add" style="grid-template-columns:auto 1fr auto">
+        <select id="logKind" style="width:auto;padding:10px 8px"><option value="call">📞 Дзвінок</option><option value="noans">📵 Не відповів</option><option value="msg">💬 Повідомлення</option><option value="note">📝 Нотатка</option></select>
+        <input id="logText" placeholder="Що відбулося…" onkeydown="if(event.key==='Enter'){event.preventDefault();addLog()}">
+        <button type="button" onclick="addLog()" title="Додати запис"><i class="fa fa-plus"></i></button>
+      </div>
+      <div id="logList" style="margin-top:8px"></div>
+    </div>
+
     <details class="hist" id="histBox" style="display:none" ontoggle="if(this.open) loadHistory(editId)">
       <summary>Історія змін</summary>
       <div id="histList"></div>
     </details>
 
     <button class="btn-s" onclick="saveO()">Зберегти</button>
+    <button id="btnWa" class="btn-alt" onclick="openWa(editId)"><i class="fab fa-whatsapp"></i> Написати клієнту (шаблони, французькою)</button>
     <button id="btnDup" class="btn-alt" onclick="dupO()"><i class="fa fa-copy"></i> Дублювати замовлення</button>
     <button id="btnD" onclick="delO()" style="color:var(--danger);border:none;background:none;width:100%;margin-top:8px;font-weight:600;cursor:pointer;display:none;font-family:inherit;font-size:13.5px">Видалити замовлення</button>
   </div>
@@ -726,7 +753,7 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
     </div>
 
     <div class="sec">Команда</div>
-    <div class="fg"><label>Я працюю як (для фільтра «Мої»)</label><div class="seg" id="meSeg" style="margin-bottom:0"></div></div>
+    <div class="fg"><label>Я працюю як (для фільтра «Мої»)</label><div class="seg" id="meSeg" style="margin-bottom:0"></div><small id="meLock" style="color:var(--muted)"></small></div>
     <div class="fg fin-only"><label>Співробітники <small id="teamNote" style="color:var(--warning);font-weight:500"></small></label>
       <div id="teamList" class="file-list"></div>
       <div class="pay-add" style="grid-template-columns:1fr auto">
@@ -738,8 +765,53 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
     <div class="sec fin-only">Контроль</div>
     <div class="fg fin-only"><label>Поріг низької націнки, % (0 — вимкнути)</label><input id="setMk" type="number" min="0" step="1" onchange="setMinMk(this.value)"></div>
 
+    <div class="sec fin-only">Автоматизація</div>
+    <div class="fg fin-only"><label>Автоматично заповнювати етапи й нагадування при зміні статусу</label>
+      <div class="seg" id="autoSeg" style="margin-bottom:0">
+        <button type="button" data-v="1" onclick="setAuto('1')">Увімкнено</button>
+        <button type="button" data-v="0" onclick="setAuto('0')">Вимкнено</button>
+      </div>
+      <small style="color:var(--muted)">«Кошторис» → нагадування через N днів · «В роботі» → відмічає «Завод» · «На складі» → «Завод» і «Склад» · «Виконано» → усі етапи, без нагадування</small>
+    </div>
+    <div class="fg fin-only"><label>Нагадати про кошторис через (днів, 0 — не нагадувати)</label><input id="setAutoDays" type="number" min="0" step="1" onchange="setAutoDays(this.value)"></div>
+
+    <div class="sec fin-only">Дані</div>
+    <div class="fg fin-only" style="gap:8px">
+      <button type="button" class="btn-alt" style="display:block;margin:0" onclick="openTrash()"><i class="fa fa-trash-can"></i> Кошик видалених замовлень</button>
+      <button type="button" class="btn-alt" style="display:block;margin:0" onclick="openDups()"><i class="fa fa-user-group"></i> Дублікати клієнтів</button>
+    </div>
+
     <div class="sec">Акаунт</div>
     <div class="fg"><small id="accInfo" style="color:var(--muted)"></small></div>
+  </div>
+</div>
+
+<!-- МОДАЛКА КОШИКА -->
+<div id="mT" class="modal-w">
+  <div class="mbox">
+    <div style="display:flex;justify-content:space-between;"><h3>Кошик</h3><i class="fa fa-times" onclick="closeM('mT')"></i></div>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px">Видалені замовлення зберігаються 30 днів, потім стираються назавжди разом з файлами.</p>
+    <div id="trashList"></div>
+  </div>
+</div>
+
+<!-- МОДАЛКА ДУБЛІКАТІВ КЛІЄНТІВ -->
+<div id="mD" class="modal-w">
+  <div class="mbox">
+    <div style="display:flex;justify-content:space-between;"><h3>Дублікати клієнтів</h3><i class="fa fa-times" onclick="closeM('mD')"></i></div>
+    <div id="dupBox"></div>
+  </div>
+</div>
+
+<!-- МОДАЛКА ПОВІДОМЛЕННЯ КЛІЄНТУ (WhatsApp) -->
+<div id="mW" class="modal-w">
+  <div class="mbox">
+    <div style="display:flex;justify-content:space-between;"><h3>Повідомлення клієнту</h3><i class="fa fa-times" onclick="closeM('mW')"></i></div>
+    <div id="waHead" style="font-size:13px;color:var(--muted);margin-bottom:12px"></div>
+    <div id="waTpls" class="tpl-row"></div>
+    <div class="fg"><label>Текст (французькою; можна редагувати перед відправкою)</label><textarea id="waText" rows="6"></textarea></div>
+    <button class="btn-s" id="waSend" onclick="sendWa()"><i class="fab fa-whatsapp"></i> Відкрити в WhatsApp</button>
+    <button class="btn-alt" style="display:block" onclick="copyWa()"><i class="fa fa-copy"></i> Копіювати текст</button>
   </div>
 </div>
 
@@ -830,7 +902,7 @@ function deadlineChip(o) {
   return `<span class="chip ${cls}" title="${hint}"><i class="fa fa-flag"></i> ${fmtShort(t)}</span>`;
 }
 // Кнопки зв'язку
-const actsHtml = wa => wa ? `<a href="tel:+${wa}" onclick="event.stopPropagation()" title="Подзвонити"><i class="fa fa-phone-alt"></i></a><a class="wa-btn" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : '';
+const actsHtml = (wa, id) => wa ? `<a href="tel:+${wa}" onclick="event.stopPropagation()" title="Подзвонити"><i class="fa fa-phone-alt"></i></a>${id ? `<a data-id="${esc(id)}" onclick="event.stopPropagation(); openWa(this.dataset.id)" title="Шаблони повідомлень (французькою)" style="cursor:pointer"><i class="fa fa-comment-dots"></i></a>` : ''}<a class="wa-btn" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : '';
 
 // Поле автоматично росте за текстом
 const autoGrow = el => { el.style.height = 'auto'; if (el.scrollHeight) el.style.height = el.scrollHeight + 'px'; };
@@ -870,16 +942,18 @@ const clientOf = o => (o.client_id && clients.find(c => c.id === o.client_id)) |
 const orderPhone = o => o.phone || (clientOf(o) || {}).phone || '';   // телефон із заявки або з картки клієнта
 
 // Запис замовлення. Якщо в базі ще немає нової колонки (client_id, assignee — SQL не виконано), повторюємо без неї, щоб збереження не ламалось
+const OPT_COLS = { client_id: "прив'язка до клієнта", assignee: 'відповідальний', factory_ordered: 'дата замовлення на фабриці', eta_date: 'очікувана дата', last_contact: 'останній контакт' };
 async function writeOrder(o, mode) {
   const run = row => mode === 'insert' ? _sb.from('orders').insert(row) : _sb.from('orders').upsert(row);
   const row = { ...o }, dropped = [];
   let r = await run(row);
-  for (let i = 0; i < 3 && r.error; i++) {
-    const m = /\b(client_id|assignee)\b/.exec(r.error.message || '');
+  for (let i = 0; i < 6 && r.error; i++) {
+    const m = /\b(client_id|assignee|factory_ordered|eta_date|last_contact)\b/.exec(r.error.message || '');
     if (!m || !(m[1] in row)) break;
     dropped.push(m[1]); delete row[m[1]]; r = await run(row);
   }
-  if (!r.error && dropped.includes('assignee') && o.assignee) alert('Замовлення збережено, але відповідального НЕ збережено: у базі немає колонки assignee. Виконайте SQL з інструкції.');
+  const lost = dropped.filter(k => o[k] !== null && o[k] !== undefined && o[k] !== '' && k !== 'client_id');
+  if (!r.error && lost.length) alert('Замовлення збережено, але НЕ збережено: ' + lost.map(k => OPT_COLS[k]).join(', ') + '. У базі немає відповідних колонок. Виконайте SQL з інструкції.');
   return r;
 }
 
@@ -887,7 +961,8 @@ async function writeOrder(o, mode) {
 const DEFAULT_TEAM = ['Олексій', 'Денис', 'Марія', 'Надя'];
 const NONE = '__none';                          // значення фільтра «без відповідального»
 let TEAM = DEFAULT_TEAM.slice(), TEAM_DB = false, qnAsInit = false;
-const ME = () => LS.get('crm_me', '');          // хто працює на цьому пристрої (для фільтра «Мої»)
+let MEMBER = '';                                 // співробітник, прив'язаний до логіна (profiles.member_name)
+const ME = () => MEMBER || LS.get('crm_me', ''); // хто працює: за логіном, інакше — вибір на цьому пристрої (для фільтра «Мої»)
 const isOpen = o => o.status !== 'Виконано' && o.status !== 'Скасовано';
 
 // Вибір значення в списку; якщо людини вже немає в команді — додаємо її як варіант, щоб значення не загубилось
@@ -942,14 +1017,15 @@ async function removeMember(i) {
   if (ME() === name) LS.del('crm_me');
   await loadTeam(); render();
 }
-function setMe(v) { if (v) LS.set('crm_me', v); else LS.del('crm_me'); renderTeamSettings(); render(); }
+function setMe(v) { if (MEMBER) return; if (v) LS.set('crm_me', v); else LS.del('crm_me'); renderTeamSettings(); render(); }
 function renderTeamSettings() {
   const box = document.getElementById('teamList'); if (!box) return;
   box.innerHTML = TEAM.length
     ? TEAM.map((t, i) => `<div class="file-chip">${avatarHtml(t)}<span style="color:var(--txt);cursor:default">${esc(t)}</span><i class="fa fa-trash" data-i="${i}" onclick="removeMember(+this.dataset.i)" title="Прибрати"></i></div>`).join('')
     : '<small style="color:var(--muted2)">Список порожній — додайте співробітників</small>';
   document.getElementById('teamNote').textContent = TEAM_DB ? '' : '(зберігається лише на цьому пристрої: виконайте SQL)';
-  document.getElementById('meSeg').innerHTML = ['', ...TEAM].map(t => `<button type="button" class="${ME() === t ? 'on' : ''}" data-n="${esc(t)}" onclick="setMe(this.dataset.n)">${t ? esc(t) : 'Ніхто'}</button>`).join('');
+  document.getElementById('meSeg').innerHTML = ['', ...TEAM].map(t => `<button type="button" class="${ME() === t ? 'on' : ''}" ${MEMBER ? 'disabled style="opacity:.55;cursor:default"' : ''} data-n="${esc(t)}" onclick="setMe(this.dataset.n)">${t ? esc(t) : 'Ніхто'}</button>`).join('');
+  const lock = document.getElementById('meLock'); if (lock) lock.textContent = MEMBER ? `Ваш логін закріплений за співробітником «${MEMBER}», змінити це можна лише в базі.` : '';
 }
 // Мітка відповідального на картці
 const asChip = o => o.assignee ? `<span class="chip as" style="--h:${hueOf(o.assignee)}" title="Відповідальний"><i class="fa fa-user"></i> ${esc(o.assignee)}</span>` : '';
@@ -1085,6 +1161,7 @@ async function checkUser() {
     co = isOwner ? 'heimek' : (company || 'heimek');
     ROLE = (prof && prof.role === 'manager') ? 'manager' : 'owner';   // немає колонки role — вважаємо власником
     USER_EMAIL = session.user.email || '';
+    MEMBER = (prof && prof.member_name) || '';
     document.body.classList.toggle('role-mgr', ROLE === 'manager');
     document.getElementById('setBtn').style.display = 'grid';
     document.getElementById('authScreen').style.display = 'none';
@@ -1128,10 +1205,18 @@ function setCo(k) {
   updateTva(); sync();
 }
 
+// Кошик: «видалення» лише ставить deleted_at. Якщо колонки ще немає — працюємо по-старому (остаточне видалення)
+let TRASH_OK = true;
+async function loadOrders() {
+  const base = () => _sb.from('orders').select('*').eq('company', co);
+  let r = await (TRASH_OK ? base().is('deleted_at', null) : base()).order('created_at', { ascending: false });
+  if (r.error && TRASH_OK && /deleted_at/.test(r.error.message || '')) { TRASH_OK = false; r = await base().order('created_at', { ascending: false }); }
+  return r.data || [];
+}
+
 async function sync() {
   document.getElementById('loader').style.display = 'flex';
-  const { data: oData } = await _sb.from('orders').select('*').eq('company', co).order('created_at', { ascending: false });
-  orders = oData || [];
+  orders = await loadOrders();
   const { data: cData } = await _sb.from('clients').select('*').eq('company', co);
   clients = cData || [];
   await loadTeam();
@@ -1167,7 +1252,7 @@ function updateChips() {
   document.querySelectorAll('.s-t').forEach(el => {
     const s = el.dataset.s;
     if (s === 'Мої') el.style.display = ME() ? '' : 'none';   // показуємо, лише якщо в налаштуваннях вибрано «Я працюю як»
-    const v = s==='Усі' ? orders.length : s==='Боржники' ? debtors : s==='Нагадування' ? calls : s==='Мої' ? orders.filter(o => ME() && o.assignee === ME() && isOpen(o)).length : orders.filter(o=>o.status===s).length;
+    const v = s==='Усі' ? orders.length : s==='Боржники' ? debtors : s==='Нагадування' ? calls : s==='Затримка' ? orders.filter(isLate).length : s==='Мої' ? orders.filter(o => ME() && o.assignee === ME() && isOpen(o)).length : orders.filter(o=>o.status===s).length;
     let b = el.querySelector('.chip-n');
     if (!b) { b = document.createElement('span'); b.className = 'chip-n'; el.appendChild(b); }
     b.textContent = v;
@@ -1185,6 +1270,7 @@ const render = () => {
 
   if (curS === 'Боржники') f = f.filter(isDebtor);
   else if (curS === 'Нагадування') f = f.filter(isRem);
+  else if (curS === 'Затримка') f = f.filter(isLate);
   else if (curS === 'Мої') f = ME() ? f.filter(o => o.assignee === ME() && isOpen(o)) : f;
   else if (curS!=='Усі') f = f.filter(o => o.status === curS);
 
@@ -1229,6 +1315,8 @@ const render = () => {
     const ts = orderTs(o);
     const chips = [
       asChip(o),
+      etaChip(o),
+      contactChip(o),
       ts ? `<span class="chip" title="Створено ${fmtDateTime(ts)}"><i class="fa fa-calendar-day"></i> ${fmtShort(ts)}</span>` : '',
       deadlineChip(o),
       nFiles ? `<span class="chip"><i class="fa fa-paperclip"></i> ${nFiles}</span>` : '',
@@ -1255,7 +1343,7 @@ const render = () => {
         </div>
         <div class="c-foot">
           <div class="c-chips">${chips}</div>
-          <div class="c-acts">${actsHtml(wa)}</div>
+          <div class="c-acts">${actsHtml(wa, o.id)}</div>
         </div>
       </div>`}).join('');
 }
@@ -1274,7 +1362,7 @@ function applyView() {
   document.body.classList.toggle('board-mode', v === 'board');
   document.querySelectorAll('#viewSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
   // у дошці колонки вже є статусами, тож чипи статусів ховаємо; лишаються Усі / Мої / Дзвінки / Боржники
-  document.querySelectorAll('.s-t').forEach(el => { if (!['Усі', 'Мої', 'Нагадування', 'Боржники'].includes(el.dataset.s)) el.classList.add('st-only'); });
+  document.querySelectorAll('.s-t').forEach(el => { if (!['Усі', 'Мої', 'Нагадування', 'Затримка', 'Боржники'].includes(el.dataset.s)) el.classList.add('st-only'); });
   if (v === 'board') {
     if (selMode) toggleSel(false);
     if (document.querySelector('.s-t.st-only.active')) flt('Усі', document.querySelector('[data-s="Усі"]'));
@@ -1291,11 +1379,11 @@ function kcHtml(o) {
   const wa = waNum(orderPhone(o)), ts = orderTs(o), nFiles = parseFiles(o.file_url).length;
   const payOn = ttc > 0 && PROG_STATUSES.includes(o.status);
   return `<div class="kc ${rem ? 'rem' : ''} ${over ? 'over' : ''}" data-id="${esc(o.id)}" onclick="kcClick(this)" oncontextmenu="return false">
-    <div class="kc-top"><div class="kc-name">${esc(o.client || 'Без імені')}${rem ? ' ⏰' : ''}</div>${wa ? `<span class="kc-ic"><a href="tel:+${wa}" onclick="event.stopPropagation()" title="Подзвонити"><i class="fa fa-phone-alt"></i></a><a class="wa" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a></span>` : ''}</div>
+    <div class="kc-top"><div class="kc-name">${esc(o.client || 'Без імені')}${rem ? ' ⏰' : ''}</div>${wa ? `<span class="kc-ic"><a href="tel:+${wa}" onclick="event.stopPropagation()" title="Подзвонити"><i class="fa fa-phone-alt"></i></a><a data-id="${esc(o.id)}" onclick="event.stopPropagation(); openWa(this.dataset.id)" title="Шаблони (французькою)" style="cursor:pointer"><i class="fa fa-comment-dots"></i></a><a class="wa" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a></span>` : ''}</div>
     <div class="kc-sum">${ttc > 0 ? fN(ttc) + ' €' : '<span style="color:var(--muted2);font-weight:500">без суми</span>'}${payOn ? `<span class="debt-tag ${debt > 1 ? 'red' : 'green'}">${debt > 1 ? 'Борг ' + fN(debt) : 'Сплачено'}</span>` : ''}</div>
     <div class="kc-sub">${esc(o.product || '—')} · ${esc(o.factory || '—')}${o.factory2 ? ' + ' + esc(o.factory2) : ''}</div>
     ${o.assignee ? `<div class="kc-as"><span>Відповідальний</span><div>${avatarHtml(o.assignee)}${esc(o.assignee)}</div></div>` : ''}
-    <div class="kc-foot">${ts ? `<span>${fmtShort(ts)}</span>` : ''}${nFiles ? `<span><i class="fa fa-paperclip"></i> ${nFiles}</span>` : ''}${deadlineChip(o)}</div>
+    <div class="kc-foot">${ts ? `<span>${fmtShort(ts)}</span>` : ''}${nFiles ? `<span><i class="fa fa-paperclip"></i> ${nFiles}</span>` : ''}${etaChip(o)}${contactChip(o)}${deadlineChip(o)}</div>
   </div>`;
 }
 
@@ -1316,6 +1404,37 @@ function renderBoard(f) {
 }
 
 // Зміна статусу перетягуванням: одразу в інтерфейсі, потім у базі; при помилці — повертаємо назад
+/* ================= АВТОМАТИЗАЦІЯ СТАТУСІВ ================= */
+const AUTO_ON = () => LS.get('crm_auto', '1') !== '0';
+const AUTO_DAYS = () => { const v = parseInt(LS.get('crm_auto_days', '3'), 10); return isNaN(v) ? 3 : Math.max(0, v); };
+const addDaysISO = d => new Date(Date.now() + d * 864e5).toISOString().split('T')[0];
+// Які поля змінюються автоматично при переході у статус (повертає лише те, що справді відрізняється від поточного)
+function autoPatch(o, st) {
+  if (!AUTO_ON()) return {};
+  const p = {};
+  if (st === 'Кошторис' && !o.reminder_date && AUTO_DAYS() > 0) p.reminder_date = addDaysISO(AUTO_DAYS());
+  if (st === 'В роботі') p.check_ordered = true;
+  if (st === 'На складі') { p.check_ordered = true; p.check_storage = true; }
+  if (st === 'Виконано') { p.check_measured = p.check_ordered = p.check_storage = p.check_installed = true; p.reminder_date = null; }
+  if (st === 'Скасовано') p.reminder_date = null;
+  Object.keys(p).forEach(k => { if (typeof p[k] === 'boolean' ? !!o[k] === p[k] : (o[k] ?? null) === p[k]) delete p[k]; });
+  return p;
+}
+// У модалці: після вибору статусу підставляємо етапи й нагадування та показуємо, що змінилось
+const AUTO_CHK = { check_measured: ['fChM', 'Замір'], check_ordered: ['fChO', 'Завод'], check_storage: ['fChS', 'Склад'], check_installed: ['fChI', 'Монтаж'] };
+function autoOnStatus() {
+  const hint = document.getElementById('autoHint'); hint.textContent = '';
+  const cur = { reminder_date: document.getElementById('fRe').value || null };
+  Object.entries(AUTO_CHK).forEach(([k, [id]]) => { cur[k] = document.getElementById(id).checked; });
+  const p = autoPatch(cur, document.getElementById('fSt').value), done = [];
+  if ('reminder_date' in p) { document.getElementById('fRe').value = p.reminder_date || ''; done.push(p.reminder_date ? 'нагадування ' + fmtDate(Date.parse(p.reminder_date)) : 'нагадування прибрано'); }
+  Object.entries(AUTO_CHK).forEach(([k, [id, lbl]]) => { if (k in p) { document.getElementById(id).checked = p[k]; done.push('етап «' + lbl + '»'); } });
+  if (done.length) hint.textContent = 'Автоматично: ' + done.join(', ');
+  saveDraft();
+}
+function setAuto(v) { LS.set('crm_auto', v); renderSettings(); }
+function setAutoDays(v) { LS.set('crm_auto_days', String(Math.max(0, parseInt(v, 10) || 0))); }
+
 async function moveOrder(o, st) {
   const prev = o.status, prevReason = o.cancel_reason;
   const upd = { status: st };
@@ -1324,9 +1443,12 @@ async function moveOrder(o, st) {
     if (r === null) return;
     upd.cancel_reason = r; o.cancel_reason = r;
   }
-  o.status = st; render();
+  const patch = autoPatch(o, st), prevVals = {};
+  Object.keys(patch).forEach(k => { prevVals[k] = o[k]; });
+  Object.assign(upd, patch);
+  o.status = st; Object.assign(o, patch); render();
   const { error } = await _sb.from('orders').update(upd).eq('id', o.id);
-  if (error) { o.status = prev; o.cancel_reason = prevReason; render(); return alert('Не вдалося змінити статус: ' + error.message); }
+  if (error) { o.status = prev; o.cancel_reason = prevReason; Object.assign(o, prevVals); render(); return alert('Не вдалося змінити статус: ' + error.message); }
   logHistory(o.id, o.company, 'updated', { status: [prev, st] });
   if (curT === 'stats') renderStats();
 }
@@ -1388,6 +1510,107 @@ document.addEventListener('pointerup', kbUp);
 document.addEventListener('pointercancel', kbUp);
 document.addEventListener('touchmove', e => { if (kbDrag && kbDrag.active) e.preventDefault(); }, { passive: false });   // під час перетягування сторінка не прокручується
 
+/* ================= ЖУРНАЛ СПІЛКУВАННЯ ================= */
+const LOG_ICON = { call: '📞', noans: '📵', msg: '💬', note: '📝' };
+const authorName = () => ME() || (USER_EMAIL || '').split('@')[0] || '—';
+async function loadLog(id) {
+  const box = document.getElementById('logList'); if (!id) return;
+  box.innerHTML = '<small style="color:var(--muted2)">Завантаження…</small>';
+  const { data, error } = await _sb.from('order_log').select('*').eq('order_id', id).order('created_at', { ascending: false }).limit(100);
+  if (error || !data) { box.innerHTML = '<small style="color:var(--muted2)">Журнал ще не ввімкнено: виконайте SQL для order_log</small>'; return; }
+  box.innerHTML = data.length
+    ? data.map(r => `<div class="h-row" data-id="${esc(r.id)}"><div class="h-meta">${fmtDateTime(Date.parse(r.created_at))} · ${esc(r.author || '—')}<i class="fa fa-trash" style="float:right;cursor:pointer" title="Видалити запис" onclick="delLog(this.closest('[data-id]').dataset.id)"></i></div>${LOG_ICON[r.kind] || '📝'} ${esc(r.text)}</div>`).join('')
+    : '<small style="color:var(--muted2)">Записів ще немає</small>';
+}
+// Додає запис у журнал і оновлює «останній контакт» (якщо такої колонки немає — це мовчки пропускається)
+async function addLogEntry(o, kind, text, silent) {
+  const { error } = await _sb.from('order_log').insert({ order_id: o.id, company: o.company, author: authorName(), kind, text });
+  if (error) { if (!silent) alert('Журнал недоступний: ' + error.message + '\nВиконайте SQL для order_log.'); return false; }
+  const now = new Date().toISOString(); o.last_contact = now;
+  try { await _sb.from('orders').update({ last_contact: now }).eq('id', o.id); } catch (e) {}
+  return true;
+}
+async function addLog() {
+  const o = orders.find(x => x.id == editId); if (!o) return;
+  const inp = document.getElementById('logText'), text = inp.value.trim(); if (!text) return;
+  if (await addLogEntry(o, document.getElementById('logKind').value, text)) { inp.value = ''; loadLog(o.id); render(); }
+}
+async function delLog(id) {
+  if (!confirm('Видалити запис журналу?')) return;
+  await _sb.from('order_log').delete().eq('id', id); loadLog(editId);
+}
+// Чипи картки: останній контакт і дата очікування з фабрики
+const OPEN_CONTACT = ['Нова', 'Кошторис', 'Підтверджено'];
+function contactChip(o) {
+  if (!o.last_contact || !OPEN_CONTACT.includes(o.status)) return '';
+  const days = Math.floor((Date.now() - Date.parse(o.last_contact)) / 864e5);
+  if (isNaN(days)) return '';
+  return `<span class="chip ${days >= 7 ? 'warn' : ''}" title="Останній контакт з клієнтом"><i class="fa fa-comments"></i> ${days <= 0 ? 'сьогодні' : days === 1 ? 'вчора' : days + ' дн.'}</span>`;
+}
+const SUPPLY_WAIT = ['Підтверджено', 'Перевірка', 'В роботі'];            // товар ще не на складі
+const isLate = o => !!o.eta_date && o.eta_date < new Date().toISOString().split('T')[0] && SUPPLY_WAIT.includes(o.status);
+function etaChip(o) {
+  if (!o.eta_date || !SUPPLY_WAIT.includes(o.status)) return '';
+  const t = Date.parse(o.eta_date + 'T00:00:00'); if (isNaN(t)) return '';
+  const left = Math.round((t - new Date().setHours(0, 0, 0, 0)) / 864e5);
+  return `<span class="chip ${left < 0 ? 'late' : left <= 2 ? 'soon' : ''}" title="${left < 0 ? 'Затримка ' + (-left) + ' дн.' : 'Очікується з фабрики'}"><i class="fa fa-truck"></i> ${fmtShort(t)}</span>`;
+}
+
+/* ================= ШАБЛОНИ WHATSAPP (французькою) ================= */
+const SOC = () => co === 'luxwin' ? 'Lux Win' : 'Heimek';
+const frN = v => n(v).toLocaleString('fr-FR', { maximumFractionDigits: 2 });
+const frDate = s => { const t = Date.parse(String(s).slice(0, 10) + 'T00:00:00'); return isNaN(t) ? '' : new Date(t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); };
+const hello = c => c.nom ? `Bonjour ${c.nom},` : 'Bonjour,';
+const WA_TPL = [
+  { k: 'relance',    ua: 'Нагадати про кошторис',          fr: c => `${hello(c)}\n\nJe me permets de revenir vers vous au sujet de votre devis${c.num}. Avez-vous eu l'occasion de le consulter ? Je reste à votre disposition pour toute question ou pour l'ajuster si nécessaire.` },
+  { k: 'confirm',    ua: 'Підтвердження замовлення',       fr: c => `${hello(c)}\n\nNous vous confirmons la prise en compte de votre commande${c.num}. Nous reviendrons vers vous dès que les prochaines étapes seront planifiées.` },
+  { k: 'acompte',    ua: 'Запит передоплати (30%)',        fr: c => `${hello(c)}\n\nPour lancer la fabrication de votre commande${c.num}, nous vous remercions de bien vouloir régler l'acompte de ${c.acompte} €. Dès réception, nous passons la commande en production.` },
+  { k: 'mesure',     ua: 'Узгодити замір',                 fr: c => `${hello(c)}\n\nNous souhaiterions convenir d'un rendez-vous pour la prise de mesures concernant votre commande${c.num}. Quelles sont vos disponibilités cette semaine ?` },
+  { k: 'production', ua: 'Замовлення у виробництві',       fr: c => `${hello(c)}\n\nVotre commande${c.num} est actuellement en cours de fabrication. Nous vous tiendrons informé(e) de son avancement et vous préviendrons dès son arrivée.` },
+  { k: 'retard',     ua: 'Затримка поставки',              fr: c => `${hello(c)}\n\nNous vous informons que la livraison de votre commande${c.num} connaît un léger retard${c.eta ? `. La nouvelle date prévue est le ${c.eta}` : ''}. Nous vous prions de bien vouloir nous excuser pour ce désagrément et restons à votre disposition.` },
+  { k: 'stock',      ua: 'Товар на складі: узгодити монтаж', fr: c => `${hello(c)}\n\nBonne nouvelle : votre commande${c.num} est arrivée dans notre dépôt. Quand souhaiteriez-vous convenir de la livraison et de la pose ?` },
+  { k: 'pose',       ua: 'Підтвердження дати монтажу',     fr: c => `${hello(c)}\n\nNous vous confirmons l'intervention de pose prévue le ${c.date}. Merci de vous assurer que l'accès aux ouvertures est dégagé. N'hésitez pas à nous contacter pour toute question.` },
+  { k: 'solde',      ua: 'Нагадати про залишок до сплати', fr: c => `${hello(c)}\n\nIl reste un solde de ${c.solde} € à régler pour votre commande${c.num}. Pourriez-vous nous indiquer la date de règlement prévue ?` },
+  { k: 'fin',        ua: 'Замовлення виконано, подяка',    fr: c => `${hello(c)}\n\nVotre commande${c.num} est terminée. Nous vous remercions de votre confiance et restons à votre disposition pour toute question.` },
+  { k: 'nouvelles',  ua: 'Клієнт не відповідає',           fr: c => `${hello(c)}\n\nJe vous contacte au sujet de votre demande${c.num}. Pourriez-vous me rappeler ou m'indiquer quand vous êtes joignable ? Merci d'avance.` }
+];
+// Які шаблони пропонувати першими за статусом
+const WA_SUGGEST = { 'Нова': ['nouvelles', 'mesure'], 'Кошторис': ['relance', 'acompte', 'nouvelles'], 'Підтверджено': ['confirm', 'acompte', 'mesure'], 'Перевірка': ['mesure', 'confirm'], 'В роботі': ['production', 'retard', 'solde'], 'На складі': ['stock', 'pose', 'solde'], 'Виконано': ['fin', 'solde'], 'Скасовано': ['relance'] };
+function waCtx(o) {
+  const ttc = n(o.total_ttc), paid = n(o.paid_amount);
+  return { nom: /\p{L}/u.test(o.client || '') ? String(o.client).trim() : '', num: o.product ? ` n° ${o.product}` : '', acompte: frN(Math.round(ttc * 0.3)), solde: frN(Math.max(0, ttc - paid)), date: o.deadline ? frDate(o.deadline) : 'la date convenue', eta: o.eta_date ? frDate(o.eta_date) : '' };
+}
+let waOrder = null, waKey = '';
+function openWa(id) {
+  const o = orders.find(x => x.id === id); if (!o) return;
+  waOrder = o; const ph = orderPhone(o);
+  document.getElementById('waHead').innerHTML = `<b>${esc(o.client || 'Без імені')}</b> · ${esc(ph || 'немає телефону')} · ${esc(o.status || '')}`;
+  const sug = WA_SUGGEST[o.status] || ['nouvelles'], keys = [...sug, ...WA_TPL.map(t => t.k).filter(k => !sug.includes(k))];
+  document.getElementById('waTpls').innerHTML = keys.map(k => { const t = WA_TPL.find(x => x.k === k); return `<button type="button" class="tpl ${sug.includes(k) ? 'sug' : ''}" data-k="${k}" onclick="pickWa(this.dataset.k)">${sug.includes(k) ? '★ ' : ''}${esc(t.ua)}</button>`; }).join('');
+  document.getElementById('waSend').disabled = !waNum(ph);
+  pickWa(keys[0]); showModal('mW');
+}
+function pickWa(k) {
+  const t = WA_TPL.find(x => x.k === k); if (!t || !waOrder) return;
+  waKey = k;
+  document.querySelectorAll('#waTpls .tpl').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+  const ta = document.getElementById('waText');
+  ta.value = t.fr(waCtx(waOrder)) + `\n\nCordialement,\n${SOC()}`;
+  autoGrow(ta);
+}
+function sendWa() {
+  const wa = waNum(orderPhone(waOrder)); if (!wa) return alert('У клієнта немає номера телефону');
+  const text = document.getElementById('waText').value.trim(); if (!text) return;
+  window.open(`https://wa.me/${wa}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+  const t = WA_TPL.find(x => x.k === waKey);
+  addLogEntry(waOrder, 'msg', 'WhatsApp: ' + (t ? t.ua : 'повідомлення'), true);
+}
+async function copyWa() {
+  const ta = document.getElementById('waText');
+  try { await navigator.clipboard.writeText(ta.value); } catch (e) { ta.select(); document.execCommand('copy'); }
+  const b = event && event.currentTarget; if (b) { const h = b.innerHTML; b.innerHTML = '<i class="fa fa-check"></i> Скопійовано'; setTimeout(() => b.innerHTML = h, 1200); }
+}
+
 /* ================= КАЛЕНДАР ================= */
 function renderCal() {
   const box = document.getElementById('calDisplay');
@@ -1397,6 +1620,7 @@ function renderCal() {
     if (o.status === 'Виконано' || o.status === 'Скасовано') return;
     if (o.deadline) items.push({ d: o.deadline, t: 'dl', o });
     if (o.reminder_date) items.push({ d: o.reminder_date, t: 'rem', o });
+    if (o.eta_date && SUPPLY_WAIT.includes(o.status)) items.push({ d: o.eta_date, t: 'eta', o });
   });
   if (!items.length) { box.innerHTML = `<div class="empty"><i class="fa fa-calendar-check"></i>Немає запланованих дат</div>`; return; }
   items.sort((a,b) => a.d.localeCompare(b.d));
@@ -1413,8 +1637,8 @@ function renderCal() {
     const rows = groups[d].map(({t,o}) => {
       const isRem = t === 'rem';
       return `<div class="cal-item" data-id="${esc(o.id)}" onclick="openO(this.dataset.id)">
-        <div class="ci" style="background:${isRem ? 'var(--danger)' : 'var(--p2)'}"><i class="fa ${isRem ? 'fa-phone' : 'fa-screwdriver-wrench'}"></i></div>
-        <div><div class="cn">${esc(o.client||'Без імені')}</div><div class="cs">${isRem ? 'Передзвонити' : 'Дедлайн'} · ${esc(o.product||'---')} · ${esc(o.status)}${o.assignee ? ' · ' + esc(o.assignee) : ''}</div></div>
+        <div class="ci" style="background:${isRem ? 'var(--danger)' : t === 'eta' ? 'var(--store)' : 'var(--p2)'}"><i class="fa ${isRem ? 'fa-phone' : t === 'eta' ? 'fa-truck' : 'fa-screwdriver-wrench'}"></i></div>
+        <div><div class="cn">${esc(o.client||'Без імені')}</div><div class="cs">${isRem ? 'Передзвонити' : t === 'eta' ? 'Очікується з фабрики' : 'Дедлайн'} · ${esc(o.product||'---')} · ${esc(o.status)}${o.assignee ? ' · ' + esc(o.assignee) : ''}</div></div>
         <div class="cv">${fN(o.total_ttc)} €</div>
       </div>`;
     }).join('');
@@ -1491,7 +1715,7 @@ function renderNew() {
             <span class="chip"><i class="fa fa-phone"></i> ${esc(ph) || 'без телефону'}</span>
             ${nFiles ? `<span class="chip"><i class="fa fa-paperclip"></i> ${nFiles}</span>` : ''}
           </div>
-          <div class="c-acts">${actsHtml(wa)}</div>
+          <div class="c-acts">${actsHtml(wa, o.id)}</div>
         </div>
       </div>`;
   }).join('');
@@ -1611,6 +1835,9 @@ function renderStats() {
     <h4 class="st-h"><span>Замовлення за статусами</span>${mgr ? '' : '<button class="btn-ghost" onclick="exportCSV()"><i class="fa fa-file-export"></i> Експорт CSV</button>'}</h4>
     <div class="cnt-grid">${cHtml}</div>
     ${teamStats(src, mgr)}
+    ${funnelStats(src)}
+    ${monthCompare(mgr)}
+    <div id="durBox"></div>
     ${mgr ? '' : `
     <h4 class="st-h">Прибуток по місяцях</h4>
     <div class="chart-box">${monthlyChart()}<div class="chart-note">Лише виконані замовлення; місяць — за датою створення замовлення.</div></div>
@@ -1618,6 +1845,69 @@ function renderStats() {
     <div class="chart-box">${factoryBars(sold)}<div class="chart-note">Скільки вже закуплено у кожної фабрики (активні й виконані замовлення за обраний період).</div></div>
     <h4 class="st-h">Борг по фабриках (в роботі)</h4>
     <div class="st-grid">${fHtml}</div>`}`;
+  loadDurations();
+}
+
+// Воронка: скільки заявок дійшло до кошторису, підтвердження, виконання, і де замовлення застрягли
+function funnelStats(src) {
+  const CONF = ['Підтверджено', 'Перевірка', 'В роботі', 'На складі', 'Виконано'];
+  const total = src.length;
+  const est = src.filter(o => o.status !== 'Нова'), conf = src.filter(o => CONF.includes(o.status)), dn = src.filter(o => o.status === 'Виконано'), canc = src.filter(o => o.status === 'Скасовано');
+  const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
+  const row = (l, v, w) => `<div class="hb"><div class="hb-top"><span>${l}</span><span>${v} · ${w}%</span></div><div class="hb-track"><div class="hb-fill" style="width:${Math.max(w, v ? 2 : 0)}%"></div></div></div>`;
+  const touch = o => Math.max(orderTs(o), o.last_contact ? Date.parse(o.last_contact) : 0), now = Date.now();
+  const stale = orders.filter(o => o.status === 'Кошторис' && now - touch(o) > 7 * 864e5);
+  const waiting = orders.filter(o => o.status === 'Нова' && now - orderTs(o) > 2 * 864e5);
+  const late = orders.filter(isLate);
+  const tile = (n_, l, sub) => `<div class="st-box" style="cursor:default"><b style="${n_ ? 'color:var(--warning)' : ''}">${n_}</b><small>${l}</small><span>${sub}</span></div>`;
+  return `<h4 class="st-h">Воронка продажів</h4>
+    <div class="chart-box">${row('Заявки', total, 100)}${row('Складено кошторис', est.length, pct(est.length, total))}${row('Підтверджено', conf.length, pct(conf.length, total))}${row('Виконано', dn.length, pct(dn.length, total))}
+      <div class="chart-note">Конверсія кошторис → підтвердження: <b>${pct(conf.length, est.length)}%</b> · скасовано: <b>${canc.length}</b> (${pct(canc.length, total)}%). Рахується за поточними статусами замовлень обраного періоду.</div></div>
+    <h4 class="st-h">Потребують уваги</h4>
+    <div class="st-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+      ${tile(stale.length, 'Кошториси без руху 7+ днів', fN(Math.round(stale.reduce((s, o) => s + n(o.total_ttc), 0))) + ' € у кошторисах')}
+      ${tile(waiting.length, 'Заявки без прорахунку 2+ дні', 'статус «Нова»')}
+      ${tile(late.length, 'Затримка постачання', 'ETA минув, товару ще немає')}
+    </div>`;
+}
+
+// Порівняння місяців (за датою створення замовлення; виконані та обіг, прибуток лише у власника)
+function monthCompare(mgr) {
+  const now = new Date(), ms = [];
+  for (let i = 5; i >= 0; i--) { const d = new Date(now.getFullYear(), now.getMonth() - i, 1); ms.push({ y: d.getFullYear(), m: d.getMonth(), label: d.toLocaleDateString('uk-UA', { month: 'long', year: '2-digit' }), cr: 0, dn: 0, rev: 0, pr: 0 }); }
+  orders.forEach(o => {
+    const ts = orderTs(o); if (!ts) return;
+    const d = new Date(ts), b = ms.find(x => x.y === d.getFullYear() && x.m === d.getMonth()); if (!b) return;
+    b.cr++;
+    if (o.status === 'Виконано') { b.dn++; b.rev += n(o.total_ttc); b.pr += n(o.sale_price_ht) - orderCost(o) + n(o.install_cost) + n(o.delivery); }
+  });
+  const delta = (cur, prev) => prev ? (() => { const p = Math.round((cur - prev) / Math.abs(prev) * 100); return `<small class="dl ${p >= 0 ? 'up' : 'dn'}">${p >= 0 ? '▲' : '▼'} ${Math.abs(p)}%</small>`; })() : '';
+  const rows = ms.map((b, i) => { const p = ms[i - 1]; return `<tr><td>${esc(b.label)}</td><td>${b.cr}${p ? delta(b.cr, p.cr) : ''}</td><td>${b.dn}</td><td>${fN(Math.round(b.rev))} €${p ? delta(b.rev, p.rev) : ''}</td>${mgr ? '' : `<td>${fN(Math.round(b.pr))} €${p ? delta(b.pr, p.pr) : ''}</td>`}</tr>`; }).reverse().join('');
+  return `<h4 class="st-h">Порівняння місяців</h4><div class="chart-box" style="overflow-x:auto"><table class="cmp"><thead><tr><th>Місяць</th><th>Заявок</th><th>Виконано</th><th>Обіг</th>${mgr ? '' : '<th>Прибуток</th>'}</tr></thead><tbody>${rows}</tbody></table><div class="chart-note">Місяць — за датою створення замовлення; «Виконано», обіг і прибуток — лише з тих, що зараз у статусі «Виконано». Зміна у % — до попереднього місяця.</div></div>`;
+}
+
+// Середній час до підтвердження й до виконання. Береться з історії змін, тож лише для замовлень після її ввімкнення
+async function loadDurations() {
+  const box = document.getElementById('durBox'); if (!box) return;
+  const r = await _sb.from('order_history').select('order_id,changed_at,details').eq('company', co).eq('action', 'updated').order('changed_at', { ascending: true }).limit(5000);
+  if (r.error || !r.data) { box.innerHTML = ''; return; }
+  const enter = {};
+  r.data.forEach(h => {
+    const s = h.details && h.details.status; if (!Array.isArray(s)) return;
+    const e = (enter[h.order_id] = enter[h.order_id] || {}), t = Date.parse(h.changed_at);
+    if (s[1] === 'Підтверджено' && !e.conf) e.conf = t;
+    if (s[1] === 'Виконано' && !e.done) e.done = t;
+  });
+  const byId = Object.fromEntries(orders.map(o => [o.id, o]));
+  const toConf = [], toDone = [];
+  Object.entries(enter).forEach(([id, e]) => { const o = byId[id]; if (!o) return; const c = orderTs(o); if (e.conf && c) toConf.push((e.conf - c) / 864e5); if (e.done && e.conf) toDone.push((e.done - e.conf) / 864e5); });
+  const avg = a => a.length ? a.reduce((s, x) => s + x, 0) / a.length : null;
+  const fmt = v => v === null ? '—' : (v < 1 ? '< 1 дня' : Math.round(v) + ' дн.');
+  const a = avg(toConf), b = avg(toDone);
+  box.innerHTML = `<h4 class="st-h">Швидкість роботи</h4><div class="st-grid">
+    <div class="st-box" style="cursor:default"><b>${fmt(a)}</b><small>Від створення до підтвердження</small><span>за ${toConf.length} замовл.</span></div>
+    <div class="st-box" style="cursor:default"><b>${fmt(b)}</b><small>Від підтвердження до виконання</small><span>за ${toDone.length} замовл.</span></div></div>
+    ${(!toConf.length && !toDone.length) ? '<div class="chart-note" style="margin-top:8px">Даних ще немає: час рахується з історії змін статусів, тому зʼявиться, коли замовлення почнуть проходити етапи.</div>' : ''}`;
 }
 
 // Підсумок по співробітниках: скільки чекає, у роботі, виконано. Прибуток бачить лише власник
@@ -1676,8 +1966,8 @@ function exportCSV() {
   if (isMgr()) return;   // експорт містить собівартість
   const src = orders.filter(inPeriod);
   if (!src.length) return alert('Немає даних за обраний період');
-  const cols = ['client','product','factory','cost_price','factory_prepay','factory2','cost_price2','factory_prepay2','status','deadline','sale_price_ht','tva_rate','total_ttc','install_cost','delivery','paid_amount','assignee','notes'];
-  const head = ['Клієнт','Номер','Фабрика 1','Ціна фабрики 1','Передплата 1','Фабрика 2','Ціна фабрики 2','Передплата 2','Статус','Дедлайн','Ціна HT','TVA %','Сума TTC','Монтаж','Доставка','Оплачено','Відповідальний','Нотатки'];
+  const cols = ['client','product','factory','cost_price','factory_prepay','factory2','cost_price2','factory_prepay2','status','deadline','sale_price_ht','tva_rate','total_ttc','install_cost','delivery','paid_amount','assignee','factory_ordered','eta_date','notes'];
+  const head = ['Клієнт','Номер','Фабрика 1','Ціна фабрики 1','Передплата 1','Фабрика 2','Ціна фабрики 2','Передплата 2','Статус','Дедлайн','Ціна HT','TVA %','Сума TTC','Монтаж','Доставка','Оплачено','Відповідальний','Замовлено на фабриці','ETA','Нотатки'];
   const esc = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
   const csv = '﻿' + head.join(';') + '\n' + src.map(o => cols.map(c => esc(o[c])).join(';')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -1689,7 +1979,7 @@ function exportCSV() {
 
 /* ================= ЗБЕРЕЖЕННЯ ================= */
 async function saveO() {
-  const o = { id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value, factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value, assignee: document.getElementById('fAs').value || null, sale_price_ht: n(document.getElementById('fSa').value), tva_rate: n(document.getElementById('fTv').value), total_ttc: n(document.getElementById('fTt').value), cost_price: n(document.getElementById('fCo').value), install_cost: n(document.getElementById('fIn').value), delivery: n(document.getElementById('fDe').value), paid_amount: payTotal(), payments: curPay, factory_prepay: n(document.getElementById('fFaPa').value), factory2: document.getElementById('fFa2').value || null, cost_price2: n(document.getElementById('fCo2').value), factory_prepay2: n(document.getElementById('fFaPa2').value), deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value, cancel_reason: document.getElementById('fCan').value, file_url: JSON.stringify(curFiles), check_measured: document.getElementById('fChM').checked, check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked };
+  const o = { id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value, factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value, assignee: document.getElementById('fAs').value || null, factory_ordered: document.getElementById('fOr').value || null, eta_date: document.getElementById('fEta').value || null, sale_price_ht: n(document.getElementById('fSa').value), tva_rate: n(document.getElementById('fTv').value), total_ttc: n(document.getElementById('fTt').value), cost_price: n(document.getElementById('fCo').value), install_cost: n(document.getElementById('fIn').value), delivery: n(document.getElementById('fDe').value), paid_amount: payTotal(), payments: curPay, factory_prepay: n(document.getElementById('fFaPa').value), factory2: document.getElementById('fFa2').value || null, cost_price2: n(document.getElementById('fCo2').value), factory_prepay2: n(document.getElementById('fFaPa2').value), deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value, cancel_reason: document.getElementById('fCan').value, file_url: JSON.stringify(curFiles), check_measured: document.getElementById('fChM').checked, check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked };
   // Дата створення виставляється автоматично: нове замовлення — зараз; наявне — зберігаємо стару
   // (якщо в старого запису її немає — відновлюємо з часу в id, інакше ставимо зараз)
   const prev = editId ? orders.find(x => x.id == editId) : null;
@@ -1741,7 +2031,7 @@ async function renameClientInOrders(id, oldName, newName) {
 
 const openO = id => {
   editId = id; const o = id ? orders.find(x=>x.id==id) : {};
-  ['fCl','fPr','fSa','fCo','fIn','fDe','fDl','fRe','fNo','fCan','fFaPa','fCo2','fFaPa2'].forEach(i=>document.getElementById(i).value='');
+  ['fCl','fPr','fSa','fCo','fIn','fDe','fDl','fRe','fNo','fCan','fFaPa','fCo2','fFaPa2','fOr','fEta'].forEach(i=>document.getElementById(i).value='');
   ['fChM','fChO','fChS','fChI'].forEach(i=>document.getElementById(i).checked=false);
   document.getElementById('fFa').value = id ? (o.factory || FACTORIES[0]) : FACTORIES[0];
   document.getElementById('fFa2').value = id ? (o.factory2 || '') : '';
@@ -1759,6 +2049,7 @@ const openO = id => {
     document.getElementById('fSa').value=o.sale_price_ht; document.getElementById('fTv').value=o.tva_rate;
     document.getElementById('fCo').value=o.cost_price; document.getElementById('fIn').value=o.install_cost; document.getElementById('fDe').value=o.delivery;
     document.getElementById('fDl').value=o.deadline; document.getElementById('fRe').value=o.reminder_date;
+    document.getElementById('fOr').value=o.factory_ordered ?? ''; document.getElementById('fEta').value=o.eta_date ?? '';
     document.getElementById('fSt').value=o.status; document.getElementById('fNo').value=o.notes ?? '';
     document.getElementById('fCan').value=o.cancel_reason ?? ''; document.getElementById('fFaPa').value=o.factory_prepay ?? '';
     document.getElementById('fChM').checked=!!o.check_measured; document.getElementById('fChO').checked=!!o.check_ordered;
@@ -1769,6 +2060,10 @@ const openO = id => {
     document.getElementById('btnD').style.display='none';
     document.getElementById('btnDup').style.display='none';
   }
+  document.getElementById('autoHint').textContent = '';
+  document.getElementById('btnWa').style.display = id ? 'block' : 'none';
+  document.getElementById('logWrap').style.display = id ? 'block' : 'none';
+  document.getElementById('logList').innerHTML = ''; if (id) loadLog(id);
   setAs('fAs', id ? o.assignee : ME());     // нове замовлення за замовчуванням призначається на мене
   // Історія змін — лише для наявного замовлення; вантажиться, коли розгорнути
   const hb = document.getElementById('histBox');
@@ -1784,7 +2079,8 @@ const openO = id => {
 function dupO() {
   editId = null;
   document.getElementById('fSt').value = 'Кошторис';
-  ['fDl','fRe','fFaPa','fFaPa2'].forEach(i => document.getElementById(i).value = '');
+  ['fDl','fRe','fFaPa','fFaPa2','fOr','fEta'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('btnWa').style.display = 'none'; document.getElementById('logWrap').style.display = 'none';
   curPay = []; curFiles = []; renderPay(); renderFiles();
   document.getElementById('btnD').style.display = 'none';
   document.getElementById('btnDup').style.display = 'none';
@@ -1805,7 +2101,8 @@ function showModal(id) {
   growAll();   // підігнати висоту полів коментарів під наявний текст
 }
 const closeM = (id, fromPop) => {
-  document.getElementById(id).style.display='none'; editId=null;
+  document.getElementById(id).style.display='none';
+  if (id === 'mO' || id === 'mC') editId = null;     // допоміжні вікна (шаблони, кошик тощо) не скидають відкрите замовлення
   if(id==='mO') { document.querySelector('#mO h3').textContent='Замовлення'; finishFiles(); }
   // якщо закрили вручну — прибрати запис з історії
   if (!fromPop && history.state && history.state.m === id) history.back();
@@ -1842,14 +2139,130 @@ function openCE(id) {
   document.getElementById('btnDC').style.display='block';
   showModal('mC');
 }
+// Остаточне видалення замовлень разом з файлами (файли не лишаються у сховищі «сиротами»)
+async function purgeOrders(list) {
+  const ids = list.map(o => o.id); if (!ids.length) return null;
+  const paths = list.flatMap(o => parseFiles(o.file_url).map(f => f.path).filter(Boolean));
+  const { error } = await _sb.from('orders').delete().in('id', ids);
+  if (error) return error;
+  if (paths.length) await _sb.storage.from(BUCKET).remove(paths);
+  return null;
+}
 async function delO() {
-  if (!confirm('Видалити замовлення разом з усіма його файлами?')) return;
-  const o = orders.find(x => x.id == editId);
-  const paths = o ? parseFiles(o.file_url).map(f => f.path).filter(Boolean) : [];
-  const { error } = await _sb.from('orders').delete().eq('id', editId);
-  if (error) return alert('Помилка видалення: ' + error.message);
-  if (paths.length) await _sb.storage.from(BUCKET).remove(paths);   // файли не лишаються у сховищі «сиротами»
+  const o = orders.find(x => x.id == editId); if (!o) return;
+  if (TRASH_OK) {
+    if (!confirm('Перемістити замовлення в кошик? Його можна відновити протягом 30 днів (Налаштування → Кошик).')) return;
+    const { error } = await _sb.from('orders').update({ deleted_at: new Date().toISOString() }).eq('id', o.id);
+    if (!error) { logHistory(o.id, o.company, 'deleted', {}); closeM('mO'); return sync(); }
+    if (!/deleted_at/.test(error.message || '')) return alert('Помилка видалення: ' + error.message);
+    TRASH_OK = false;     // колонки deleted_at ще немає в базі — нижче видаляємо остаточно
+  }
+  if (!confirm('Кошика в базі ще немає, тому замовлення буде видалено НАЗАВЖДИ разом з файлами. Видалити?')) return;
+  const err = await purgeOrders([o]);
+  if (err) return alert('Помилка видалення: ' + err.message);
   closeM('mO'); sync();
+}
+
+/* ================= ДУБЛІКАТИ КЛІЄНТІВ ================= */
+const phoneKey = s => { const d = String(s || '').replace(/\D/g, ''); return d.length >= 9 ? d.slice(-9) : ''; };   // останні 9 цифр: 0612… = +33612…
+const nameIsPhone = s => !/\p{L}/u.test(String(s || '')) && String(s || '').replace(/\D/g, '').length >= 7;
+const clientOrders = c => orders.filter(o => o.client_id ? o.client_id === c.id : o.client === c.name);
+let dupGroups = [];
+function findDupGroups() {
+  const par = clients.map((_, i) => i);
+  const find = i => par[i] === i ? i : (par[i] = find(par[i]));
+  const seen = {};
+  clients.forEach((c, i) => {
+    const keys = [];
+    const pk = phoneKey(c.phone); if (pk) keys.push('p' + pk);
+    if (nameIsPhone(c.name)) { const nk = phoneKey(c.name); if (nk) keys.push('p' + nk); }
+    else { const nm = normS(c.name); if (nm.length >= 3) keys.push('n' + nm); }
+    keys.forEach(k => { if (k in seen) par[find(i)] = find(seen[k]); else seen[k] = i; });
+  });
+  const g = {}; clients.forEach((c, i) => { (g[find(i)] = g[find(i)] || []).push(c); });
+  return Object.values(g).filter(a => a.length > 1);
+}
+const phoneFixList = () => clients.filter(c => nameIsPhone(c.name) && !(c.phone || '').trim());
+function openDups() { renderDups(); showModal('mD'); }
+function renderDups() {
+  dupGroups = findDupGroups();
+  const fix = phoneFixList(), box = document.getElementById('dupBox');
+  let h = '';
+  if (fix.length) h += `<div class="qbox" style="margin-bottom:12px"><div class="qh">Номер замість імені: ${fix.length}</div><div class="qs">У цих клієнтів імʼя виглядає як телефон, а поле «Телефон» порожнє. Можна скопіювати номер у телефон (імʼя не змінюється).</div><button class="btn-s" style="margin:0" onclick="fixPhoneNames()">Заповнити телефони (${fix.length})</button></div>`;
+  if (!dupGroups.length) h += '<div class="empty" style="padding:30px 0"><i class="fa fa-circle-check"></i>Дублікатів не знайдено</div>';
+  else {
+    h += `<p style="font-size:12.5px;color:var(--muted);margin-bottom:12px">Груп дублікатів: ${dupGroups.length}. Оберіть запис, який лишиться, і натисніть «Обʼєднати».</p>`;
+    h += dupGroups.map((g, gi) => {
+      const best = [...g].sort((a, b) => (/\p{L}/u.test(b.name || '') - /\p{L}/u.test(a.name || '')) || (clientOrders(b).length - clientOrders(a).length))[0];
+      return `<div class="qbox" style="margin-bottom:12px">${g.map(c => `<label class="dup-opt"><input type="radio" name="dg${gi}" value="${esc(c.id)}" ${c === best ? 'checked' : ''}><div><b>${esc(c.name || 'Без імені')}</b><div style="font-size:11.5px;color:var(--muted)">${esc(c.phone || 'без телефону')} · замовлень: ${clientOrders(c).length}</div></div></label>`).join('')}<button class="btn-s" style="margin:6px 0 0" data-gi="${gi}" onclick="mergeGroup(+this.dataset.gi)">Обʼєднати ${g.length} записи</button></div>`;
+    }).join('');
+  }
+  box.innerHTML = h;
+}
+async function fixPhoneNames() {
+  const list = phoneFixList(); if (!list.length) return;
+  for (const c of list) { const { error } = await _sb.from('clients').update({ phone: c.name }).eq('id', c.id); if (error) return alert('Помилка: ' + error.message); c.phone = c.name; }
+  renderDups(); render();
+}
+async function mergeGroup(gi) {
+  const grp = dupGroups[gi]; if (!grp) return;
+  const sel = document.querySelector(`input[name="dg${gi}"]:checked`); if (!sel) return;
+  const p = grp.find(c => c.id === sel.value), others = grp.filter(c => c !== p);
+  if (!confirm(`Обʼєднати ${grp.length} записи в «${p.name}»? Замовлення інших буде переведено на нього, а самі записи видалено.`)) return;
+  const patch = {};
+  ['phone', 'address', 'notes'].forEach(k => { if (!(p[k] || '').trim()) { const v = others.map(o => o[k]).find(x => (x || '').trim()); if (v) patch[k] = v; } });
+  if (Object.keys(patch).length) { const { error } = await _sb.from('clients').update(patch).eq('id', p.id); if (error) return alert('Помилка: ' + error.message); }
+  for (const s of others) {
+    let r = await _sb.from('orders').update({ client: p.name, client_id: p.id }).eq('company', co).eq('client_id', s.id);
+    if (r.error) r = await _sb.from('orders').update({ client: p.name }).eq('company', co).eq('client', s.name);   // колонки client_id ще немає
+    else await _sb.from('orders').update({ client: p.name, client_id: p.id }).eq('company', co).is('client_id', null).eq('client', s.name);
+    if (r.error) return alert('Помилка перенесення замовлень: ' + r.error.message);
+    const d = await _sb.from('clients').delete().eq('id', s.id); if (d.error) return alert('Помилка видалення дубліката: ' + d.error.message);
+  }
+  await sync(); renderDups();
+}
+
+/* ================= КОШИК ================= */
+let trashData = [];
+const TRASH_DAYS = 30;
+async function openTrash() {
+  if (!TRASH_OK) return alert('Кошик ще не ввімкнено: у базі немає колонки deleted_at. Виконайте SQL з інструкції.');
+  const r = await _sb.from('orders').select('*').eq('company', co).not('deleted_at', 'is', null).order('deleted_at', { ascending: false });
+  if (r.error) { if (/deleted_at/.test(r.error.message || '')) TRASH_OK = false; return alert('Кошик недоступний: ' + r.error.message); }
+  let list = r.data || [];
+  const old = list.filter(o => Date.now() - Date.parse(o.deleted_at) > TRASH_DAYS * 864e5);   // старше 30 днів — стираємо остаточно
+  if (old.length) { const e = await purgeOrders(old); if (!e) list = list.filter(o => !old.includes(o)); }
+  trashData = list; renderTrash(); showModal('mT');
+}
+function renderTrash() {
+  const box = document.getElementById('trashList');
+  if (!trashData.length) { box.innerHTML = '<div class="empty" style="padding:30px 0"><i class="fa fa-trash-can"></i>Кошик порожній</div>'; return; }
+  box.innerHTML = trashData.map(o => {
+    const left = Math.max(0, TRASH_DAYS - Math.floor((Date.now() - Date.parse(o.deleted_at)) / 864e5));
+    return `<div class="file-chip" style="flex-wrap:wrap" data-id="${esc(o.id)}">
+      <div style="flex:1;min-width:160px"><b>${esc(o.client || 'Без імені')}</b><div style="font-size:11.5px;color:var(--muted)">${esc(o.product || '—')} · ${fN(o.total_ttc)} € · ${esc(o.status || '')}</div><div style="font-size:11px;color:var(--muted2)">видалено ${fmtDate(Date.parse(o.deleted_at))} · лишилось ${left} дн.</div></div>
+      <button class="tbtn" style="height:36px" onclick="restoreOrder(this.closest('[data-id]').dataset.id)"><i class="fa fa-rotate-left"></i> Відновити</button>
+      <button class="tbtn" style="height:36px;color:var(--danger)" onclick="purgeFromTrash(this.closest('[data-id]').dataset.id)" title="Видалити назавжди"><i class="fa fa-xmark"></i></button>
+    </div>`;
+  }).join('') + `<button class="btn-alt" style="display:block;color:var(--danger)" onclick="emptyTrash()">Очистити кошик назавжди</button>`;
+}
+async function restoreOrder(id) {
+  const o = trashData.find(x => x.id === id); if (!o) return;
+  const { error } = await _sb.from('orders').update({ deleted_at: null }).eq('id', id);
+  if (error) return alert('Помилка: ' + error.message);
+  logHistory(id, o.company, 'restored', {});
+  trashData = trashData.filter(x => x.id !== id); renderTrash(); sync();
+}
+async function purgeFromTrash(id) {
+  const o = trashData.find(x => x.id === id); if (!o) return;
+  if (!confirm(`Видалити «${o.client || 'замовлення'}» НАЗАВЖДИ разом з файлами? Це не скасувати.`)) return;
+  const e = await purgeOrders([o]); if (e) return alert('Помилка: ' + e.message);
+  trashData = trashData.filter(x => x.id !== id); renderTrash();
+}
+async function emptyTrash() {
+  if (!trashData.length || !confirm(`Видалити назавжди все (${trashData.length} замовл.) разом з файлами? Це не скасувати.`)) return;
+  const e = await purgeOrders(trashData); if (e) return alert('Помилка: ' + e.message);
+  trashData = []; renderTrash();
 }
 async function delC() { if(confirm('Видалити?')) { await _sb.from('clients').delete().eq('id', editId); closeM('mC'); sync(); } }
 const calc = () => {
@@ -1902,9 +2315,14 @@ async function applyBulk() {
   const ids = [...selIds];
   if (!ids.length) return alert('Спершу виберіть замовлення');
   if (!confirm(`Змінити статус у ${ids.length} замовл. на «${st}»?`)) return;
-  const { error } = await _sb.from('orders').update({ status: st }).in('id', ids);
-  if (error) return alert('Помилка: ' + error.message);
-  ids.forEach(id => { const o = orders.find(x => x.id === id); if (o && o.status !== st) logHistory(id, o.company, 'updated', { status: [o.status, st] }); });
+  let failed = 0;
+  for (const id of ids) {          // по одному: автоматизація залежить від поточних полів кожного замовлення
+    const o = orders.find(x => x.id === id); if (!o) continue;
+    const { error } = await _sb.from('orders').update({ status: st, ...autoPatch(o, st) }).eq('id', id);
+    if (error) { failed++; continue; }
+    if (o.status !== st) logHistory(id, o.company, 'updated', { status: [o.status, st] });
+  }
+  if (failed) alert(`Не вдалося змінити ${failed} із ${ids.length} замовл.`);
   toggleSel(false); await sync();
 }
 
@@ -1919,7 +2337,7 @@ function toggleFlt() { const p = document.getElementById('fltPanel'); p.style.di
 function resetFlt() { ['fltFac','fltAs','fltFrom','fltTo'].forEach(i => document.getElementById(i).value = ''); render(); }
 
 /* ================= ІСТОРІЯ ЗМІН ================= */
-const HIST_LBL = { status:'Статус', assignee:'Відповідальний', client:'Клієнт', factory:'Фабрика', factory2:'Фабрика 2', deadline:'Дедлайн', reminder_date:'Нагадування', sale_price_ht:'Ціна HT', total_ttc:'Сума TTC', paid_amount:'Оплачено' };
+const HIST_LBL = { status:'Статус', assignee:'Відповідальний', client:'Клієнт', factory:'Фабрика', factory2:'Фабрика 2', deadline:'Дедлайн', reminder_date:'Нагадування', factory_ordered:'Замовлено на фабриці', eta_date:'Очікується (ETA)', sale_price_ht:'Ціна HT', total_ttc:'Сума TTC', paid_amount:'Оплачено' };
 const HIST_NUM = new Set(['sale_price_ht', 'total_ttc', 'paid_amount']);
 async function logHistory(orderId, orderCo, action, details) {
   try { await _sb.from('order_history').insert({ order_id: orderId, company: orderCo, user_email: USER_EMAIL, action, details }); } catch (e) {}
@@ -1928,6 +2346,8 @@ const histVal = (k, v) => (v === '' || v == null) ? '—' : (HIST_NUM.has(k) ? f
 function histText(h) {
   const d = h.details || {};
   if (h.action === 'created') return 'Створено' + (d.status ? ` · статус «${esc(d.status)}»` : '');
+  if (h.action === 'deleted') return 'Переміщено в кошик';
+  if (h.action === 'restored') return 'Відновлено з кошика';
   return Object.keys(d).filter(k => Array.isArray(d[k]))
     .map(k => `${esc(HIST_LBL[k] || k)}: <s>${histVal(k, d[k][0])}</s> → <b>${histVal(k, d[k][1])}</b>`).join('<br>') || 'Змінено';
 }
@@ -1942,7 +2362,7 @@ async function loadHistory(id) {
 }
 
 /* ================= ЧЕРНЕТКИ (щоб не губити введене) ================= */
-const DRAFT_IDS = ['fCl','fPr','fFa','fFa2','fSt','fAs','fDl','fSa','fTv','fIn','fDe','fCo','fFaPa','fCo2','fFaPa2','fRe','fNo','fCan'];
+const DRAFT_IDS = ['fCl','fPr','fFa','fFa2','fSt','fAs','fOr','fEta','fDl','fSa','fTv','fIn','fDe','fCo','fFaPa','fCo2','fFaPa2','fRe','fNo','fCan'];
 const DRAFT_CHK = ['fChM','fChO','fChS','fChI'];
 const draftKey = () => 'crm_draft_o_' + co;
 let draftTimer = null;
@@ -2005,6 +2425,8 @@ function setMinMk(v) { LS.set('crm_min_markup', String(Math.max(0, parseFloat(v)
 function openSettings() { renderSettings(); showModal('mS'); }
 function renderSettings() {
   renderTeamSettings();
+  document.querySelectorAll('#autoSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === (AUTO_ON() ? '1' : '0')));
+  document.getElementById('setAutoDays').value = AUTO_DAYS();
   const pref = LS.get('crm_theme', 'auto');
   document.querySelectorAll('#themeSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === pref));
   const z = parseFloat(LS.get('crm_zoom', ''));
@@ -2017,11 +2439,13 @@ if (window.matchMedia) { const mq = matchMedia('(prefers-color-scheme: dark)'); 
 
 // Закриття модалки: клік поза вікном або Esc
 document.querySelectorAll('.modal-w').forEach(m => { m.addEventListener('click', e => { if (e.target === m) closeM(m.id); }); });
-document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; document.querySelectorAll('.modal-w').forEach(m => { if (m.style.display === 'flex') closeM(m.id); }); });
+// Esc закриває лише верхню відкриту модалку
+const topModal = () => [...document.querySelectorAll('.modal-w')].filter(m => m.style.display === 'flex').pop();
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; const m = topModal(); if (m) closeM(m.id); });
 
 // Кнопка "Назад": спершу закриває модалку, потім повертає на попередню вкладку
 window.addEventListener('popstate', e => {
-  const openModalEl = [...document.querySelectorAll('.modal-w')].find(m => m.style.display === 'flex');
+  const openModalEl = topModal();
   if (openModalEl) { closeM(openModalEl.id, true); return; }
   const st = e.state;
   if (st && st.t) tab(st.t, true);
