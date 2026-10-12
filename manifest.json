@@ -1,26 +1,17 @@
 {
-  "name": "Heimek / Lux Win CRM",
-  "short_name": "CRM",
-  "description": "CRM для замовлень, клієнтів і звітності",
+  "name": "Axis",
+  "short_name": "Axis",
+  "description": "Axis — Clarity. Control. Growth. Замовлення, клієнти і звітність Heimek та Lux Win",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#101a2c",
+  "background_color": "#0E2A47",
   "theme_color": "#101a2c",
   "lang": "uk",
   "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

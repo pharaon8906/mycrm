@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>CRM</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#101a2c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="CRM">
+<link rel="apple-touch-icon" href="icon.svg">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ============ ТОКЕНИ ============ */
+:root {
+  --p: #101a2c; --p2: #3355ff; --p2-soft: #eef1ff; --a: #7c92ff;
+  --bg: #e9edf3; --surface: #ffffff; --line: #d9dfe9; --line-soft: #eaeef4;
+  --txt: #0b1220; --muted: #5a6577; --muted2: #78839a;
+  --new: #db2777;
+  --est: #7d8798; --conf: #3355ff; --verify: #0e8fa8; --work: #c2610a;
+  --store: #6d3fd4; --done: #12805c; --canc: #c0344a;
+  --success: #12805c; --danger: #c0344a; --warning: #c2610a; --violet: #6d3fd4; --cyan: #0e8fa8;
+  --r-xs: 8px; --r-sm: 10px; --r: 14px; --r-lg: 18px; --r-xl: 24px;
+  --sh-1: 0 1px 2px rgba(11,18,32,.05);
+  --sh-2: 0 4px 16px -4px rgba(11,18,32,.10);
+  --sh-3: 0 24px 48px -16px rgba(11,18,32,.24);
+  --nav-h: 58px; --side-w: 244px;
+}
+[data-co="luxwin"] { --p: #0b1f18; --p2: #068a63; --p2-soft: #e9f8f2; --a: #4fc79f; --conf: #068a63; }
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg); color: var(--txt); font-family: 'Inter', system-ui, sans-serif; padding-bottom: 78px; font-size: 14px; line-height: 1.45; -webkit-font-smoothing: antialiased; touch-action: manipulation; }
+::selection { background: var(--p2); color: #fff; }
+
+header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px) 18px 0; height: calc(var(--nav-h) + env(safe-area-inset-top,0px)); box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+.brand { display: flex; align-items: center; gap: 11px; }
+.brand .logo { width: 32px; height: 32px; border-radius: var(--r-sm); background: var(--p2); display: grid; place-items: center; font-size: 14px; }
+#brd { font-weight: 700; letter-spacing: -.02em; font-size: 15px; }
+#logoutBtn { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: #fff; height: 36px; padding: 0 14px; border-radius: var(--r-sm); cursor: pointer; display: none; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; font-family: inherit; transition: .15s; }
+#logoutBtn:hover { background: rgba(255,255,255,.18); }
+.co-switch { display: flex; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); border-radius: var(--r-sm); padding: 3px; gap: 2px; }
+.co-switch button { border: none; background: none; color: rgba(255,255,255,.6); font-family: inherit; font-weight: 600; font-size: 12px; padding: 5px 11px; border-radius: 7px; cursor: pointer; transition: .14s; }
+.co-switch button.on { background: rgba(255,255,255,.22); color: #fff; }
+
+/* ============ ФІЛЬТРИ ============ */
+.nav-s { display: flex; gap: 8px; overflow-x: auto; padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: calc(var(--nav-h) + env(safe-area-inset-top,0px)); z-index: 900; scrollbar-width: none; }
+.nav-s::-webkit-scrollbar { display: none; }
+.s-t { height: 36px; padding: 0 12px; display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; background: var(--surface); font-size: 12.5px; font-weight: 600; color: var(--muted); white-space: nowrap; border: 1px solid var(--line); cursor: pointer; transition: .14s; flex-shrink: 0; }
+.s-t:hover { border-color: var(--muted2); color: var(--txt); }
+.s-t.active { background: var(--txt); color: #fff; border-color: var(--txt); }
+.chip-n { display: inline-grid; place-items: center; min-width: 19px; height: 19px; padding: 0 5px; border-radius: 999px; background: var(--line-soft); color: var(--muted); font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.s-t.active .chip-n { background: rgba(255,255,255,.22); color: #fff; }
+.s-t.zero { opacity: .5; }
+
+.container { padding: 18px 16px; max-width: 1240px; margin: 0 auto; }
+.panel { display: none; } .panel.on { display: block; }
+#list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+
+/* ============ КАРТКА ============ */
+.card { background: var(--surface); border-radius: var(--r); padding: 16px; border: 1px solid var(--line); box-shadow: var(--sh-1); position: relative; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .15s; }
+.card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--est); }
+.card:hover { border-color: var(--muted2); box-shadow: var(--sh-2); transform: translateY(-1px); }
+.card:active { transform: scale(.995); }
+.card.st-done::before { background: var(--done); }
+.card.st-cancelled::before { background: var(--canc); }
+.card.st-inwork::before { background: var(--work); }
+.card.st-verify::before { background: var(--verify); }
+.card.st-storage::before { background: var(--store); }
+.card.st-done { background: #f5fdfa; }
+.card.st-cancelled { background: #fdf7f8; opacity: .72; }
+.card.st-inwork { background: #fffaf4; }
+.card.st-verify { background: #f4fcfd; }
+.card.st-storage { background: #faf8ff; }
+.card.over { border-color: var(--danger); }
+.card.st-new::before { background: var(--new); }
+.card.st-new { background: #fdf2f8; }
+.st-new .status-badge { color: var(--new); background: #fce7f3; }
+.st-new .status-badge::before { background: var(--new); }
+/* Заявка, надіслана з іншої компанії — інший колір (фіолетовий) */
+.card.st-new.st-cross::before { background: var(--violet); }
+.card.st-new.st-cross { background: #f6f3ff; }
+.st-new.st-cross .status-badge { color: var(--violet); background: #ede9fe; }
+.st-new.st-cross .status-badge::before { background: var(--violet); }
+.cross-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--violet); background: #ede9fe; padding: 3px 9px; border-radius: 999px; margin-top: 6px; }
+.card.st-est { background: #fdf4f5; }
+.card.st-est::before { background: var(--canc); }
+.card.rem { background: #fceef0; border-color: color-mix(in srgb, var(--danger) 35%, var(--line)); }
+.card.rem::before { background: var(--canc); }
+.card.rem::after { content: "⏰"; position: absolute; top: 14px; right: 14px; font-size: 12px; }
+
+.c-row-1 { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.c-name { font-size: 15px; font-weight: 700; color: var(--txt); letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: var(--muted); background: var(--line-soft); border-radius: 999px; padding: 4px 10px 4px 8px; white-space: nowrap; flex-shrink: 0; }
+.status-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--est); }
+.st-done .status-badge::before { background: var(--done); }
+.st-cancelled .status-badge::before { background: var(--canc); }
+.st-inwork .status-badge::before { background: var(--work); }
+.st-verify .status-badge::before { background: var(--verify); }
+.st-storage .status-badge::before { background: var(--store); }
+.st-done .status-badge { color: var(--done); background: #e8f6f1; }
+.st-cancelled .status-badge { color: var(--canc); background: #fbecef; }
+.st-inwork .status-badge { color: var(--work); background: #fdf1e5; }
+.st-verify .status-badge { color: var(--verify); background: #e6f6f9; }
+.st-storage .status-badge { color: var(--store); background: #f1ecfd; }
+
+.c-row-2 { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+.c-date { font-size: 11.5px; color: var(--muted2); margin-top: 5px; display: flex; align-items: center; gap: 5px; }
+.c-steps-inline { display: flex; align-items: center; gap: 14px; font-size: 13px; color: #cfd5df; margin: 14px 0; }
+.c-steps-inline i.active { color: var(--p2); }
+.clip { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--muted); font-weight: 600; background: var(--line-soft); padding: 4px 9px; border-radius: 999px; margin-left: auto; }
+.c-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid var(--line-soft); }
+.val { font-size: 19px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.c-foot a { width: 36px; height: 36px; border-radius: var(--r-xs); display: grid; place-items: center; background: var(--line-soft); color: var(--muted); transition: .14s; }
+.c-foot a:hover { background: var(--line); }
+.debt-tag { font-size: 12px; font-weight: 700; padding: 5px 9px; border-radius: var(--r-xs); font-variant-numeric: tabular-nums; }
+.debt-tag.red { background: #fbecef; color: var(--danger); }
+.debt-tag.green { background: #e8f6f1; color: var(--success); }
+
+#listC { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+#listNew { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.qbox { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; box-shadow: var(--sh-1); margin-bottom: 6px; }
+.qbox .qh { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+.qbox .qs { font-size: 12.5px; color: var(--muted); margin-bottom: 16px; }
+#listC .card strong { font-size: 14.5px; font-weight: 700; }
+#listC .card small { color: var(--muted); font-size: 12.5px; }
+
+/* ============ ВХІД ============ */
+#authScreen { position: fixed; inset: 0; background: var(--p); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.auth-box { background: var(--surface); padding: 40px 32px; border-radius: var(--r-xl); width: 100%; max-width: 380px; text-align: center; box-shadow: var(--sh-3); }
+.auth-box .a-logo { width: 52px; height: 52px; border-radius: var(--r); background: var(--p2); color: #fff; display: grid; place-items: center; font-size: 20px; margin: 0 auto 18px; }
+.auth-box h2 { margin-bottom: 26px; font-weight: 700; font-size: 20px; letter-spacing: -.02em; }
+.auth-box .fg { text-align: left; }
+
+/* ============ ЗВІТ ============ */
+.seg { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--line); padding: 4px; border-radius: var(--r-sm); margin-bottom: 16px; }
+.seg button { flex: 1; height: 34px; border: none; background: none; border-radius: var(--r-xs); font-size: 12.5px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; transition: .14s; }
+.seg button:hover { color: var(--txt); }
+.seg button.on { background: var(--txt); color: #fff; }
+
+.st-main { background: var(--p); color: #fff; padding: 30px 26px; border-radius: var(--r-lg); text-align: center; margin-bottom: 12px; position: relative; overflow: hidden; }
+.st-main::after { content: ""; position: absolute; right: -60px; top: -60px; width: 220px; height: 220px; background: radial-gradient(circle, color-mix(in srgb, var(--p2) 45%, transparent), transparent 70%); }
+.st-main small { color: rgba(255,255,255,.6); font-weight: 600; letter-spacing: .08em; font-size: 11px; }
+.st-main h2 { margin: 10px 0 6px; letter-spacing: -.04em; font-weight: 700; font-variant-numeric: tabular-nums; }
+.st-main p { color: rgba(255,255,255,.68); font-size: 13px; }
+.st-h { margin: 24px 0 12px; color: var(--muted2); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+.st-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.st-box { background: var(--surface); padding: 18px; border-radius: var(--r); border: 1px solid var(--line); box-shadow: var(--sh-1); cursor: pointer; transition: .15s; }
+.st-box:hover { border-color: var(--muted2); }
+.st-box b { display: block; font-size: 20px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.st-box small { display: block; color: var(--muted); font-weight: 600; font-size: 11.5px; margin-top: 4px; }
+.st-box span { display: block; font-size: 12px; color: var(--muted2); margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+.cnt-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.cnt { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; cursor: pointer; display: flex; align-items: center; gap: 13px; transition: .15s; box-shadow: var(--sh-1); }
+.cnt:hover { border-color: var(--muted2); box-shadow: var(--sh-2); transform: translateY(-1px); }
+.cnt .ic { width: 40px; height: 40px; border-radius: var(--r-xs); display: grid; place-items: center; font-size: 15px; color: #fff; flex-shrink: 0; }
+.cnt .num { font-size: 24px; font-weight: 700; line-height: 1.1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.cnt .lbl { font-size: 11.5px; color: var(--muted); font-weight: 600; margin-top: 3px; }
+.cnt .sum { font-size: 12.5px; color: var(--txt); font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.btn-ghost { background: var(--surface); border: 1px solid var(--line); color: var(--muted); height: 32px; padding: 0 12px; border-radius: var(--r-xs); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: .14s; text-transform: none; letter-spacing: 0; }
+.btn-ghost:hover { border-color: var(--muted2); color: var(--txt); }
+
+/* ============ КАЛЕНДАР ============ */
+.cal-day { margin-bottom: 20px; }
+.cal-head { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+.cal-date { font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
+.cal-rel { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--line-soft); color: var(--muted); }
+.cal-rel.today { background: var(--p2); color: #fff; }
+.cal-rel.late { background: #fbecef; color: var(--danger); }
+.cal-item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: .14s; box-shadow: var(--sh-1); }
+.cal-item:hover { border-color: var(--muted2); box-shadow: var(--sh-2); }
+.cal-item .ci { width: 34px; height: 34px; border-radius: var(--r-xs); display: grid; place-items: center; font-size: 13px; color: #fff; flex-shrink: 0; }
+.cal-item .cn { font-weight: 600; font-size: 14px; }
+.cal-item .cs { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.cal-item .cv { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; font-size: 14px; }
+
+/* ============ НАВІГАЦІЯ ============ */
+.bottom-nav { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,.94); backdrop-filter: blur(14px); display: flex; border-top: 1px solid var(--line); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+.n-i { flex: 1; padding: 11px 5px; border: none; background: none; text-align: center; color: var(--muted2); font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; transition: .14s; }
+.n-i.active { color: var(--p2); }
+.n-i i { display: block; font-size: 18px; margin-bottom: 5px; }
+.nav-credit { display: none; }
+
+/* ============ МОДАЛКИ ============ */
+.modal-w { position: fixed; inset: 0; background: rgba(11,18,32,.5); backdrop-filter: blur(6px); z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
+.modal-w[style*="flex"] .mbox { animation: slideUp .3s cubic-bezier(.16,1,.3,1); }
+@keyframes slideUp { from { transform: translateY(28px); opacity: 0; } to { transform: none; opacity: 1; } }
+.mbox { background: var(--surface); width: 100%; max-width: 560px; border-radius: var(--r-xl) var(--r-xl) 0 0; padding: 26px 24px 28px; max-height: 94vh; overflow-y: auto; }
+.mbox > div:first-child { margin-bottom: 22px !important; align-items: center; }
+.mbox h3 { font-weight: 700; font-size: 18px; letter-spacing: -.02em; }
+.mbox .fa-times { color: var(--muted2); font-size: 18px; cursor: pointer; padding: 6px; transition: .14s; }
+.mbox .fa-times:hover { color: var(--txt); }
+.sec { font-size: 11px; font-weight: 700; color: var(--muted2); text-transform: uppercase; letter-spacing: .08em; margin: 22px 0 12px; padding-top: 18px; border-top: 1px solid var(--line-soft); }
+.sec:first-of-type { margin-top: 4px; padding-top: 0; border-top: none; }
+.fg { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+label { font-size: 12px; font-weight: 600; color: var(--muted); }
+/* 16px — щоб iOS Safari не наближав екран при фокусі на полі */
+input, select, textarea { padding: 12px 13px; border: 1px solid var(--line); border-radius: var(--r-sm); font-size: 16px; background: var(--surface); width: 100%; font-family: inherit; color: var(--txt); transition: .14s; }
+input:hover, select:hover, textarea:hover { border-color: var(--muted2); }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p2); box-shadow: 0 0 0 3px color-mix(in srgb, var(--p2) 14%, transparent); }
+input[readonly] { background: var(--line-soft); color: var(--muted); }
+select { cursor: pointer; }
+.steps { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.steps label { display: flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 500; color: var(--txt); padding: 11px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); cursor: pointer; transition: .14s; }
+.steps label:hover { border-color: var(--muted2); }
+.steps input[type=checkbox] { width: auto; accent-color: var(--p2); transform: scale(1.15); cursor: pointer; }
+
+/* Файли */
+.file-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.file-chip { display: flex; align-items: center; gap: 11px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 11px 12px; font-size: 13px; }
+.file-chip > i.fa-paperclip { color: var(--muted2); }
+.file-chip .thumb { width: 40px; height: 40px; border-radius: var(--r-xs); object-fit: cover; background: var(--line-soft); flex-shrink: 0; cursor: pointer; }
+.file-chip span { flex: 1; cursor: pointer; color: var(--p2); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-chip span:hover { text-decoration: underline; }
+.file-chip i.fa-trash { color: var(--muted2); cursor: pointer; font-size: 13px; padding: 4px; transition: .14s; }
+.file-chip i.fa-trash:hover { color: var(--danger); }
+.up-btn { display: flex; align-items: center; justify-content: center; gap: 9px; background: var(--p2-soft); color: var(--p2); border: 1px dashed color-mix(in srgb, var(--p2) 45%, transparent); border-radius: var(--r-sm); padding: 13px; cursor: pointer; font-size: 13.5px; font-weight: 600; transition: .14s; }
+.up-btn:hover { background: color-mix(in srgb, var(--p2) 12%, #fff); }
+
+/* Платежі */
+.pay-row { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 10px 12px; font-size: 13px; }
+.pay-row .pd { color: var(--muted); font-size: 12px; min-width: 78px; }
+.pay-row .pa { font-weight: 700; font-variant-numeric: tabular-nums; margin-left: auto; }
+.pay-row i.fa-trash { color: var(--muted2); cursor: pointer; font-size: 13px; padding: 4px; }
+.pay-row i.fa-trash:hover { color: var(--danger); }
+.pay-add { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-top: 8px; }
+.pay-add input { font-size: 16px; padding: 10px 11px; }
+.pay-add button { background: var(--p2); color: #fff; border: none; border-radius: var(--r-sm); width: 46px; font-size: 16px; cursor: pointer; }
+.pay-total { display: flex; justify-content: space-between; margin-top: 10px; padding: 11px 13px; background: var(--line-soft); border-radius: var(--r-sm); font-size: 13px; font-weight: 600; }
+.pay-total b { font-variant-numeric: tabular-nums; }
+
+.fab-add { position: fixed; right: 18px; bottom: 88px; width: 56px; height: 56px; border-radius: var(--r-lg); background: var(--p2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; border: none; box-shadow: var(--sh-2); z-index: 1000; cursor: pointer; transition: .18s; }
+.fab-add:hover { transform: translateY(-2px); }
+.fab-add:active { transform: scale(.92) rotate(90deg); }
+/* WhatsApp-кнопка на картці */
+.c-foot a.wa-btn { background: #25d366; color: #fff; }
+.c-foot a.wa-btn:hover { background: #1eb457; }
+.btn-s { background: var(--txt); color: #fff; width: 100%; height: 50px; border: none; border-radius: var(--r-sm); font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 8px; font-family: inherit; transition: .15s; }
+.btn-s:hover { background: var(--p2); }
+.btn-alt { background: var(--surface); color: var(--txt); border: 1px solid var(--line); width: 100%; height: 46px; border-radius: var(--r-sm); font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 8px; font-family: inherit; transition: .15s; display: none; }
+.btn-alt:hover { border-color: var(--muted2); }
+#loader { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: flex; justify-content: center; align-items: center; }
+.empty { text-align: center; padding: 48px 20px; color: var(--muted2); grid-column: 1/-1; }
+.empty i { font-size: 32px; opacity: .4; display: block; margin-bottom: 12px; }
+
+/* Зебра на телефоні */
+@media (max-width: 640px) {
+  #list .card:nth-child(even) { background: #f3f6fa; }
+  #list .card.st-done:nth-child(even) { background: #ecf9f3; }
+  #list .card.st-cancelled:nth-child(even) { background: #fbf0f2; }
+  #list .card.st-inwork:nth-child(even) { background: #fdf4e9; }
+  #list .card.st-verify:nth-child(even) { background: #ecf7f9; }
+  #list .card.st-storage:nth-child(even) { background: #f4f0fd; }
+  #list .card.st-est:nth-child(even) { background: #fbeaec; }
+  #list .card.rem:nth-child(even) { background: #fae2e6; }
+  #listC .card:nth-child(even) { background: #f3f6fa; }
+}
+
+/* ============ КОМПАКТНІШЕ НА ТЕЛЕФОНІ ============ */
+/* Тільки Galaxy S25 (базова) і подібні за шириною екрана — НЕ Ultra, НЕ інші телефони */
+@media (min-width: 340px) and (max-width: 380px) {
+  html { zoom: .65; }
+}
+
+@media (max-width: 640px) {
+  /* Модалка — на весь екран */
+  .modal-w { align-items: stretch; }
+  .mbox { max-width: none; width: 100%; height: 100%; max-height: none; border-radius: 0; padding: calc(16px + env(safe-area-inset-top,0px)) 18px calc(20px + env(safe-area-inset-bottom,0px)); }
+  .modal-w[style*="flex"] .mbox { animation: fadeInFull .2s ease; }
+  @keyframes fadeInFull { from { opacity: 0; } to { opacity: 1; } }
+
+  header { height: calc(52px + env(safe-area-inset-top,0px)); padding: env(safe-area-inset-top,0px) 14px 0; }
+  #brd { font-size: 14px; }
+  .nav-s { padding: 8px 12px; gap: 6px; top: calc(52px + env(safe-area-inset-top,0px)); }
+  .s-t { height: 32px; padding: 0 11px; font-size: 12px; }
+  .container { padding: 12px 12px 14px; }
+  #list { gap: 10px; }
+  .card { padding: 12px 13px; }
+  .c-name { font-size: 14px; }
+  .val { font-size: 17px; }
+  .c-steps-inline { margin: 11px 0; gap: 12px; }
+  .c-foot { padding-top: 11px; }
+  .c-foot a { width: 34px; height: 34px; }
+  /* поля: шрифт лишається 16px, менша висота */
+  input, select, textarea { padding: 10px 12px; }
+  .mbox { padding: 20px 16px 24px; }
+  .mbox > div:first-child { margin-bottom: 16px !important; }
+  .fg { margin-bottom: 11px; }
+  .sec { margin: 16px 0 10px; padding-top: 14px; }
+  .steps label { padding: 10px 11px; font-size: 13px; }
+  .st-main { padding: 22px 20px; }
+  .st-main h2 { font-size: 30px !important; }
+  .cnt { padding: 13px; gap: 11px; }
+  .cnt .ic { width: 38px; height: 38px; }
+  .cnt .num { font-size: 21px; }
+  .st-box { padding: 15px; }
+  .st-box b { font-size: 18px; }
+  .n-i { font-size: 10.5px; padding: 9px 4px; }
+  .n-i i { font-size: 17px; margin-bottom: 4px; }
+  .fab-add { width: 52px; height: 52px; bottom: 82px; }
+}
+
+/* ============ ДЕСКТОП ============ */
+@media (min-width: 900px) {
+  body { padding-left: var(--side-w); padding-bottom: 0; }
+  .bottom-nav { top: 0; left: 0; width: var(--side-w); height: 100vh; flex-direction: column; padding: 20px 12px; border-right: 1px solid var(--line); border-top: none; background: var(--surface); backdrop-filter: none; align-items: stretch; gap: 2px; }
+  .nav-credit { display: block; margin-top: auto; padding: 14px 8px 6px; font-size: 10.5px; color: var(--muted2); text-align: center; border-top: 1px solid var(--line); }
+  .n-i { flex: none; text-align: left; padding: 11px 12px; font-size: 13.5px; border-radius: var(--r-xs); display: flex; align-items: center; gap: 12px; color: var(--muted); }
+  .n-i:hover { background: var(--line-soft); color: var(--txt); }
+  .n-i i { margin: 0; font-size: 15px; width: 20px; text-align: center; }
+  .n-i.active { background: var(--p2-soft); color: var(--p2); }
+  .container { padding: 24px 28px 60px; }
+  .cnt-grid { grid-template-columns: repeat(4, 1fr); }
+  .fab-add { right: 28px; bottom: 28px; }
+  .modal-w { align-items: center; padding: 32px; }
+  .mbox { border-radius: var(--r-xl); max-width: 740px; max-height: 88vh; padding: 28px; }
+  .modal-w[style*="flex"] .mbox { animation: popIn .24s cubic-bezier(.16,1,.3,1); }
+  @keyframes popIn { from { transform: scale(.97); opacity: 0; } to { transform: none; opacity: 1; } }
+  .grid { grid-template-columns: 1fr 1fr; }
+  .steps { grid-template-columns: repeat(4, 1fr); }
+  .seg { max-width: 460px; }
+}
+</style>
+</head>
+<body>
+
+<div id="loader"><i class="fa fa-spinner fa-spin fa-2x" style="color:var(--p2)"></i></div>
+
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="a-logo"><i class="fa fa-cubes"></i></div>
+    <h2>CRM</h2>
+    <div class="fg"><label>Email</label><input id="email" type="email" placeholder="mail@example.com"></div>
+    <div class="fg"><label>Пароль</label><input id="password" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn-s" onclick="doLogin()">Увійти</button>
+  </div>
+</div>
+
+<header>
+  <div class="brand"><span class="logo"><i class="fa fa-cubes"></i></span><div id="brd">CRM</div></div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="co-switch" id="coSwitch" style="display:none">
+      <button id="b-hmk" class="on" onclick="setCo('heimek')">Heimek</button>
+      <button id="b-lux" onclick="setCo('luxwin')">Lux Win</button>
+    </div>
+    <button id="logoutBtn" onclick="doLogout()"><i class="fa fa-sign-out-alt"></i> Вихід</button>
+  </div>
+</header>
+
+<div class="nav-s" id="navS" style="display:none">
+  <div class="s-t active" data-s="Усі" onclick="flt('Усі',this)">Усі</div>
+  <div class="s-t" data-s="Нова" onclick="flt('Нова',this)">🆕 Нові</div>
+  <div class="s-t" data-s="Боржники" onclick="flt('Боржники',this)">💸 Боржники</div>
+  <div class="s-t" data-s="Кошторис" onclick="flt('Кошторис',this)">📑 Кошторис</div>
+  <div class="s-t" data-s="Підтверджено" onclick="flt('Підтверджено',this)">✅ Підтверджено</div>
+  <div class="s-t" data-s="Перевірка" onclick="flt('Перевірка',this)">🔎 Перевірка</div>
+  <div class="s-t" data-s="В роботі" onclick="flt('В роботі',this)">🏭 В роботі</div>
+  <div class="s-t" data-s="На складі" onclick="flt('На складі',this)">🚚 На складі</div>
+  <div class="s-t" data-s="Виконано" onclick="flt('Виконано',this)">📦 Виконано</div>
+  <div class="s-t" data-s="Скасовано" onclick="flt('Скасовано',this)">🚫 Скасовано</div>
+</div>
+
+<div class="container" id="mainUI" style="display:none">
+  <div id="p-orders" class="panel on">
+    <div style="display:flex; gap:10px; margin-bottom:18px;">
+      <input type="text" id="q" placeholder="🔍 Пошук: клієнт, № замовлення, телефон..." oninput="render()" style="flex:1">
+      <select id="sortSel" onchange="render()" style="width:auto; font-size:16px; font-weight:600; color:var(--muted);">
+        <option value="new">⇅ Спочатку нові</option>
+        <option value="old">⇅ Спочатку старі</option>
+        <option value="status">⇅ Статус</option>
+        <option value="deadline">⇅ Дедлайн</option>
+        <option value="price">⇅ Ціна</option>
+      </select>
+    </div>
+    <div id="list"></div>
+  </div>
+
+  <div id="p-clients" class="panel">
+    <input type="text" id="qc" placeholder="🔍 Пошук: ім'я або телефон..." oninput="renderC()">
+    <div id="listC" style="margin-top:18px"></div>
+  </div>
+
+  <div id="p-new" class="panel">
+    <div class="qbox">
+      <div class="qh">Нова заявка</div>
+      <div class="qs">Швидко зафіксуйте звернення. Можна створити для іншої компанії — тоді вона зʼявиться там як нова заявка.</div>
+      <div class="fg"><label>Для компанії</label>
+        <div class="seg" id="qnCoSeg" style="margin-bottom:0">
+          <button type="button" data-co="heimek" onclick="qnSetCo('heimek')">Heimek</button>
+          <button type="button" data-co="luxwin" onclick="qnSetCo('luxwin')">Lux Win</button>
+        </div>
+      </div>
+      <div class="fg"><label>Клієнт</label><input id="qnClient" list="dlC" placeholder="Ім'я або компанія"></div>
+      <div class="grid">
+        <div class="fg"><label>Телефон</label><input id="qnPhone" type="tel"></div>
+        <div class="fg"><label>Номер замовлення</label><input id="qnNum" placeholder="напр. WEB/26/..."></div>
+      </div>
+      <div class="fg"><label>Нотатки</label><textarea id="qnNotes" rows="2" placeholder="Що хоче клієнт, деталі звернення..."></textarea></div>
+      <div class="fg"><label>Файли (фото, замір, документ)</label>
+        <div id="qnFileList" class="file-list"></div>
+        <label class="up-btn"><i class="fa fa-paperclip"></i> <span id="qnUpTxt">Прикріпити файл</span>
+          <input type="file" multiple onchange="uploadQnFiles(this)" style="display:none">
+        </label>
+      </div>
+      <button class="btn-s" onclick="newRequest()">Створити заявку</button>
+    </div>
+    <div class="st-h">Заявки в очікуванні прорахунку</div>
+    <div id="listNew"></div>
+  </div>
+
+  <div id="p-calendar" class="panel"><div id="calDisplay"></div></div>
+
+  <div id="p-stats" class="panel"><div id="statsDisplay"></div></div>
+</div>
+
+<div class="bottom-nav" id="bottomNav" style="display:none">
+  <button class="n-i active" id="ni-orders" onclick="tab('orders')"><i class="fa fa-list-ul"></i><span>Замовлення</span></button>
+  <button class="n-i" id="ni-new" onclick="tab('new')"><i class="fa fa-inbox"></i><span>Нові</span></button>
+  <button class="n-i" id="ni-clients" onclick="tab('clients')"><i class="fa fa-users"></i><span>Клієнти</span></button>
+  <button class="n-i" id="ni-calendar" onclick="tab('calendar')"><i class="fa fa-calendar-days"></i><span>Календар</span></button>
+  <button class="n-i" id="ni-stats" onclick="tab('stats')"><i class="fa fa-chart-line"></i><span>Звіт</span></button>
+  <div class="nav-credit">Created by Gherman for <span id="creditCo">HEIMEK</span></div>
+</div>
+
+<button class="fab-add" id="fabBtn" style="display:none" onclick="fab()"><i class="fa fa-plus"></i></button>
+
+<!-- МОДАЛКА ЗАМОВЛЕННЯ -->
+<div id="mO" class="modal-w">
+  <div class="mbox">
+    <div style="display:flex;justify-content:space-between;"><h3>Замовлення</h3><i class="fa fa-times" onclick="closeM('mO')"></i></div>
+
+    <div class="sec">Основне</div>
+    <div class="fg"><label>Клієнт</label><input id="fCl" list="dlC"><datalist id="dlC"></datalist></div>
+    <div class="grid"><div class="fg"><label>Номер замовлення</label><input id="fPr" placeholder="напр. WEB/26/0947426"></div><div class="fg"><label>Фабрика 1</label><select id="fFa"></select></div></div>
+    <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan()"><option>Нова</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
+    <div id="canB" class="fg" style="display:none"><label style="color:var(--danger)">Причина скасування</label><textarea id="fCan" rows="2"></textarea></div>
+
+    <div class="sec">Фінанси</div>
+    <div class="grid"><div class="fg"><label>Ціна HT €</label><input id="fSa" type="number" oninput="calc()"></div><div class="fg"><label>TVA %</label><select id="fTv" onchange="calc()"></select></div></div>
+    <div class="grid"><div class="fg"><label>Монтаж €</label><input id="fIn" type="number" oninput="calc()"></div><div class="fg"><label>Доставка €</label><input id="fDe" type="number" oninput="calc()"></div></div>
+    <div class="fg"><label>Сума TTC €</label><input id="fTt" readonly style="background:#fdf8e3;color:#7a5c00;font-weight:700"></div>
+    <div class="grid"><div class="fg"><label>Ціна Фабрики 1 €</label><input id="fCo" type="number" oninput="calc()"></div><div class="fg"><label>Передплата фабриці 1 €</label><input id="fFaPa" type="number"></div></div>
+    <div id="fac2Toggle" onclick="toggleFac2()" style="color:var(--p2);cursor:pointer;font-size:13px;font-weight:600;margin:2px 0 14px">+ Додати другу фабрику</div>
+    <div id="fac2Block" style="display:none">
+      <div class="fg"><label>Фабрика 2</label><select id="fFa2"></select></div>
+      <div class="grid"><div class="fg"><label>Ціна Фабрики 2 €</label><input id="fCo2" type="number" oninput="calc()"></div><div class="fg"><label>Передплата фабриці 2 €</label><input id="fFaPa2" type="number"></div></div>
+    </div>
+    <div class="grid"><div class="fg"><label>Чистий прибуток</label><input id="fMr" readonly style="background:#e8f6f1;color:#0a5c42;font-weight:700"></div><div class="fg"><label>Націнка %</label><input id="fMk" readonly style="background:#eef1ff;color:#26389e;font-weight:700"></div></div>
+
+    <div class="sec">Платежі клієнта</div>
+    <div class="fg">
+      <div id="payList" class="file-list"></div>
+      <div class="pay-add">
+        <input type="date" id="payDate" title="Дата платежу">
+        <input type="number" id="payAmt" placeholder="Сума €" onkeydown="if(event.key==='Enter'){event.preventDefault();addPay()}">
+        <button type="button" onclick="addPay()" title="Додати платіж"><i class="fa fa-plus"></i></button>
+      </div>
+      <div class="pay-total"><span>Оплачено разом</span><b id="payTotal">0 €</b></div>
+      <input id="fPa" type="hidden">
+    </div>
+
+    <div class="sec">Деталі</div>
+    <div class="fg"><label>Етапи</label>
+      <div class="steps">
+        <label title="Замір виконано"><input type="checkbox" id="fChM"> 📐 Замір</label>
+        <label title="Замовлено на фабриці"><input type="checkbox" id="fChO"> 🏭 Завод</label>
+        <label title="Прибуло на склад"><input type="checkbox" id="fChS"> 🚚 Склад</label>
+        <label title="Змонтовано"><input type="checkbox" id="fChI"> 🏠 Монтаж</label>
+      </div>
+    </div>
+    <div class="fg"><label>Файли (договір, фото, замір)</label>
+      <div id="fList" class="file-list"></div>
+      <label class="up-btn"><i class="fa fa-paperclip"></i> <span id="upTxt">Прикріпити файл</span>
+        <input type="file" multiple onchange="uploadFiles(this)" style="display:none">
+      </label>
+    </div>
+    <div class="fg"><label>Передзвонити ⏰</label><input id="fRe" type="date"></div>
+    <div class="fg"><label>Нотатки</label><textarea id="fNo" rows="2"></textarea></div>
+
+    <button class="btn-s" onclick="saveO()">Зберегти</button>
+    <button id="btnDup" class="btn-alt" onclick="dupO()"><i class="fa fa-copy"></i> Дублювати замовлення</button>
+    <button id="btnD" onclick="delO()" style="color:var(--danger);border:none;background:none;width:100%;margin-top:8px;font-weight:600;cursor:pointer;display:none;font-family:inherit;font-size:13.5px">Видалити замовлення</button>
+  </div>
+</div>
+
+<!-- МОДАЛКА КЛІЄНТА -->
+<div id="mC" class="modal-w">
+  <div class="mbox">
+    <div style="display:flex;justify-content:space-between;"><h3>Клієнт</h3><i class="fa fa-times" onclick="closeM('mC')"></i></div>
+    <div class="fg"><label>ПІБ / Компанія</label><input id="cNa"></div>
+    <div class="grid"><div class="fg"><label>Телефон</label><input id="cPh" type="tel"></div><div class="fg"><label>Адреса</label><input id="cAd"></div></div>
+    <div class="fg"><label>Нотатки</label><textarea id="cNo" rows="2"></textarea></div>
+    <div id="hSec" style="display:none;"><div class="sec">Історія замовлень</div><div id="hList"></div></div>
+    <button class="btn-s" onclick="saveC()">Зберегти клієнта</button>
+    <button id="btnDC" onclick="delC()" style="color:var(--danger);border:none;background:none;width:100%;margin-top:8px;font-weight:600;cursor:pointer;display:none;font-family:inherit;font-size:13.5px">Видалити клієнта</button>
+  </div>
+</div>
+
+<script>
+const URL_SB = "https://ysctdrsxqtekxuvkjmdx.supabase.co";
+const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzY3RkcnN4cXRla3h1dmtqbWR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODkxOTksImV4cCI6MjA5OTE2NTE5OX0.vmOKBfc1dGLgrNu1YQ9IVF-v6nUGb2tzEK29L1X0aiQ";
+const _sb = window.supabase.createClient(URL_SB, KEY_SB);
+
+const CO_NAME = { heimek: 'Heimek CRM', luxwin: 'Lux Win CRM' };
+const BUCKET = 'order-files';
+const FACTORIES = ['Eko-okna','Seharia','Ukraine','Optimedia','S.C. GERE&CO S.R.L.','Vindovkii','WDC'];
+
+function fillFactories() {
+  const opts = FACTORIES.map(f => `<option>${f}</option>`).join('');
+  document.getElementById('fFa').innerHTML = opts;
+  document.getElementById('fFa2').innerHTML = '<option value="">— немає —</option>' + opts;
+}
+function toggleFac2(show) {
+  const on = show === undefined ? document.getElementById('fac2Block').style.display === 'none' : !!show;
+  document.getElementById('fac2Block').style.display = on ? 'block' : 'none';
+  document.getElementById('fac2Toggle').textContent = on ? '− Прибрати другу фабрику' : '+ Додати другу фабрику';
+  if (!on) { ['fFa2','fCo2','fFaPa2'].forEach(i=>document.getElementById(i).value=''); calc(); }
+}
+// Сумарний борг фабрикам по одному замовленню (обидві фабрики)
+const orderFacDebt = o => (n(o.cost_price)-n(o.factory_prepay)) + (o.factory2 ? (n(o.cost_price2)-n(o.factory_prepay2)) : 0);
+const orderCost = o => n(o.cost_price) + n(o.cost_price2);
+
+// Боржник = має борг і в активному статусі (Підтверджено / В роботі / На складі)
+const DEBT_STATUSES = ['Підтверджено','В роботі','На складі'];
+const isDebtor = o => DEBT_STATUSES.includes(o.status) && (n(o.total_ttc) - n(o.paid_amount)) > 1;
+
+let co='heimek', orders=[], clients=[], editId=null, curT='orders', curS='Усі';
+let curFiles=[], curPay=[], statPeriod='all';
+const TVA_OPTS = { heimek: [0, 5.5, 20], luxwin: [0, 6, 21] };
+const n = v => parseFloat(v) || 0;
+const fN = v => n(v).toLocaleString('uk-UA');
+
+// Номер у міжнародному форматі (лише цифри) для wa.me
+const waNum = p => {
+  let d = (p || '').replace(/\D/g, '');
+  if (!d) return '';
+  const cc = co === 'heimek' ? '33' : '32';
+  if (d.startsWith('00')) return d.slice(2);
+  if (d.startsWith('0'))  return cc + d.slice(1);
+  if (d.startsWith(cc))   return d;
+  return cc + d;
+};
+const phoneOf = nm => (clients.find(c => c.name === nm) || {}).phone || '';
+const orderPhone = o => o.phone || phoneOf(o.client);   // телефон із заявки або з картки клієнта
+let qnTargetCo = 'heimek';                               // для якої компанії створюється заявка
+function qnSetCo(k) {
+  qnTargetCo = k;
+  document.querySelectorAll('#qnCoSeg button').forEach(b => b.classList.toggle('on', b.dataset.co === k));
+}
+
+/* ================= ФАЙЛИ ================= */
+const parseFiles = v => { if(!v) return []; try{ const a = typeof v==='string'?JSON.parse(v):v; return Array.isArray(a)?a:[]; }catch{ return [{name:'Файл', url:v}]; } };
+const isImg = nm => /\.(jpe?g|png|gif|webp|bmp|heic)$/i.test(nm || '');
+
+async function uploadFiles(input) {
+  const files = [...input.files];
+  if (!files.length) return;
+  const txt = document.getElementById('upTxt'); const orig = txt.textContent;
+  for (const f of files) {
+    txt.textContent = 'Завантаження: ' + f.name;
+    const safe = f.name.replace(/[^\w.\-]/g, '_');
+    const path = `${co}/${editId || 'new'}/${Date.now()}_${safe}`;
+    const { error } = await _sb.storage.from(BUCKET).upload(path, f);
+    if (error) { alert('Помилка завантаження: ' + error.message); continue; }
+    curFiles.push({ name: f.name, path });
+  }
+  txt.textContent = orig; input.value = ''; renderFiles();
+}
+
+async function renderFiles() {
+  const box = document.getElementById('fList');
+  if (!curFiles.length) { box.innerHTML = '<small style="color:var(--muted2)">Файлів немає</small>'; return; }
+  box.innerHTML = curFiles.map((f, i) => {
+    const thumb = isImg(f.name) ? `<img class="thumb" id="th${i}" onclick="openFile(${i})" alt="">` : `<i class="fa fa-paperclip"></i>`;
+    return `<div class="file-chip">${thumb}<span onclick="openFile(${i})">${f.name}</span><i class="fa fa-trash" onclick="rmFile(${i})"></i></div>`;
+  }).join('');
+  // мініатюри для картинок
+  for (let i = 0; i < curFiles.length; i++) {
+    const f = curFiles[i]; const el = document.getElementById('th' + i);
+    if (!el || !isImg(f.name)) continue;
+    if (f.url) { el.src = f.url; continue; }
+    const { data } = await _sb.storage.from(BUCKET).createSignedUrl(f.path, 3600);
+    if (data) el.src = data.signedUrl;
+  }
+}
+
+async function openFile(i) {
+  const f = curFiles[i];
+  // справжнє посилання — лише те, що починається з http(s)
+  if (f.url && /^https?:\/\//i.test(f.url)) return window.open(f.url, '_blank');
+  if (f.path) {
+    const { data, error } = await _sb.storage.from(BUCKET).createSignedUrl(f.path, 3600);
+    if (error) return alert('Помилка: ' + error.message);
+    return window.open(data.signedUrl, '_blank');
+  }
+  alert('Цей запис пошкоджений (не містить файлу). Видаліть його кошиком і прикріпіть файл заново.');
+}
+async function rmFile(i) {
+  if (!confirm('Видалити файл?')) return;
+  const f = curFiles[i];
+  if (f.path) await _sb.storage.from(BUCKET).remove([f.path]);
+  curFiles.splice(i, 1); renderFiles();
+}
+
+/* ================= ПЛАТЕЖІ ================= */
+const parsePay = v => { if(!v) return []; try{ const a = typeof v==='string'?JSON.parse(v):v; return Array.isArray(a)?a:[]; }catch{ return []; } };
+const payTotal = () => curPay.reduce((s,p)=> s + n(p.amount), 0);
+
+function renderPay() {
+  const box = document.getElementById('payList');
+  box.innerHTML = curPay.length
+    ? curPay.map((p,i)=>`<div class="pay-row"><span class="pd">${p.date ? new Date(p.date).toLocaleDateString('uk-UA') : '—'}</span><span class="pa">${fN(p.amount)} €</span><i class="fa fa-trash" onclick="rmPay(${i})"></i></div>`).join('')
+    : '<small style="color:var(--muted2)">Платежів немає</small>';
+  const t = payTotal();
+  document.getElementById('payTotal').textContent = fN(t) + ' €';
+  document.getElementById('fPa').value = t;
+}
+function addPay() {
+  const d = document.getElementById('payDate').value;
+  const a = n(document.getElementById('payAmt').value);
+  if (!a) return alert('Вкажіть суму платежу');
+  curPay.push({ date: d || new Date().toISOString().split('T')[0], amount: a });
+  curPay.sort((x,y)=> (x.date||'').localeCompare(y.date||''));
+  document.getElementById('payDate').value = ''; document.getElementById('payAmt').value = '';
+  renderPay();
+}
+function rmPay(i) { curPay.splice(i,1); renderPay(); }
+
+/* ================= АУТЕНТИФІКАЦІЯ ================= */
+async function checkUser() {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (session) {
+    const { data: prof } = await _sb.from('profiles').select('company').eq('id', session.user.id).single();
+    const company = prof ? prof.company : 'heimek';
+    const isOwner = company === 'all';          // доступ до обох компаній
+    co = isOwner ? 'heimek' : (company || 'heimek');
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('mainUI').style.display = 'block';
+    document.getElementById('bottomNav').style.display = 'flex';
+    document.getElementById('navS').style.display = 'flex';
+    document.getElementById('fabBtn').style.display = 'flex';
+    document.getElementById('logoutBtn').style.display = 'flex';
+    document.getElementById('coSwitch').style.display = isOwner ? 'flex' : 'none';
+    document.getElementById('b-hmk').classList.toggle('on', co==='heimek');
+    document.getElementById('b-lux').classList.toggle('on', co==='luxwin');
+    document.body.setAttribute('data-co', co);
+    document.getElementById('brd').innerText = CO_NAME[co] || 'CRM';
+    document.title = CO_NAME[co] || 'CRM';
+    document.getElementById('creditCo').textContent = co.toUpperCase();
+    history.replaceState({ t: 'orders' }, '');   // базовий запис для кнопки "Назад"
+    fillFactories(); updateTva(); sync();
+  } else {
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('authScreen').style.display = 'flex';
+  }
+}
+async function doLogin() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const { error } = await _sb.auth.signInWithPassword({ email, password });
+  if (error) alert("Помилка: " + error.message); else checkUser();
+}
+async function doLogout() { await _sb.auth.signOut(); location.reload(); }
+
+// Перемикання компанії (лише для власника з доступом до обох)
+function setCo(k) {
+  if (k === co) return;
+  co = k;
+  document.body.setAttribute('data-co', co);
+  document.getElementById('brd').innerText = CO_NAME[co] || 'CRM';
+  document.title = CO_NAME[co] || 'CRM';
+  document.getElementById('creditCo').textContent = co.toUpperCase();
+  document.getElementById('b-hmk').classList.toggle('on', co==='heimek');
+  document.getElementById('b-lux').classList.toggle('on', co==='luxwin');
+  updateTva(); sync();
+}
+
+async function sync() {
+  document.getElementById('loader').style.display = 'flex';
+  const { data: oData } = await _sb.from('orders').select('*').eq('company', co).order('created_at', { ascending: false });
+  orders = oData || [];
+  const { data: cData } = await _sb.from('clients').select('*').eq('company', co);
+  clients = cData || [];
+  updateDl(); render();
+  if (curT==='stats') renderStats();
+  if (curT==='calendar') renderCal();
+  document.getElementById('loader').style.display = 'none';
+}
+
+/* ================= ЛІЧИЛЬНИКИ НА ФІЛЬТРАХ ================= */
+function updateChips() {
+  const debtors = orders.filter(isDebtor).length;
+  document.querySelectorAll('.s-t').forEach(el => {
+    const s = el.dataset.s;
+    const v = s==='Усі' ? orders.length : s==='Боржники' ? debtors : orders.filter(o=>o.status===s).length;
+    let b = el.querySelector('.chip-n');
+    if (!b) { b = document.createElement('span'); b.className = 'chip-n'; el.appendChild(b); }
+    b.textContent = v;
+    el.classList.toggle('zero', v === 0);
+  });
+}
+
+/* ================= СПИСОК ЗАМОВЛЕНЬ ================= */
+const render = () => {
+  const q = document.getElementById('q').value.toLowerCase().trim();
+  const qDigits = q.replace(/\D/g,'');
+  const sort = document.getElementById('sortSel').value;
+  const list = document.getElementById('list'); const today = new Date().toISOString().split('T')[0];
+
+  let f = orders.filter(o => {
+    if (!q) return true;
+    const ph = phoneOf(o.client);
+    const hay = ((o.client||'') + ' ' + (o.product||'') + ' ' + (o.factory||'') + ' ' + ph).toLowerCase();
+    if (hay.includes(q)) return true;
+    return qDigits.length >= 3 && ph.replace(/\D/g,'').includes(qDigits);
+  });
+
+  if (curS === 'Боржники') f = f.filter(isDebtor);
+  else if (curS!=='Усі') f = f.filter(o => o.status === curS);
+
+  const stPriority = { 'Нова':0, 'В роботі':1, 'На складі':2, 'Перевірка':3, 'Підтверджено':4, 'Кошторис':5, 'Виконано':6, 'Скасовано':7 };
+  if(sort === 'status') f.sort((a,b) => (stPriority[a.status]||99) - (stPriority[b.status]||99));
+  else if(sort === 'deadline') f.sort((a,b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
+  else if(sort === 'new') f.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  else if(sort === 'old') f.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+  else if(sort === 'price') f.sort((a,b) => n(b.total_ttc) - n(a.total_ttc));
+
+  updateChips();
+
+  if (!f.length) { list.innerHTML = `<div class="empty"><i class="fa fa-inbox"></i>Замовлень не знайдено</div>`; return; }
+
+  list.innerHTML = f.map(o=>{
+    const ttc = n(o.total_ttc), paid = n(o.paid_amount), debt = ttc - paid;
+    const over = o.deadline && o.deadline < today && o.status !== 'Виконано' && o.status !== 'Скасовано';
+    const rem = o.reminder_date && o.reminder_date <= today && o.status !== 'Виконано' && o.status !== 'Скасовано';
+    const nFiles = parseFiles(o.file_url).length;
+    const wa = waNum(orderPhone(o));
+    let stCl = o.status==='Виконано'?'st-done':o.status==='Скасовано'?'st-cancelled':o.status==='В роботі'?'st-inwork':o.status==='На складі'?'st-storage':o.status==='Перевірка'?'st-verify':o.status==='Кошторис'?'st-est':o.status==='Нова'?'st-new':'';
+
+    return `<div class="card ${over?'over':''} ${rem?'rem':''} ${stCl}" onclick="openO('${o.id}')">
+        <div class="c-row-1"><div class="c-name">${o.client||'Без імені'}</div><div class="status-badge">${o.status}</div></div>
+        <div class="c-row-2">${o.factory}${o.factory2 ? ' + '+o.factory2 : ''} · ${o.product||'---'}</div>
+        ${o.created_at ? `<div class="c-date"><i class="fa fa-calendar-day"></i> ${new Date(o.created_at).toLocaleDateString('uk-UA')}</div>` : ''}
+        <div class="c-steps-inline">
+          <i class="fa fa-ruler-combined ${o.check_measured?'active':''}" title="Замір"></i>
+          <i class="fa fa-file-signature ${o.check_ordered?'active':''}" title="Завод"></i>
+          <i class="fa fa-warehouse ${o.check_storage?'active':''}" title="Склад"></i>
+          <i class="fa fa-tools ${o.check_installed?'active':''}" title="Монтаж"></i>
+          ${nFiles ? `<span class="clip"><i class="fa fa-paperclip"></i>${nFiles}</span>` : ''}
+        </div>
+        <div class="c-foot">
+          <div class="val">${fN(ttc)} €</div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            ${wa ? `<a href="tel:+${wa}" onclick="event.stopPropagation()" title="Подзвонити"><i class="fa fa-phone-alt"></i></a>
+            <a class="wa-btn" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : ''}
+            <div class="debt-tag ${debt > 1 ? 'red' : 'green'}">${debt > 1 ? fN(debt)+' €' : 'OK'}</div>
+          </div>
+        </div>
+      </div>`}).join('');
+}
+
+/* ================= КАЛЕНДАР ================= */
+function renderCal() {
+  const box = document.getElementById('calDisplay');
+  const today = new Date().toISOString().split('T')[0];
+  const items = [];
+  orders.forEach(o => {
+    if (o.status === 'Виконано' || o.status === 'Скасовано') return;
+    if (o.deadline) items.push({ d: o.deadline, t: 'dl', o });
+    if (o.reminder_date) items.push({ d: o.reminder_date, t: 'rem', o });
+  });
+  if (!items.length) { box.innerHTML = `<div class="empty"><i class="fa fa-calendar-check"></i>Немає запланованих дат</div>`; return; }
+  items.sort((a,b) => a.d.localeCompare(b.d));
+
+  const groups = {};
+  items.forEach(i => { (groups[i.d] = groups[i.d] || []).push(i); });
+
+  const tomorrow = new Date(Date.now() + 864e5).toISOString().split('T')[0];
+  const relLabel = d => d < today ? ['Прострочено','late'] : d === today ? ['Сьогодні','today'] : d === tomorrow ? ['Завтра',''] : ['',''];
+
+  box.innerHTML = Object.keys(groups).map(d => {
+    const [rel, cls] = relLabel(d);
+    const dt = new Date(d).toLocaleDateString('uk-UA', { weekday:'short', day:'numeric', month:'long' });
+    const rows = groups[d].map(({t,o}) => {
+      const isRem = t === 'rem';
+      return `<div class="cal-item" onclick="openO('${o.id}')">
+        <div class="ci" style="background:${isRem ? 'var(--danger)' : 'var(--p2)'}"><i class="fa ${isRem ? 'fa-phone' : 'fa-screwdriver-wrench'}"></i></div>
+        <div><div class="cn">${o.client||'Без імені'}</div><div class="cs">${isRem ? 'Передзвонити' : 'Дедлайн'} · ${o.product||'---'} · ${o.status}</div></div>
+        <div class="cv">${fN(o.total_ttc)} €</div>
+      </div>`;
+    }).join('');
+    return `<div class="cal-day"><div class="cal-head"><span class="cal-date">${dt}</span>${rel?`<span class="cal-rel ${cls}">${rel}</span>`:''}</div>${rows}</div>`;
+  }).join('');
+}
+
+/* ================= НОВІ ЗАЯВКИ ================= */
+let qnFiles = [];
+async function uploadQnFiles(input) {
+  const files = [...input.files]; if (!files.length) return;
+  const txt = document.getElementById('qnUpTxt'); const orig = txt.textContent;
+  for (const f of files) {
+    txt.textContent = 'Завантаження: ' + f.name;
+    const safe = f.name.replace(/[^\w.\-]/g, '_');
+    const path = `${qnTargetCo}/new/${Date.now()}_${safe}`;
+    const { error } = await _sb.storage.from(BUCKET).upload(path, f);
+    if (error) { alert('Помилка завантаження: ' + error.message); continue; }
+    qnFiles.push({ name: f.name, path });
+  }
+  txt.textContent = orig; input.value = ''; renderQnFiles();
+}
+async function renderQnFiles() {
+  const box = document.getElementById('qnFileList');
+  if (!qnFiles.length) { box.innerHTML = ''; return; }
+  box.innerHTML = qnFiles.map((f, i) => {
+    const thumb = isImg(f.name) ? `<img class="thumb" id="qth${i}" onclick="openQnFile(${i})" alt="">` : `<i class="fa fa-paperclip"></i>`;
+    return `<div class="file-chip">${thumb}<span onclick="openQnFile(${i})">${f.name}</span><i class="fa fa-trash" onclick="rmQnFile(${i})"></i></div>`;
+  }).join('');
+  for (let i = 0; i < qnFiles.length; i++) {
+    const f = qnFiles[i]; const el = document.getElementById('qth' + i);
+    if (!el || !isImg(f.name)) continue;
+    const { data } = await _sb.storage.from(BUCKET).createSignedUrl(f.path, 3600);
+    if (data) el.src = data.signedUrl;
+  }
+}
+async function openQnFile(i) {
+  const { data, error } = await _sb.storage.from(BUCKET).createSignedUrl(qnFiles[i].path, 3600);
+  if (error) return alert('Помилка: ' + error.message);
+  window.open(data.signedUrl, '_blank');
+}
+async function rmQnFile(i) {
+  if (!confirm('Видалити файл?')) return;
+  if (qnFiles[i].path) await _sb.storage.from(BUCKET).remove([qnFiles[i].path]);
+  qnFiles.splice(i, 1); renderQnFiles();
+}
+
+const crossOrigin = o => { const m = (o.notes||'').match(/^↪ Заявка від (.+)$/m); return m ? m[1] : null; };
+
+function renderNew() {
+  qnSetCo(co);   // за замовчуванням — поточна компанія
+  const box = document.getElementById('listNew');
+  const f = orders.filter(o => o.status === 'Нова')
+                  .sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  if (!f.length) { box.innerHTML = `<div class="empty"><i class="fa fa-circle-check"></i>Немає заявок в очікуванні</div>`; return; }
+  box.innerHTML = f.map(o => {
+    const ph = orderPhone(o); const wa = waNum(ph);
+    const nFiles = parseFiles(o.file_url).length;
+    const origin = crossOrigin(o);
+    return `<div class="card st-new ${origin?'st-cross':''}" onclick="openO('${o.id}')">
+        <div class="c-row-1"><div class="c-name">${o.client||'Без імені'}</div><div class="status-badge">Нова</div></div>
+        <div class="c-row-2">${o.product ? '№ '+o.product : 'Без номера'} · очікує прорахунку${nFiles ? ' · 📎 '+nFiles : ''}</div>
+        ${origin ? `<div class="cross-tag"><i class="fa fa-right-left"></i> Від ${origin}</div>` : ''}
+        <div class="c-foot">
+          <div style="font-size:13px;color:var(--muted)">${ph || 'без телефону'}</div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            ${wa ? `<a href="tel:+${wa}" onclick="event.stopPropagation()" title="Подзвонити"><i class="fa fa-phone-alt"></i></a>
+            <a class="wa-btn" href="https://wa.me/${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function newRequest() {
+  const name  = document.getElementById('qnClient').value.trim();
+  const phone = document.getElementById('qnPhone').value.trim();
+  const num   = document.getElementById('qnNum').value.trim();
+  if (!name) return alert('Вкажіть клієнта');
+
+  const target = qnTargetCo;
+  const cross = target !== co;   // заявка для іншої компанії
+
+  // клієнта авто-додаємо ЛИШЕ у своїй компанії (в чужу RLS не пустить)
+  if (!cross) {
+    const existing = clients.find(c => (c.name||'').trim().toLowerCase() === name.toLowerCase());
+    if (!existing) {
+      await _sb.from('clients').upsert({ id:'CNEW'+Date.now(), company:co, name, phone, address:'', notes:'' });
+    } else if (phone && !existing.phone) {
+      await _sb.from('clients').update({ phone }).eq('id', existing.id);
+    }
+  }
+
+  // телефон зберігаємо прямо в заявці (щоб приймаюча компанія бачила його)
+  const noteVal = (cross ? `↪ Заявка від ${CO_NAME[co]}\n` : '') + document.getElementById('qnNotes').value;
+  const o = { id:'NEW'+Date.now(), company:target, client:name, product:num, phone, factory:FACTORIES[0], status:'Нова',
+              notes: noteVal, file_url: JSON.stringify(qnFiles) };
+  // insert (не upsert!): це завжди новий унікальний запис; upsert додатково перевіряє
+  // USING-частину RLS-політики через ON CONFLICT DO UPDATE і блокує крос-компанійні заявки
+  const { error } = await _sb.from('orders').insert(o);
+  if (error) return alert('Помилка: ' + error.message);
+
+  ['qnClient','qnPhone','qnNum','qnNotes'].forEach(i => document.getElementById(i).value = '');
+  qnFiles = []; renderQnFiles();
+  await sync(); renderNew();
+  if (cross) alert(`Заявку надіслано в ${CO_NAME[target]}. У вашій компанії вона не зберігається.`);
+}
+
+/* ================= ЗВІТ ================= */
+const inPeriod = o => {
+  if (statPeriod === 'all') return true;
+  if (!o.created_at) return false;
+  const d = new Date(o.created_at), now = new Date();
+  if (statPeriod === 'month')   return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();
+  if (statPeriod === 'quarter') return d.getFullYear()===now.getFullYear() && Math.floor(d.getMonth()/3)===Math.floor(now.getMonth()/3);
+  if (statPeriod === 'year')    return d.getFullYear()===now.getFullYear();
+  return true;
+};
+function setPeriod(p) { statPeriod = p; renderStats(); }
+
+function renderStats() {
+  const container = document.getElementById('statsDisplay');
+  const src = orders.filter(inPeriod);
+
+  const ACTIVE = ['Підтверджено','Перевірка','В роботі','На складі'];
+  const done   = src.filter(o => o.status === 'Виконано');
+  const active = src.filter(o => ACTIVE.includes(o.status));
+  const sold   = src.filter(o => ACTIVE.includes(o.status) || o.status === 'Виконано');
+  const sumTTC = a => a.reduce((s,o)=> s + n(o.total_ttc), 0);
+
+  const profit  = done.reduce((s,o)=> s + (n(o.sale_price_ht)-orderCost(o)+n(o.install_cost)+n(o.delivery)), 0);
+  const doneRev = sumTTC(done);
+  const clientDebt  = sold.reduce((s,o)=> s + (n(o.total_ttc)-n(o.paid_amount)), 0);
+  const factoryDebt = active.reduce((s,o)=> s + orderFacDebt(o), 0);
+
+  const P = [['month','Місяць'],['quarter','Квартал'],['year','Рік'],['all','Увесь час']];
+  const segHtml = P.map(([k,l])=>`<button class="${statPeriod===k?'on':''}" onclick="setPeriod('${k}')">${l}</button>`).join('');
+
+  const S = [
+    {k:'Нова', ic:'fa-inbox', c:'var(--new)'},
+    {k:'Виконано', ic:'fa-box', c:'var(--done)'},
+    {k:'В роботі', ic:'fa-gears', c:'var(--work)'},
+    {k:'Перевірка', ic:'fa-magnifying-glass', c:'var(--verify)'},
+    {k:'На складі', ic:'fa-warehouse', c:'var(--store)'},
+    {k:'Підтверджено', ic:'fa-circle-check', c:'var(--conf)'},
+    {k:'Кошторис', ic:'fa-file-lines', c:'var(--est)'},
+    {k:'Скасовано', ic:'fa-ban', c:'var(--canc)'}
+  ];
+  const cHtml = S.map(s => {
+    const g = src.filter(o=>o.status===s.k);
+    return `<div class="cnt" onclick="tab('orders'); flt('${s.k}', document.querySelector('[data-s=\\'${s.k}\\']'))"><div class="ic" style="background:${s.c}"><i class="fa ${s.ic}"></i></div><div><div class="num">${g.length}</div><div class="lbl">${s.k}</div><div class="sum">${fN(sumTTC(g))} €</div></div></div>`;
+  }).join('');
+
+  let fHtml = '';
+  FACTORIES.forEach(f => {
+    let cnt = 0, fd = 0;
+    active.forEach(o => {
+      if (o.factory === f)  { cnt++; fd += n(o.cost_price)-n(o.factory_prepay); }
+      if (o.factory2 === f) { cnt++; fd += n(o.cost_price2)-n(o.factory_prepay2); }
+    });
+    if (!cnt && fd === 0) return;   // не показувати фабрики без замовлень у роботі
+    fHtml += `<div class="st-box"><b style="font-size:15px">${f}</b><small>${cnt} в роботі</small><span>Борг: ${fN(fd)} €</span></div>`;
+  });
+  if (!fHtml) fHtml = '<div class="st-box" style="grid-column:1/-1;text-align:center"><small>Немає замовлень у роботі</small></div>';
+
+  container.innerHTML = `
+    <div class="seg">${segHtml}</div>
+    <div class="st-main">
+      <small>ЧИСТИЙ ПРИБУТОК · ГОТОВО</small>
+      <h2 style="font-size:38px">${fN(profit)} €</h2>
+      <p>Виконано: ${done.length} замовл. · Обіг ${fN(doneRev)} €</p>
+    </div>
+    <div class="st-grid">
+      <div class="st-box"><b style="color:var(--danger)">${fN(clientDebt)} €</b><small>Борг клієнтів</small></div>
+      <div class="st-box"><b style="color:var(--warning)">${fN(factoryDebt)} €</b><small>Борг фабрикам (в роботі)</small></div>
+    </div>
+    <h4 class="st-h"><span>Замовлення за статусами</span><button class="btn-ghost" onclick="exportCSV()"><i class="fa fa-file-export"></i> Експорт CSV</button></h4>
+    <div class="cnt-grid">${cHtml}</div>
+    <h4 class="st-h">Борг по фабриках (в роботі)</h4>
+    <div class="st-grid">${fHtml}</div>`;
+}
+
+/* ================= ЕКСПОРТ CSV ================= */
+function exportCSV() {
+  const src = orders.filter(inPeriod);
+  if (!src.length) return alert('Немає даних за обраний період');
+  const cols = ['client','product','factory','cost_price','factory_prepay','factory2','cost_price2','factory_prepay2','status','deadline','sale_price_ht','tva_rate','total_ttc','install_cost','delivery','paid_amount','notes'];
+  const head = ['Клієнт','Номер','Фабрика 1','Ціна фабрики 1','Передплата 1','Фабрика 2','Ціна фабрики 2','Передплата 2','Статус','Дедлайн','Ціна HT','TVA %','Сума TTC','Монтаж','Доставка','Оплачено','Нотатки'];
+  const esc = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
+  const csv = '﻿' + head.join(';') + '\n' + src.map(o => cols.map(c => esc(o[c])).join(';')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${co}_zamovlennya_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+/* ================= ЗБЕРЕЖЕННЯ ================= */
+async function saveO() {
+  const o = { id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value, factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value, sale_price_ht: n(document.getElementById('fSa').value), tva_rate: n(document.getElementById('fTv').value), total_ttc: n(document.getElementById('fTt').value), cost_price: n(document.getElementById('fCo').value), install_cost: n(document.getElementById('fIn').value), delivery: n(document.getElementById('fDe').value), paid_amount: payTotal(), payments: curPay, factory_prepay: n(document.getElementById('fFaPa').value), factory2: document.getElementById('fFa2').value || null, cost_price2: n(document.getElementById('fCo2').value), factory_prepay2: n(document.getElementById('fFaPa2').value), deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value, cancel_reason: document.getElementById('fCan').value, file_url: JSON.stringify(curFiles), check_measured: document.getElementById('fChM').checked, check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked };
+  const { error } = await _sb.from('orders').upsert(o);
+  if (error) return alert('Помилка збереження: ' + error.message);
+  closeM('mO'); sync();
+}
+async function saveC() { const c = { id: editId || 'CNEW'+Date.now(), company: co, name: document.getElementById('cNa').value, phone: document.getElementById('cPh').value, address: document.getElementById('cAd').value, notes: document.getElementById('cNo').value }; await _sb.from('clients').upsert(c); closeM('mC'); sync(); }
+
+const openO = id => {
+  editId = id; const o = id ? orders.find(x=>x.id==id) : {};
+  ['fCl','fPr','fSa','fCo','fIn','fDe','fDl','fRe','fNo','fCan','fFaPa','fCo2','fFaPa2'].forEach(i=>document.getElementById(i).value='');
+  ['fChM','fChO','fChS','fChI'].forEach(i=>document.getElementById(i).checked=false);
+  document.getElementById('fFa').value = id ? (o.factory || FACTORIES[0]) : FACTORIES[0];
+  document.getElementById('fFa2').value = id ? (o.factory2 || '') : '';
+  document.getElementById('fCo2').value = id ? (o.cost_price2 || '') : '';
+  document.getElementById('fFaPa2').value = id ? (o.factory_prepay2 || '') : '';
+  toggleFac2(!!(id && o.factory2));
+  curFiles = id ? parseFiles(o.file_url) : [];
+  curPay   = id ? parsePay(o.payments) : [];
+  // сумісність: старі замовлення без журналу платежів
+  if (id && !curPay.length && n(o.paid_amount) > 0) curPay = [{ date: null, amount: n(o.paid_amount) }];
+  renderFiles(); renderPay();
+  if (id) {
+    document.getElementById('fCl').value=o.client; document.getElementById('fPr').value=o.product;
+    document.getElementById('fSa').value=o.sale_price_ht; document.getElementById('fTv').value=o.tva_rate;
+    document.getElementById('fCo').value=o.cost_price; document.getElementById('fIn').value=o.install_cost; document.getElementById('fDe').value=o.delivery;
+    document.getElementById('fDl').value=o.deadline; document.getElementById('fRe').value=o.reminder_date;
+    document.getElementById('fSt').value=o.status; document.getElementById('fNo').value=o.notes;
+    document.getElementById('fCan').value=o.cancel_reason; document.getElementById('fFaPa').value=o.factory_prepay;
+    document.getElementById('fChM').checked=!!o.check_measured; document.getElementById('fChO').checked=!!o.check_ordered;
+    document.getElementById('fChS').checked=!!o.check_storage; document.getElementById('fChI').checked=!!o.check_installed;
+    document.getElementById('btnD').style.display='block';
+    document.getElementById('btnDup').style.display='block';
+  } else {
+    document.getElementById('btnD').style.display='none';
+    document.getElementById('btnDup').style.display='none';
+  }
+  tglCan(); calc(); showModal('mO');
+}
+
+// Дублювання: лишає клієнта/виріб/ціни, скидає дати, платежі, файли
+function dupO() {
+  editId = null;
+  document.getElementById('fSt').value = 'Кошторис';
+  ['fDl','fRe','fFaPa','fFaPa2'].forEach(i => document.getElementById(i).value = '');
+  curPay = []; curFiles = []; renderPay(); renderFiles();
+  document.getElementById('btnD').style.display = 'none';
+  document.getElementById('btnDup').style.display = 'none';
+  tglCan(); calc();
+  document.querySelector('#mO .mbox').scrollTop = 0;
+  document.querySelector('#mO h3').textContent = 'Замовлення (копія)';
+}
+
+const fab = () => curT === 'clients'
+  ? (editId=null, ['cNa','cPh','cAd','cNo'].forEach(i=>document.getElementById(i).value=''), document.getElementById('hSec').style.display='none', document.getElementById('btnDC').style.display='none', showModal('mC'))
+  : openO(null);
+// Показ модалки + запис в історію (щоб "Назад" її закривав)
+function showModal(id) {
+  document.getElementById(id).style.display = 'flex';
+  history.pushState({ m: id }, '');
+}
+const closeM = (id, fromPop) => {
+  document.getElementById(id).style.display='none'; editId=null;
+  if(id==='mO') document.querySelector('#mO h3').textContent='Замовлення';
+  // якщо закрили вручну — прибрати запис з історії
+  if (!fromPop && history.state && history.state.m === id) history.back();
+}
+const tglCan = () => document.getElementById('canB').style.display = document.getElementById('fSt').value === 'Скасовано' ? 'block' : 'none';
+const updateDl = () => { document.getElementById('dlC').innerHTML = clients.map(c=>`<option value="${c.name}">`).join(''); }
+const flt = (s,el) => { curS=s; document.querySelectorAll('.s-t').forEach(t=>t.classList.remove('active')); if(el) el.classList.add('active'); else { const t=document.querySelector(`[data-s='${s}']`); if(t) t.classList.add('active'); } render(); }
+const tab = (t, fromPop) => {
+  curT=t; document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
+  document.getElementById('p-'+t).style.display='block';
+  document.querySelectorAll('.n-i').forEach(i=>i.classList.remove('active'));
+  document.getElementById('ni-'+t).classList.add('active');
+  if(t==='clients') renderC(); if(t==='stats') renderStats(); if(t==='calendar') renderCal(); if(t==='new') renderNew();
+  document.getElementById('navS').style.display = t === 'orders' ? 'flex' : 'none';
+  // запис в історію, щоб "Назад" повертав на попередню вкладку
+  if (!fromPop && !(history.state && history.state.t === t)) history.pushState({ t }, '');
+}
+
+function renderC() {
+  const q = document.getElementById('qc').value.toLowerCase().trim();
+  const qd = q.replace(/\D/g,'');
+  const f = clients.filter(c => {
+    if (!q) return true;
+    if ((c.name||'').toLowerCase().includes(q)) return true;
+    return qd.length >= 3 && (c.phone||'').replace(/\D/g,'').includes(qd);
+  });
+  document.getElementById('listC').innerHTML = f.length
+    ? f.map(c=>`<div class="card" onclick="openCE('${c.id}')"><strong>${c.name||'Без імені'}</strong><br><small>${c.phone||'—'}</small></div>`).join('')
+    : `<div class="empty"><i class="fa fa-user-slash"></i>Клієнтів не знайдено</div>`;
+}
+function openCE(id) {
+  editId=id; const c=clients.find(x=>x.id==id);
+  document.getElementById('cNa').value=c.name; document.getElementById('cPh').value=c.phone;
+  document.getElementById('cAd').value=c.address; document.getElementById('cNo').value=c.notes;
+  const h = orders.filter(o => o.client === c.name);
+  document.getElementById('hSec').style.display='block';
+  document.getElementById('hList').innerHTML = h.map(o=>`<div class="file-chip" onclick="event.stopPropagation(); closeM('mC'); openO('${o.id}')" style="cursor:pointer"><span>${o.product||'Замовлення'}</span><b style="font-variant-numeric:tabular-nums">${fN(o.total_ttc)} €</b></div>`).join('') || '<small style="color:var(--muted2)">Замовлень немає</small>';
+  document.getElementById('btnDC').style.display='block';
+  showModal('mC');
+}
+async function delO() { if(confirm('Видалити?')) { await _sb.from('orders').delete().eq('id', editId); closeM('mO'); sync(); } }
+async function delC() { if(confirm('Видалити?')) { await _sb.from('clients').delete().eq('id', editId); closeM('mC'); sync(); } }
+const calc = () => {
+  const h=n(document.getElementById('fSa').value), t=n(document.getElementById('fTv').value), i=n(document.getElementById('fIn').value), d=n(document.getElementById('fDe').value);
+  const c = n(document.getElementById('fCo').value) + n(document.getElementById('fCo2').value); // обидві фабрики
+  document.getElementById('fTt').value = ((h+i+d)*(1+t/100)).toFixed(2);
+  document.getElementById('fMr').value = ((h-c)+i+d).toFixed(2) + ' €';
+  // Націнка = наскільки продано дорожче за ціну фабрик (у %)
+  document.getElementById('fMk').value = c > 0 ? Math.round((h - c) / c * 100) + ' %' : '—';
+}
+function updateTva() { const sel = document.getElementById('fTv'); if(sel) sel.innerHTML = TVA_OPTS[co].map(v => `<option value="${v}">${v}%</option>`).join(''); }
+
+// Закриття модалки: клік поза вікном або Esc
+document.querySelectorAll('.modal-w').forEach(m => { m.addEventListener('click', e => { if (e.target === m) closeM(m.id); }); });
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; document.querySelectorAll('.modal-w').forEach(m => { if (m.style.display === 'flex') closeM(m.id); }); });
+
+// Кнопка "Назад": спершу закриває модалку, потім повертає на попередню вкладку
+window.addEventListener('popstate', e => {
+  const openModalEl = [...document.querySelectorAll('.modal-w')].find(m => m.style.display === 'flex');
+  if (openModalEl) { closeM(openModalEl.id, true); return; }
+  const st = e.state;
+  if (st && st.t) tab(st.t, true);
+  else tab('orders', true);
+});
+
+// Блокування зуму на iOS (Safari ігнорує user-scalable=no)
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('gesturechange', e => e.preventDefault());
+let lastTouch = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if (now - lastTouch <= 300) e.preventDefault();   // подвійний тап → без зуму
+  lastTouch = now;
+}, { passive: false });
+
+// Блокування зуму на ПК (Ctrl + колесо миші / Ctrl +,-,0)
+window.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
+window.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && ['+','-','=','_','0'].includes(e.key)) e.preventDefault();
+}, { passive: false });
+
+// PWA
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+
+window.onload = checkUser;
+</script>
+</body>
+</html>

@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>CRM</title>
+<title>Axis</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#101a2c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="CRM">
-<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-title" content="Axis">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,7 +50,12 @@ body { background: var(--bg); color: var(--txt); font-family: 'Inter', system-ui
 
 header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px) 18px 0; height: calc(var(--nav-h) + env(safe-area-inset-top,0px)); box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
 .brand { display: flex; align-items: center; gap: 11px; }
-.brand .logo { width: 32px; height: 32px; border-radius: var(--r-sm); background: var(--p2); display: grid; place-items: center; font-size: 14px; }
+.brand .logo { width: 34px; height: 34px; border-radius: var(--r-sm); background: #0E2A47; overflow: hidden; display: grid; place-items: center; }
+.brand .logo img { width: 100%; height: 100%; display: block; }
+.auth-box .a-brand { text-align: center; margin: 4px auto 22px; color: var(--txt); }
+.auth-box .a-brand svg { display: block; width: 200px; max-width: 70%; height: auto; margin: 0 auto; }
+.auth-box .a-tag { margin-top: 12px; font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 #brd { font-weight: 700; letter-spacing: -.02em; font-size: 15px; }
 #logoutBtn { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: #fff; height: 36px; padding: 0 14px; border-radius: var(--r-sm); cursor: pointer; display: none; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; font-family: inherit; transition: .15s; }
 #logoutBtn:hover { background: rgba(255,255,255,.18); }
@@ -139,6 +145,21 @@ header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px
 .card.cl .cl-arrow { color: var(--muted2); font-size: 12px; }
 
 /* Панель-підсумок угорі «Замовлень» */
+/* ===== Стартова заставка Axis ===== */
+#splash { position: fixed; inset: 0; z-index: 20000; background: #ffffff; --ink: #0E2A47; display: flex; align-items: center; justify-content: center; transition: opacity .6s ease, visibility .6s; cursor: pointer; }
+html.dark #splash { background: #0b101c; --ink: #f2f5fb; }
+#splash.out { opacity: 0; visibility: hidden; pointer-events: none; }
+#splash .sp-wrap { width: min(78vw, 440px); text-align: center; }
+#splash .sp-word { display: block; width: 100%; height: auto; overflow: visible; }
+#splash .sp-word path, #splash .sp-word rect { transform-box: fill-box; transform-origin: center; }
+#splash .sp-l { fill: var(--ink); opacity: 0; transform: translateY(16px); animation: spLet .7s cubic-bezier(.2,.8,.2,1) forwards; }
+#splash .sp-a { animation-delay: .1s; } #splash .sp-x { fill: #1D9E75; animation-delay: .25s, 1.05s; animation-name: spLet, spPop; animation-duration: .7s, .6s; } #splash .sp-i { animation-delay: .4s; } #splash .sp-s { animation-delay: .55s; }
+#splash .sp-bar { fill: #1D9E75; transform: scaleX(0); animation: spBar .7s cubic-bezier(.3,.7,.2,1) .9s forwards; }
+#splash .sp-tag { margin-top: 18px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); opacity: 0; transform: translateY(8px); animation: spLet .7s ease 1.3s forwards; }
+@keyframes spLet { to { opacity: 1; transform: none; } }
+@keyframes spBar { to { transform: scaleX(1); } }
+@keyframes spPop { 0%, 100% { filter: drop-shadow(0 0 0 rgba(29,158,117,0)); } 45% { transform: scale(1.12); filter: drop-shadow(0 0 14px rgba(29,158,117,.65)); } }
+@media (prefers-reduced-motion: reduce) { #splash .sp-l, #splash .sp-bar, #splash .sp-tag { transform: none; animation: spFade .5s ease forwards; } #splash .sp-x { animation-name: spFade; } @keyframes spFade { to { opacity: 1; transform: none; } } #splash .sp-bar { opacity: 0; } }
 .bal-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 9px 12px; border: 1px solid var(--line); border-left: 3px solid var(--warning); border-radius: 12px; background: var(--surface); font-size: 12.5px; color: var(--txt); }
 .bal-bar > i { color: var(--warning); }
 .bal-bar > span { flex: 1; line-height: 1.35; }
@@ -502,12 +523,29 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
 </head>
 <body>
 
+<div id="splash" aria-hidden="true"><div class="sp-wrap">
+  <svg class="sp-word" viewBox="0 48 489 190"><path class="sp-l sp-a" d="m 139.16016,200 h -34.375 L 94.824219,168.84766 H 45.019531 L 35.15625,200 H 0.9765625 L 51.953125,59.960937 H 89.355469 Z M 87.597656,144.62891 72.558594,97.558594 q -1.660157,-5.273438 -2.34375,-12.597657 h -0.78125 q -0.488282,6.152344 -2.441407,12.207032 L 51.757812,144.62891 Z"/><path class="sp-l sp-x" d="m 284.9711,200 h -37.40234 l -24.1211,-45.60547 q -1.36719,-2.53906 -2.83203,-9.375 h -0.39062 q -0.6836,3.22266 -3.22266,9.76563 L 192.7836,200 h -37.59766 l 44.62891,-70.01953 -40.82031,-70.019533 h 38.3789 l 20.01953,41.992193 q 2.34375,4.98046 4.19922,11.8164 h 0.39063 q 1.17187,-4.10156 4.39453,-12.20703 l 22.26562,-41.601563 h 35.15625 l -41.99218,69.433593 z"/><path class="sp-l sp-i" d="M 347.25861,200 H 315.71564 V 59.960937 h 31.54297 z"/><path class="sp-l sp-s" d="m 386.67032,194.62891 v -31.25 q 8.49609,7.1289 18.45703,10.74218 9.96094,3.51563 20.11719,3.51563 5.95703,0 10.35156,-1.07422 4.49219,-1.07422 7.42187,-2.92969 3.02735,-1.95312 4.49219,-4.49219 1.46485,-2.63671 1.46485,-5.66406 0,-4.10156 -2.34375,-7.32422 -2.34375,-3.22265 -6.44532,-5.95703 -4.0039,-2.73437 -9.57031,-5.27344 -5.56641,-2.53906 -12.01172,-5.17578 -16.40625,-6.83593 -24.51172,-16.69921 -8.00781,-9.86329 -8.00781,-23.82813 0,-10.9375 4.39453,-18.75 4.39453,-7.910156 11.91406,-12.988281 7.61719,-5.078125 17.57813,-7.421875 9.96094,-2.441407 21.09375,-2.441407 10.9375,0 19.33594,1.367188 8.49609,1.269531 15.625,4.003906 V 92.1875 q -3.51563,-2.441406 -7.71485,-4.296875 -4.10156,-1.855469 -8.49609,-3.027344 -4.39453,-1.269531 -8.78906,-1.855469 -4.29688,-0.585937 -8.20313,-0.585937 -5.37109,0 -9.76562,1.074219 -4.39453,0.976562 -7.42188,2.832031 -3.02734,1.855469 -4.6875,4.492187 -1.66015,2.539063 -1.66015,5.761719 0,3.515629 1.85546,6.347659 1.85547,2.73437 5.27344,5.27344 3.41797,2.4414 8.30078,4.88281 4.88282,2.34375 11.03516,4.88281 8.39844,3.51563 15.03906,7.51953 6.73828,3.90625 11.52344,8.88672 4.78516,4.98047 7.32422,11.42578 2.53906,6.34766 2.53906,14.84375 0,11.71875 -4.49219,19.72656 -4.39453,7.91016 -12.01172,12.89063 -7.61718,4.88281 -17.77343,7.03125 -10.0586,2.14844 -21.28907,2.14844 -11.52343,0 -21.97265,-1.95313 -10.35156,-1.95312 -17.96875,-5.85937 z"/><rect class="sp-bar" x="0" y="222" width="489" height="8" rx="4"/></svg>
+  <div class="sp-tag">Clarity. Control. Growth.</div>
+</div></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="axis-word" viewBox="0 48 489 190"><path fill="currentColor" d="m 139.16016,200 h -34.375 L 94.824219,168.84766 H 45.019531 L 35.15625,200 H 0.9765625 L 51.953125,59.960937 H 89.355469 Z M 87.597656,144.62891 72.558594,97.558594 q -1.660157,-5.273438 -2.34375,-12.597657 h -0.78125 q -0.488282,6.152344 -2.441407,12.207032 L 51.757812,144.62891 Z"/><path fill="#1D9E75" d="m 284.9711,200 h -37.40234 l -24.1211,-45.60547 q -1.36719,-2.53906 -2.83203,-9.375 h -0.39062 q -0.6836,3.22266 -3.22266,9.76563 L 192.7836,200 h -37.59766 l 44.62891,-70.01953 -40.82031,-70.019533 h 38.3789 l 20.01953,41.992193 q 2.34375,4.98046 4.19922,11.8164 h 0.39063 q 1.17187,-4.10156 4.39453,-12.20703 l 22.26562,-41.601563 h 35.15625 l -41.99218,69.433593 z"/><path fill="currentColor" d="M 347.25861,200 H 315.71564 V 59.960937 h 31.54297 z"/><path fill="currentColor" d="m 386.67032,194.62891 v -31.25 q 8.49609,7.1289 18.45703,10.74218 9.96094,3.51563 20.11719,3.51563 5.95703,0 10.35156,-1.07422 4.49219,-1.07422 7.42187,-2.92969 3.02735,-1.95312 4.49219,-4.49219 1.46485,-2.63671 1.46485,-5.66406 0,-4.10156 -2.34375,-7.32422 -2.34375,-3.22265 -6.44532,-5.95703 -4.0039,-2.73437 -9.57031,-5.27344 -5.56641,-2.53906 -12.01172,-5.17578 -16.40625,-6.83593 -24.51172,-16.69921 -8.00781,-9.86329 -8.00781,-23.82813 0,-10.9375 4.39453,-18.75 4.39453,-7.910156 11.91406,-12.988281 7.61719,-5.078125 17.57813,-7.421875 9.96094,-2.441407 21.09375,-2.441407 10.9375,0 19.33594,1.367188 8.49609,1.269531 15.625,4.003906 V 92.1875 q -3.51563,-2.441406 -7.71485,-4.296875 -4.10156,-1.855469 -8.49609,-3.027344 -4.39453,-1.269531 -8.78906,-1.855469 -4.29688,-0.585937 -8.20313,-0.585937 -5.37109,0 -9.76562,1.074219 -4.39453,0.976562 -7.42188,2.832031 -3.02734,1.855469 -4.6875,4.492187 -1.66015,2.539063 -1.66015,5.761719 0,3.515629 1.85546,6.347659 1.85547,2.73437 5.27344,5.27344 3.41797,2.4414 8.30078,4.88281 4.88282,2.34375 11.03516,4.88281 8.39844,3.51563 15.03906,7.51953 6.73828,3.90625 11.52344,8.88672 4.78516,4.98047 7.32422,11.42578 2.53906,6.34766 2.53906,14.84375 0,11.71875 -4.49219,19.72656 -4.39453,7.91016 -12.01172,12.89063 -7.61718,4.88281 -17.77343,7.03125 -10.0586,2.14844 -21.28907,2.14844 -11.52343,0 -21.97265,-1.95313 -10.35156,-1.95312 -17.96875,-5.85937 z"/><rect x="0" y="222" width="489" height="8" rx="4" fill="#1D9E75"/></symbol></svg>
+<script>
+/* Заставка: показується мінімум ~3 с, торкання пропускає її */
+(function () {
+  var s = document.getElementById('splash'); if (!s) return;
+  var t0 = Date.now(), done = false;
+  function hide() { if (done) return; done = true; s.classList.add('out'); setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 700); }
+  s.addEventListener('click', hide);
+  window.addEventListener('load', function () { setTimeout(hide, Math.max(300, 3000 - (Date.now() - t0))); });
+  setTimeout(hide, 5000);
+})();
+</script>
+
 <div id="loader"><i class="fa fa-spinner fa-spin fa-2x" style="color:var(--p2)"></i></div>
 
 <div id="authScreen">
   <div class="auth-box">
-    <div class="a-logo"><i class="fa fa-cubes"></i></div>
-    <h2>CRM</h2>
+    <div class="a-brand"><svg viewBox="0 48 489 190" role="img" aria-label="Axis"><use href="#axis-word"/></svg><div class="a-tag">Clarity. Control. Growth.</div></div>
+    <h2 class="sr-only">Axis</h2>
     <div class="fg"><label>Email</label><input id="email" type="email" placeholder="mail@example.com"></div>
     <div class="fg"><label>Пароль</label><input id="password" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <button class="btn-s" onclick="doLogin()">Увійти</button>
@@ -515,7 +553,7 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
 </div>
 
 <header>
-  <div class="brand"><span class="logo"><i class="fa fa-cubes"></i></span><div id="brd">CRM</div></div>
+  <div class="brand"><span class="logo"><img src="icon-192.png" alt=""></span><div id="brd">Axis</div></div>
   <div style="display:flex;align-items:center;gap:10px;">
     <div class="co-switch" id="coSwitch" style="display:none">
       <button id="b-hmk" class="on" onclick="setCo('heimek')">Heimek</button>
@@ -844,7 +882,13 @@ const URL_SB = "https://ysctdrsxqtekxuvkjmdx.supabase.co";
 const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzY3RkcnN4cXRla3h1dmtqbWR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODkxOTksImV4cCI6MjA5OTE2NTE5OX0.vmOKBfc1dGLgrNu1YQ9IVF-v6nUGb2tzEK29L1X0aiQ";
 const _sb = window.supabase.createClient(URL_SB, KEY_SB);
 
-const CO_NAME = { heimek: 'Heimek CRM', luxwin: 'Lux Win CRM' };
+const CO_NAME = { heimek: 'Heimek', luxwin: 'Lux Win' };
+// Назва в шапці: «Axis»; менеджеру (без перемикача компаній) додаємо назву компанії
+function setBrand() {
+  const sw = document.getElementById('coSwitch');
+  document.getElementById('brd').innerHTML = 'Axis' + (sw && sw.style.display === 'none' && CO_NAME[co] ? ` <small style="font-weight:500;color:var(--muted)">· ${CO_NAME[co]}</small>` : '');
+  document.title = 'Axis' + (CO_NAME[co] ? ' · ' + CO_NAME[co] : '');
+}
 const BUCKET = 'order-files';
 const FACTORIES = ['Eko-okna','Seharia','Ukraine','Optimedia','S.C. GERE&CO S.R.L.','Vindovkii','WDC'];
 
@@ -1289,8 +1333,7 @@ async function checkUser() {
     document.getElementById('b-hmk').classList.toggle('on', co==='heimek');
     document.getElementById('b-lux').classList.toggle('on', co==='luxwin');
     document.body.setAttribute('data-co', co);
-    document.getElementById('brd').innerText = CO_NAME[co] || 'CRM';
-    document.title = CO_NAME[co] || 'CRM';
+    setBrand();
     document.getElementById('creditCo').textContent = co.toUpperCase();
     history.replaceState({ t: 'orders' }, '');   // базовий запис для кнопки "Назад"
     fillFactories(); updateTva(); applyView(); sync();
@@ -1312,8 +1355,7 @@ function setCo(k) {
   if (k === co) return;
   co = k;
   document.body.setAttribute('data-co', co);
-  document.getElementById('brd').innerText = CO_NAME[co] || 'CRM';
-  document.title = CO_NAME[co] || 'CRM';
+  setBrand();
   document.getElementById('creditCo').textContent = co.toUpperCase();
   document.getElementById('b-hmk').classList.toggle('on', co==='heimek');
   document.getElementById('b-lux').classList.toggle('on', co==='luxwin');
