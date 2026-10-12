@@ -139,6 +139,11 @@ header { background: var(--p); color: #fff; padding: env(safe-area-inset-top,0px
 .card.cl .cl-arrow { color: var(--muted2); font-size: 12px; }
 
 /* Панель-підсумок угорі «Замовлень» */
+.bal-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 9px 12px; border: 1px solid var(--line); border-left: 3px solid var(--warning); border-radius: 12px; background: var(--surface); font-size: 12.5px; color: var(--txt); }
+.bal-bar > i { color: var(--warning); }
+.bal-bar > span { flex: 1; line-height: 1.35; }
+.bal-bar button { border: 0; border-radius: 9px; padding: 7px 12px; font: inherit; font-weight: 600; background: var(--primary, #3355ff); color: #fff; cursor: pointer; white-space: nowrap; }
+@media (max-width: 640px) { .bal-bar { flex-wrap: wrap; } .bal-bar button { width: 100%; padding: 9px 12px; } }
 .sum-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
 .sum-tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; cursor: pointer; box-shadow: var(--sh-1); transition: .14s; min-width: 0; }
 .sum-tile:hover { border-color: var(--muted2); box-shadow: var(--sh-2); }
@@ -545,6 +550,7 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
         <button type="button" data-v="board" onclick="setView('board')"><i class="fa fa-table-columns"></i>Канбан</button>
       </div>
     </div>
+    <div id="balBar"></div>
     <div class="sum-strip" id="sumStrip"></div>
     <div class="tool-row">
       <input type="text" id="q" placeholder="🔍 Пошук: клієнт, № замовлення, телефон..." oninput="render()">
@@ -775,6 +781,24 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
     </div>
     <div class="fg fin-only"><label>Нагадати про кошторис через (днів, 0 — не нагадувати)</label><input id="setAutoDays" type="number" min="0" step="1" onchange="setAutoDays(this.value)"></div>
 
+    <div class="sec fin-only">Автопризначення заявок</div>
+    <div class="fg fin-only"><label>Нові заявки призначати по черзі між співробітниками компанії</label>
+      <div class="seg" id="asSeg" style="margin-bottom:0">
+        <button type="button" data-v="1" onclick="setAsOn('1')">Увімкнено</button>
+        <button type="button" data-v="0" onclick="setAsOn('0')">Вимкнено</button>
+      </div>
+    </div>
+    <div class="fg fin-only"><label>У черзі <small id="poolCo" style="color:var(--muted2);font-weight:500"></small></label>
+      <div class="seg" id="poolSeg" style="margin-bottom:0"></div>
+      <small style="color:var(--muted)">Натисніть імʼя, щоб виключити людину з черги (відпустка, лікарняний) або повернути.</small>
+    </div>
+    <div class="fg fin-only"><label>Перекидати замовлення, якщо різниця в навантаженні від (відкритих замовлень)</label><input id="setBalGap" type="number" min="2" step="1" onchange="setBalGap(this.value)"></div>
+    <div class="fg fin-only" style="gap:8px">
+      <div id="loadBox"></div>
+      <button type="button" class="btn-alt" style="display:block;margin:0" onclick="balanceLoad()"><i class="fa fa-scale-balanced"></i> Перерозподілити навантаження</button>
+      <small style="color:var(--muted)">Переносяться лише заявки й кошториси (статуси «Нова» та «Кошторис»); те, що вже в роботі, залишається у свого співробітника.</small>
+    </div>
+
     <div class="sec fin-only">Дані</div>
     <div class="fg fin-only" style="gap:8px">
       <button type="button" class="btn-alt" style="display:block;margin:0" onclick="openTrash()"><i class="fa fa-trash-can"></i> Кошик видалених замовлень</button>
@@ -959,6 +983,8 @@ async function writeOrder(o, mode) {
 
 /* ================= КОМАНДА (відповідальні) ================= */
 const DEFAULT_TEAM = ['Олексій', 'Денис', 'Марія', 'Надя'];
+const DEFAULT_POOL = { heimek: ['Олексій', 'Денис'], luxwin: ['Надя', 'Марія'] };   // хто за замовчуванням у черзі на нові заявки
+const AS_AUTO = '__auto';                       // значення в списку «Відповідальний» = призначити автоматично по черзі
 const NONE = '__none';                          // значення фільтра «без відповідального»
 let TEAM = DEFAULT_TEAM.slice(), TEAM_DB = false, qnAsInit = false;
 let MEMBER = '';                                 // співробітник, прив'язаний до логіна (profiles.member_name)
@@ -968,7 +994,7 @@ const isOpen = o => o.status !== 'Виконано' && o.status !== 'Скасо�
 // Вибір значення в списку; якщо людини вже немає в команді — додаємо її як варіант, щоб значення не загубилось
 function setAs(id, val) {
   const el = document.getElementById(id); if (!el) return;
-  if (val && val !== NONE && !TEAM.includes(val) && ![...el.options].some(x => x.value === val)) {
+  if (val && val !== NONE && val !== AS_AUTO && !TEAM.includes(val) && ![...el.options].some(x => x.value === val)) {
     const op = document.createElement('option'); op.value = val; op.textContent = val; el.appendChild(op);
   }
   el.value = val || '';
@@ -976,13 +1002,13 @@ function setAs(id, val) {
 function fillSel(id, first) {
   const el = document.getElementById(id); if (!el) return;
   const cur = el.value, names = [...TEAM];
-  if (cur && cur !== NONE && !names.includes(cur)) names.push(cur);
+  if (cur && cur !== NONE && cur !== AS_AUTO && !names.includes(cur)) names.push(cur);
   el.innerHTML = first + names.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
   el.value = cur;
 }
 function fillTeam() {
   fillSel('fAs', '<option value="">— не призначено —</option>');
-  fillSel('qnAs', '<option value="">— не призначено —</option>');
+  fillSel('qnAs', (AS_ON() ? `<option value="${AS_AUTO}">🔄 Автоматично (по черзі)</option>` : '') + '<option value="">— не призначено —</option>');
   fillSel('fltAs', '<option value="">Усі</option><option value="__none">Без відповідального</option>');
   fillSel('bulkAs', '<option value="">— зняти відповідального —</option>');
   renderTeamSettings();
@@ -996,10 +1022,10 @@ async function loadTeam() {
   if (!list) {      // таблиці ще немає — працюємо локально (лише на цьому пристрої)
     TEAM_DB = false;
     try { list = JSON.parse(LS.get('crm_team_' + co, 'null')); } catch (e) {}
-    if (!Array.isArray(list)) list = DEFAULT_TEAM.slice();
+    if (!Array.isArray(list)) list = (DEFAULT_POOL[co] || DEFAULT_TEAM).slice();
   }
   TEAM = list; fillTeam();
-  if (!qnAsInit) { setAs('qnAs', ME()); qnAsInit = true; }
+  if (!qnAsInit) { setAs('qnAs', qnAsDefault()); qnAsInit = true; }
 }
 async function addMember() {
   const inp = document.getElementById('teamNew'), name = inp.value.trim();
@@ -1026,6 +1052,95 @@ function renderTeamSettings() {
   document.getElementById('teamNote').textContent = TEAM_DB ? '' : '(зберігається лише на цьому пристрої: виконайте SQL)';
   document.getElementById('meSeg').innerHTML = ['', ...TEAM].map(t => `<button type="button" class="${ME() === t ? 'on' : ''}" ${MEMBER ? 'disabled style="opacity:.55;cursor:default"' : ''} data-n="${esc(t)}" onclick="setMe(this.dataset.n)">${t ? esc(t) : 'Ніхто'}</button>`).join('');
   const lock = document.getElementById('meLock'); if (lock) lock.textContent = MEMBER ? `Ваш логін закріплений за співробітником «${MEMBER}», змінити це можна лише в базі.` : '';
+}
+/* ================= АВТОПРИЗНАЧЕННЯ ПО ЧЕРЗІ ================= */
+const AS_ON = () => LS.get('crm_autoas', '1') !== '0';
+const BAL_GAP = () => Math.max(2, parseInt(LS.get('crm_bal_gap', '3'), 10) || 3);
+const qnAsDefault = () => AS_ON() ? AS_AUTO : ME();
+// Черга компанії: збережений вибір, інакше типовий склад
+function poolOf(c) {
+  try { const p = JSON.parse(LS.get('crm_pool_' + c, 'null')); if (Array.isArray(p)) return p; } catch (e) {}
+  return (DEFAULT_POOL[c] || []).slice();
+}
+// Кому призначити наступну заявку: тому, кому найдавніше призначали (справжня черга).
+// Спершу SQL-функція pick_assignee (бачить усі замовлення компанії, навіть з іншої компанії), далі — з пам'яті, далі — лічильник на пристрої
+async function pickAssignee(target) {
+  const pool = poolOf(target); if (!pool.length) return null; if (pool.length === 1) return pool[0];
+  try { const r = await _sb.rpc('pick_assignee', { p_company: target, p_pool: pool }); if (!r.error && pool.includes(r.data)) return r.data; } catch (e) {}
+  if (target === co) {
+    const last = {}; pool.forEach(p => last[p] = 0);
+    orders.forEach(o => { if (o.company === target && last[o.assignee] !== undefined) last[o.assignee] = Math.max(last[o.assignee], orderTs(o) || 0); });
+    return pool.slice().sort((a, b) => last[a] - last[b])[0];
+  }
+  const k = 'crm_rr_' + target, i = (parseInt(LS.get(k, '0'), 10) || 0) % pool.length; LS.set(k, String(i + 1)); return pool[i];
+}
+function setAsOn(v) { LS.set('crm_autoas', v); const cur = document.getElementById('qnAs').value; fillTeam(); setAs('qnAs', v === '1' ? AS_AUTO : (cur === AS_AUTO ? ME() : cur)); renderSettings(); renderBalBar(); }
+function setBalGap(v) { LS.set('crm_bal_gap', String(Math.max(2, parseInt(v, 10) || 3))); renderSettings(); renderBalBar(); }
+function togglePool(name) {
+  const p = poolOf(co), i = p.indexOf(name);
+  if (i >= 0) p.splice(i, 1); else p.push(name);
+  LS.set('crm_pool_' + co, JSON.stringify(p)); renderSettings(); renderBalBar();
+}
+// План вирівнювання: непризначені заявки/кошториси роздаємо тим, у кого менше; у перевантаженого забираємо зайві, поки різниця не стане меншою за поріг
+function balancePlan() {
+  const pool = poolOf(co), gap = BAL_GAP(), load = {}, before = {}, moves = [];
+  if (pool.length < 2) return { moves, before, after: before };
+  pool.forEach(p => load[p] = 0);
+  orders.forEach(o => { if (isOpen(o) && load[o.assignee] !== undefined) load[o.assignee]++; });
+  Object.assign(before, load);
+  const movable = o => o.status === 'Нова' || o.status === 'Кошторис';
+  const lc = o => o.last_contact ? 1 : 0;      // спершу ті, з якими ще не спілкувалися, і новіші
+  const byEase = (a, b) => lc(a) - lc(b) || orderTs(b) - orderTs(a);
+  const pend = {}; pool.forEach(p => pend[p] = orders.filter(o => movable(o) && o.assignee === p).sort(byEase));
+  const pick = f => pool.reduce((m, p) => f(load[p], load[m]) ? p : m, pool[0]);
+  orders.filter(o => movable(o) && !o.assignee).sort(byEase).forEach(o => { const to = pick((a, b) => a < b); moves.push({ o, from: '', to }); load[to]++; });
+  for (let g = 0; g < 500; g++) {
+    const hi = pick((a, b) => a > b), lo = pick((a, b) => a < b);
+    if (load[hi] - load[lo] < gap) break;
+    const o = pend[hi].shift(); if (!o) break;
+    moves.push({ o, from: hi, to: lo }); load[hi]--; load[lo]++;
+  }
+  return { moves, before, after: load };
+}
+async function balanceLoad() {
+  const p = balancePlan();
+  if (!p.moves.length) return alert('Навантаження збалансоване — переносити нічого.');
+  const sum = Object.keys(p.after).map(k => `${k}: ${p.before[k]} → ${p.after[k]}`).join('\n');
+  if (!confirm(`Буде змінено відповідального в ${p.moves.length} замовленнях (відкриті замовлення):\n\n${sum}\n\nПродовжити?`)) return;
+  let ok = 0;
+  for (const m of p.moves) {
+    const { error } = await _sb.from('orders').update({ assignee: m.to }).eq('id', m.o.id);
+    if (error) { if (/assignee/.test(error.message || '')) return alert('У базі немає колонки assignee. Виконайте SQL з інструкції.'); continue; }
+    logHistory(m.o.id, m.o.company, 'updated', { assignee: [m.from, m.to] });
+    m.o.assignee = m.to; ok++;
+  }
+  render(); renderSettings();
+  alert(ok === p.moves.length ? `Готово: перепризначено ${ok}.` : `Перепризначено ${ok} з ${p.moves.length}, решту зберегти не вдалося.`);
+}
+// Навантаження в налаштуваннях і підказка зверху
+function loadStats() {
+  const pool = poolOf(co), st = {};
+  pool.forEach(p => st[p] = { open: 0, work: 0, late: 0 });
+  orders.forEach(o => { const s = st[o.assignee]; if (!s || !isOpen(o)) return; s.open++; if (o.status === 'В роботі') s.work++; if (isRem(o) || isLate(o)) s.late++; });
+  return st;
+}
+function renderPoolSettings() {
+  const seg = document.getElementById('poolSeg'); if (!seg) return;
+  const pool = poolOf(co);
+  document.getElementById('poolCo').textContent = '· ' + (CO_NAME[co] || '');
+  seg.innerHTML = TEAM.length ? TEAM.map(t => `<button type="button" class="${pool.includes(t) ? 'on' : ''}" data-n="${esc(t)}" onclick="togglePool(this.dataset.n)">${esc(t)}</button>`).join('') : '<small style="color:var(--muted2)">Спершу додайте співробітників</small>';
+  document.querySelectorAll('#asSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === (AS_ON() ? '1' : '0')));
+  document.getElementById('setBalGap').value = BAL_GAP();
+  const st = loadStats();
+  document.getElementById('loadBox').innerHTML = Object.keys(st).length ? Object.keys(st).map(k => `<div class="file-chip">${avatarHtml(k)}<span style="color:var(--txt);cursor:default;flex:1">${esc(k)}</span><small style="color:var(--muted)">${st[k].open} відкритих · ${st[k].work} в роботі${st[k].late ? ` · <b style="color:var(--canc)">${st[k].late} потребують уваги</b>` : ''}</small></div>`).join('') : '';
+}
+function renderBalBar() {
+  const box = document.getElementById('balBar'); if (!box) return;
+  if (isMgr() || !AS_ON()) { box.innerHTML = ''; return; }
+  const p = balancePlan();
+  box.innerHTML = p.moves.length
+    ? `<div class="bal-bar"><i class="fa fa-scale-balanced"></i><span>Навантаження нерівне: ${Object.keys(p.before).map(k => `<b>${esc(k)}</b> ${p.before[k]}`).join(' · ')}. Можна перерозподілити ${p.moves.length} зам.</span><button type="button" onclick="balanceLoad()">Перерозподілити</button></div>`
+    : '';
 }
 // Мітка відповідального на картці
 const asChip = o => o.assignee ? `<span class="chip as" style="--h:${hueOf(o.assignee)}" title="Відповідальний"><i class="fa fa-user"></i> ${esc(o.assignee)}</span>` : '';
@@ -1230,6 +1345,7 @@ async function sync() {
 /* ================= ЛІЧИЛЬНИКИ НА ФІЛЬТРАХ ================= */
 // Панель-підсумок: що вимагає уваги просто зараз
 function renderSummary() {
+  renderBalBar();
   const box = document.getElementById('sumStrip'); if (!box) return;
   const waiting = orders.filter(o => o.status === 'Нова').length;
   const inWork  = orders.filter(o => o.status === 'В роботі').length;
@@ -1745,7 +1861,9 @@ async function newRequest() {
 
   // телефон зберігаємо прямо в заявці (щоб приймаюча компанія бачила його)
   const noteVal = (cross ? `↪ Заявка від ${CO_NAME[co]}\n` : '') + document.getElementById('qnNotes').value;
-  const o = { id:'NEW'+Date.now(), created_at:new Date().toISOString(), company:target, client:name, client_id:clientId, product:num, phone, factory:FACTORIES[0], status:'Нова', assignee: document.getElementById('qnAs').value || null,
+  let asg = document.getElementById('qnAs').value;
+  if (asg === AS_AUTO) asg = await pickAssignee(target);
+  const o = { id:'NEW'+Date.now(), created_at:new Date().toISOString(), company:target, client:name, client_id:clientId, product:num, phone, factory:FACTORIES[0], status:'Нова', assignee: asg || null,
               notes: noteVal, file_url: JSON.stringify(qnFiles) };
   // insert (не upsert!): це завжди новий унікальний запис; upsert додатково перевіряє
   // USING-частину RLS-політики через ON CONFLICT DO UPDATE і блокує крос-компанійні заявки
@@ -1755,11 +1873,11 @@ async function newRequest() {
 
   ['qnClient','qnPhone','qnNum','qnNotes'].forEach(i => document.getElementById(i).value = '');
   LS.del('crm_draft_qn_' + co);
-  setAs('qnAs', ME());
+  setAs('qnAs', qnAsDefault());
   autoGrow(document.getElementById('qnNotes'));
   qnFiles = []; renderQnFiles();
   await sync(); renderNew();
-  if (cross) alert(`Заявку надіслано в ${CO_NAME[target]}. У вашій компанії вона не зберігається.`);
+  if (cross) alert(`Заявку надіслано в ${CO_NAME[target]}${asg ? ' · відповідальний: ' + asg : ''}. У вашій компанії вона не зберігається.`);
 }
 
 /* ================= ЗВІТ ================= */
@@ -2424,7 +2542,7 @@ function resetScale() { LS.del('crm_zoom'); applyScale(); renderSettings(); }
 function setMinMk(v) { LS.set('crm_min_markup', String(Math.max(0, parseFloat(v) || 0))); render(); }
 function openSettings() { renderSettings(); showModal('mS'); }
 function renderSettings() {
-  renderTeamSettings();
+  renderTeamSettings(); renderPoolSettings();
   document.querySelectorAll('#autoSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === (AUTO_ON() ? '1' : '0')));
   document.getElementById('setAutoDays').value = AUTO_DAYS();
   const pref = LS.get('crm_theme', 'auto');
