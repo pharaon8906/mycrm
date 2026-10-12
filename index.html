@@ -1678,7 +1678,8 @@ const frN = v => n(v).toLocaleString('fr-FR', { maximumFractionDigits: 2 });
 const frDate = s => { const t = Date.parse(String(s).slice(0, 10) + 'T00:00:00'); return isNaN(t) ? '' : new Date(t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); };
 const hello = c => c.nom ? `Bonjour ${c.nom},` : 'Bonjour,';
 const WA_TPL = [
-  { k: 'relance',    ua: 'Нагадати про кошторис',          fr: c => `${hello(c)}\n\nJe me permets de revenir vers vous au sujet de votre devis${c.num}. Avez-vous eu l'occasion de le consulter ? Je reste à votre disposition pour toute question ou pour l'ajuster si nécessaire.` },
+  { k: 'devis',      ua: 'Надіслати цінову пропозицію',    fr: c => `Bonjour\n\nL’équipe ${SOC()} vous remercie pour votre demande. Nous avons bien reçu votre demande et vous prions de trouver ci-joint notre proposition\n\nSi vous avez la moindre question, n’hésitez pas à nous contacter : nous serons ravis d’ajuster notre offre et d’en discuter avec vous.` },
+  { k: 'relance',   ua: 'Нагадати про кошторис',          fr: c => `${hello(c)}\n\nJe me permets de revenir vers vous au sujet de votre devis${c.num}. Avez-vous eu l'occasion de le consulter ? Je reste à votre disposition pour toute question ou pour l'ajuster si nécessaire.` },
   { k: 'confirm',    ua: 'Підтвердження замовлення',       fr: c => `${hello(c)}\n\nNous vous confirmons la prise en compte de votre commande${c.num}. Nous reviendrons vers vous dès que les prochaines étapes seront planifiées.` },
   { k: 'acompte',    ua: 'Запит передоплати (30%)',        fr: c => `${hello(c)}\n\nPour lancer la fabrication de votre commande${c.num}, nous vous remercions de bien vouloir régler l'acompte de ${c.acompte} €. Dès réception, nous passons la commande en production.` },
   { k: 'mesure',     ua: 'Узгодити замір',                 fr: c => `${hello(c)}\n\nNous souhaiterions convenir d'un rendez-vous pour la prise de mesures concernant votre commande${c.num}. Quelles sont vos disponibilités cette semaine ?` },
@@ -1691,10 +1692,10 @@ const WA_TPL = [
   { k: 'nouvelles',  ua: 'Клієнт не відповідає',           fr: c => `${hello(c)}\n\nJe vous contacte au sujet de votre demande${c.num}. Pourriez-vous me rappeler ou m'indiquer quand vous êtes joignable ? Merci d'avance.` }
 ];
 // Які шаблони пропонувати першими за статусом
-const WA_SUGGEST = { 'Нова': ['nouvelles', 'mesure'], 'Кошторис': ['relance', 'acompte', 'nouvelles'], 'Підтверджено': ['confirm', 'acompte', 'mesure'], 'Перевірка': ['mesure', 'confirm'], 'В роботі': ['production', 'retard', 'solde'], 'На складі': ['stock', 'pose', 'solde'], 'Виконано': ['fin', 'solde'], 'Скасовано': ['relance'] };
+const WA_SUGGEST = { 'Нова': ['devis', 'nouvelles', 'mesure'], 'Кошторис': ['devis', 'relance', 'acompte'], 'Підтверджено': ['confirm', 'acompte', 'mesure'], 'Перевірка': ['mesure', 'confirm'], 'В роботі': ['production', 'retard', 'solde'], 'На складі': ['stock', 'pose', 'solde'], 'Виконано': ['fin', 'solde'], 'Скасовано': ['relance'] };
 function waCtx(o) {
   const ttc = n(o.total_ttc), paid = n(o.paid_amount);
-  return { nom: /\p{L}/u.test(o.client || '') ? String(o.client).trim() : '', num: o.product ? ` n° ${o.product}` : '', acompte: frN(Math.round(ttc * 0.3)), solde: frN(Math.max(0, ttc - paid)), date: o.deadline ? frDate(o.deadline) : 'la date convenue', eta: o.eta_date ? frDate(o.eta_date) : '' };
+  return { nom: /\p{L}/u.test(o.client || '') ? String(o.client).trim() : '', num: o.product ? ` n° ${o.product}` : '', ttc: ttc > 0 ? frN(ttc) : '', acompte: frN(Math.round(ttc * 0.3)), solde: frN(Math.max(0, ttc - paid)), date: o.deadline ? frDate(o.deadline) : 'la date convenue', eta: o.eta_date ? frDate(o.eta_date) : '' };
 }
 let waOrder = null, waKey = '';
 function openWa(id) {
