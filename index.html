@@ -660,16 +660,16 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
     <div id="canB" class="fg" style="display:none"><label style="color:var(--danger)">Причина скасування</label><textarea id="fCan" rows="2"></textarea></div>
 
     <div class="sec">Фінанси</div>
-    <div class="grid"><div class="fg"><label>Ціна HT €</label><input id="fSa" type="number" oninput="calc()"></div><div class="fg"><label>TVA %</label><select id="fTv" onchange="calc()"></select></div></div>
+    <div class="grid"><div class="fg"><label>Ціна HT €</label><input id="fSa" type="number" step="any" oninput="onSale()"></div><div class="fg"><label>TVA %</label><select id="fTv" onchange="calc()"></select></div></div>
     <div class="grid"><div class="fg"><label>Монтаж €</label><input id="fIn" type="number" oninput="calc()"></div><div class="fg"><label>Доставка €</label><input id="fDe" type="number" oninput="calc()"></div></div>
     <div class="fg"><label>Сума TTC €</label><input id="fTt" class="ro-yel" readonly></div>
-    <div class="grid fin-only"><div class="fg"><label>Ціна Фабрики 1 €</label><input id="fCo" type="number" oninput="calc()"></div><div class="fg"><label>Передплата фабриці 1 €</label><input id="fFaPa" type="number"></div></div>
+    <div class="grid fin-only"><div class="fg"><label>Ціна Фабрики 1 €</label><input id="fCo" type="number" step="any" oninput="onCost()"></div><div class="fg"><label>Передплата фабриці 1 €</label><input id="fFaPa" type="number"></div></div>
     <div id="fac2Toggle" class="fin-only" onclick="toggleFac2()" style="color:var(--p2);cursor:pointer;font-size:13px;font-weight:600;margin:2px 0 14px">+ Додати другу фабрику</div>
     <div id="fac2Block" class="fin-only" style="display:none">
       <div class="fg"><label>Фабрика 2</label><select id="fFa2"></select></div>
-      <div class="grid"><div class="fg"><label>Ціна Фабрики 2 €</label><input id="fCo2" type="number" oninput="calc()"></div><div class="fg"><label>Передплата фабриці 2 €</label><input id="fFaPa2" type="number"></div></div>
+      <div class="grid"><div class="fg"><label>Ціна Фабрики 2 €</label><input id="fCo2" type="number" step="any" oninput="onCost()"></div><div class="fg"><label>Передплата фабриці 2 €</label><input id="fFaPa2" type="number"></div></div>
     </div>
-    <div class="grid fin-only"><div class="fg"><label>Чистий прибуток</label><input id="fMr" class="ro-grn" readonly></div><div class="fg"><label>Націнка %</label><input id="fMk" class="ro-blu" readonly></div></div>
+    <div class="grid fin-only"><div class="fg"><label>Чистий прибуток</label><input id="fMr" class="ro-grn" readonly></div><div class="fg"><label>Націнка % (ціна продажу рахується сама)</label><input id="fMk" class="ro-blu" type="number" step="any" inputmode="decimal" placeholder="напр. 30" oninput="onMk()"></div></div>
 
     <div class="sec">Платежі клієнта</div>
     <div class="fg">
@@ -858,7 +858,7 @@ function toggleFac2(show) {
   const on = show === undefined ? document.getElementById('fac2Block').style.display === 'none' : !!show;
   document.getElementById('fac2Block').style.display = on ? 'block' : 'none';
   document.getElementById('fac2Toggle').textContent = on ? '− Прибрати другу фабрику' : '+ Додати другу фабрику';
-  if (!on) { ['fFa2','fCo2','fFaPa2'].forEach(i=>document.getElementById(i).value=''); calc(); }
+  if (!on) { ['fFa2','fCo2','fFaPa2'].forEach(i=>document.getElementById(i).value=''); onCost(); }
 }
 // Сумарний борг фабрикам по одному замовленню (обидві фабрики)
 const orderFacDebt = o => (n(o.cost_price)-n(o.factory_prepay)) + (o.factory2 ? (n(o.cost_price2)-n(o.factory_prepay2)) : 0);
@@ -2158,6 +2158,7 @@ const openO = id => {
   document.getElementById('fFaPa2').value = id ? (o.factory_prepay2 || '') : '';
   toggleFac2(!!(id && o.factory2));
   pendingDel = []; newUploads = []; modalSaved = false;
+  priceSrc = 'sale'; document.getElementById('fMk').value = '';
   curFiles = id ? parseFiles(o.file_url) : [];
   curPay   = id ? parsePay(o.payments) : [];
   // сумісність: старі замовлення без журналу платежів
@@ -2205,7 +2206,7 @@ function dupO() {
   document.getElementById('btnDup').style.display = 'none';
   document.getElementById('histBox').style.display = 'none';
   document.getElementById('fCr').value = 'Встановиться автоматично при збереженні';
-  tglCan(); calc();
+  priceSrc = 'sale'; tglCan(); calc();
   document.querySelector('#mO .mbox').scrollTop = 0;
   document.querySelector('#mO h3').textContent = 'Замовлення (копія)';
 }
@@ -2389,9 +2390,19 @@ const calc = () => {
   const c = n(document.getElementById('fCo').value) + n(document.getElementById('fCo2').value); // обидві фабрики
   document.getElementById('fTt').value = ((h+i+d)*(1+t/100)).toFixed(2);
   document.getElementById('fMr').value = ((h-c)+i+d).toFixed(2) + ' €';
-  // Націнка = наскільки продано дорожче за ціну фабрик (у %)
-  document.getElementById('fMk').value = c > 0 ? Math.round((h - c) / c * 100) + ' %' : '—';
+  // Націнка = наскільки продано дорожче за ціну фабрик (у %). Поки людина вводить націнку сама — поле не чіпаємо
+  if (priceSrc !== 'mk') document.getElementById('fMk').value = c > 0 && h > 0 ? String(Math.round((h - c) / c * 1000) / 10) : '';
 }
+// Ціна продажу HT рахується з ціни фабрик і націнки: ціна фабрик × (1 + націнка/100).
+// priceSrc: 'mk' — користувач вводить націнку (ціна продажу рахується сама), 'sale' — ціну продажу вказано вручну (націнка рахується з неї)
+let priceSrc = 'sale';
+function applyMk() {
+  const c = n(document.getElementById('fCo').value) + n(document.getElementById('fCo2').value), v = document.getElementById('fMk').value;
+  if (c > 0 && v !== '' && !isNaN(parseFloat(v))) document.getElementById('fSa').value = String(Math.round(c * (1 + parseFloat(v) / 100) * 100) / 100);
+}
+function onMk()   { priceSrc = 'mk'; applyMk(); calc(); }
+function onSale() { priceSrc = 'sale'; calc(); }
+function onCost() { if (priceSrc === 'mk') applyMk(); calc(); }
 function updateTva() { const sel = document.getElementById('fTv'); if(sel) sel.innerHTML = TVA_OPTS[co].map(v => `<option value="${v}">${v}%</option>`).join(''); }
 
 /* ================= МАСОВІ ДІЇ (вибір кількох замовлень) ================= */
