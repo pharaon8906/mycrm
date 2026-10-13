@@ -363,6 +363,7 @@ html.dark #splash { background: #0b101c; --ink: #f2f5fb; }
 .cc-le { margin-bottom: 11px; position: relative; font-size: 13px; }
 .cc-le::before { content: ''; position: absolute; left: -20px; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: var(--p2); }
 .cc-le .lm { font-size: 11.5px; color: var(--muted); margin-bottom: 1px; }
+body.drop-on::after { content: 'Відпустіть файл, щоб прикріпити'; position: fixed; inset: 12px; z-index: 5000; border: 3px dashed var(--p2); border-radius: 18px; background: color-mix(in srgb, var(--p2) 10%, transparent); color: var(--p2); display: grid; place-items: center; font-size: 20px; font-weight: 700; pointer-events: none; }
 .cal-day { margin-bottom: 20px; }
 .cal-head { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
 .cal-date { font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
@@ -787,7 +788,7 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
       <div class="fg"><label>Нотатки</label><textarea id="qnNotes" rows="2" placeholder="Що хоче клієнт, деталі звернення..."></textarea></div>
       <div class="fg"><label>Файли (фото, замір, документ)</label>
         <div id="qnFileList" class="file-list"></div>
-        <label class="up-btn"><i class="fa fa-paperclip"></i> <span id="qnUpTxt">Прикріпити файл</span>
+        <label class="up-btn"><i class="fa fa-paperclip"></i> <span id="qnUpTxt">Прикріпити файл (або Ctrl+V, або перетягніть сюди)</span>
           <input type="file" multiple onchange="uploadQnFiles(this)" style="display:none">
         </label>
       </div>
@@ -886,7 +887,7 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
     <div class="grid"><div class="fg"><label>Замовлено на фабриці (дата)</label><input id="fOr" type="date"></div><div class="fg"><label>Очікується з фабрики (ETA)</label><input id="fEta" type="date"></div></div>
     <div class="fg"><label>Файли (договір, фото, замір)</label>
       <div id="fList" class="file-list"></div>
-      <label class="up-btn"><i class="fa fa-paperclip"></i> <span id="upTxt">Прикріпити файл</span>
+      <label class="up-btn"><i class="fa fa-paperclip"></i> <span id="upTxt">Прикріпити файл (або Ctrl+V, або перетягніть сюди)</span>
         <input type="file" multiple onchange="uploadFiles(this)" style="display:none">
       </label>
     </div>
@@ -2625,6 +2626,40 @@ function ccDo(what) {
     else { openO(null); document.getElementById('fCl').value = c.name || ''; }
   }, 80);
 }
+
+/* ================= ВСТАВКА ФАЙЛІВ З БУФЕРА (Ctrl+V) І ПЕРЕТЯГУВАННЯ ================= */
+// Куди йдуть файли: відкрите замовлення або форма «Нова заявка»; в інших вікнах нічого не чіпаємо
+function fileTarget() {
+  const top = typeof topModal === 'function' ? topModal() : null;
+  if (top) return top.id === 'mO' ? uploadFiles : null;
+  return curT === 'new' ? uploadQnFiles : null;
+}
+async function sendFiles(fn, files) {
+  const named = files.map(f => /^image\.\w+$/i.test(f.name || '') || !f.name
+    ? new File([f], 'скрін_' + new Date().toLocaleString('sv-SE').replace(/[: ]/g, '-') + '.' + ((f.type || 'image/png').split('/')[1] || 'png').replace('jpeg', 'jpg'), { type: f.type })
+    : f);
+  await fn({ files: named, value: '' });
+  toast(named.length === 1 ? 'Файл додано: ' + named[0].name : 'Додано файлів: ' + named.length);
+}
+document.addEventListener('paste', e => {
+  const cd = e.clipboardData, files = cd ? [...cd.files] : []; if (!files.length) return;
+  const fn = fileTarget(); if (!fn) return;
+  // якщо в буфері є і текст, і файл, а курсор у полі — це звичайна вставка тексту
+  const ae = document.activeElement;
+  if (cd.getData('text/plain') && ae && /^(INPUT|TEXTAREA)$/.test(ae.tagName)) return;
+  e.preventDefault(); sendFiles(fn, files);
+});
+document.addEventListener('dragover', e => {
+  if (!e.dataTransfer || ![...e.dataTransfer.types].includes('Files') || !fileTarget()) return;
+  e.preventDefault(); document.body.classList.add('drop-on');
+});
+document.addEventListener('dragleave', e => { if (!e.relatedTarget) document.body.classList.remove('drop-on'); });
+document.addEventListener('drop', e => {
+  document.body.classList.remove('drop-on');
+  const files = e.dataTransfer ? [...e.dataTransfer.files] : []; if (!files.length) return;
+  const fn = fileTarget(); if (!fn) return;
+  e.preventDefault(); sendFiles(fn, files);
+});
 
 /* ================= НОВІ ЗАЯВКИ ================= */
 let qnFiles = [];
