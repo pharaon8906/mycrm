@@ -2401,10 +2401,16 @@ function openEv(id, preset) {
 }
 function openEvOrder() { const id = document.getElementById('evOrder').value; if (id) { closeM('mE'); setTimeout(() => openO(id), 60); } }
 async function saveEv() {
-  const title = document.getElementById('evTitle').value.trim(), date = document.getElementById('evDate').value;
-  if (!title) return alert('Вкажіть, що потрібно зробити');
-  if (!date) return alert('Вкажіть дату');
+  let title = document.getElementById('evTitle').value.trim();
+  const date = document.getElementById('evDate').value;
   const oid = document.getElementById('evOrder').value || null, ord = oid ? orders.find(x => x.id === oid) : null, prev = evId ? events.find(x => x.id === evId) : null;
+  // Назва необовʼязкова: якщо порожня — беремо початок нотаток, або тип події та імʼя клієнта
+  if (!title) {
+    const nt = document.getElementById('evNotes').value.trim().split(/[\r\n]/)[0].trim().slice(0, 70);
+    title = nt || (ord ? EV_T[evType].lbl + ' · ' + (ord.client || 'замовлення') : '');
+  }
+  if (!title) { document.getElementById('evTitle').focus(); return alert('Напишіть, що потрібно зробити, або виберіть замовлення'); }
+  if (!date) return alert('Вкажіть дату');
   const row = { kind: evType, title, event_date: date, event_time: document.getElementById('evTime').value || null, order_id: oid, client: ord ? ord.client : null,
                 assignee: document.getElementById('evAs').value || null, notes: document.getElementById('evNotes').value.trim() || null };
   const r = prev ? await _sb.from('events').update(row).eq('id', prev.id)
