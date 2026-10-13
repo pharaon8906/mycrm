@@ -364,6 +364,12 @@ html.dark #splash { background: #0b101c; --ink: #f2f5fb; }
 .cc-le::before { content: ''; position: absolute; left: -20px; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: var(--p2); }
 .cc-le .lm { font-size: 11.5px; color: var(--muted); margin-bottom: 1px; }
 body.drop-on::after { content: 'Відпустіть файл, щоб прикріпити'; position: fixed; inset: 12px; z-index: 5000; border: 3px dashed var(--p2); border-radius: 18px; background: color-mix(in srgb, var(--p2) 10%, transparent); color: var(--p2); display: grid; place-items: center; font-size: 20px; font-weight: 700; pointer-events: none; }
+.cal-find { margin-bottom: 14px; }
+.cal-find input { width: 100%; height: 46px; font-size: 16px; padding: 0 14px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--txt); font-family: inherit; box-sizing: border-box; }
+.cal-find .res:not(:empty), .ev-res:not(:empty) { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 4px; margin-top: 6px; box-shadow: var(--sh-2); }
+.cal-focus { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--p2-soft); border: 1px solid var(--p2); border-radius: var(--r-sm); padding: 10px 12px; margin-bottom: 12px; font-size: 13px; }
+.cal-focus b { font-weight: 700; }
+.cal-focus button { border: 0; background: none; color: var(--p2); font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit; padding: 2px 4px; }
 .cal-day { margin-bottom: 20px; }
 .cal-head { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
 .cal-date { font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
@@ -844,7 +850,7 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
     <div class="sec">Основне</div>
     <div class="fg"><label>Дата створення</label><input id="fCr" readonly></div>
     <div class="fg"><label>Клієнт</label><input id="fCl" list="dlC"><datalist id="dlC"></datalist></div>
-    <div class="grid"><div class="fg"><label>Номер замовлення</label><input id="fPr" placeholder="напр. WEB/26/0947426"></div><div class="fg"><label>Фабрика 1</label><select id="fFa"></select></div></div>
+    <div class="grid"><div class="fg"><label>Номер замовлення</label><input id="fPr" placeholder="напр. WEB/26/0947426"></div><div class="fg"><label>Фабрика 1</label><select id="fFa" onchange="renderFacPay()"></select></div></div>
     <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan(); autoOnStatus()"><option>Нова</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
     <div id="autoHint" style="font-size:12px;color:var(--p2);margin:-6px 0 10px"></div>
     <div class="fg"><label>Відповідальний</label><select id="fAs"></select></div>
@@ -854,11 +860,22 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
     <div class="grid"><div class="fg"><label>Ціна HT €</label><input id="fSa" type="number" step="any" oninput="onSale()"></div><div class="fg"><label>TVA %</label><select id="fTv" onchange="calc()"></select></div></div>
     <div class="grid"><div class="fg"><label>Монтаж €</label><input id="fIn" type="number" oninput="calc()"></div><div class="fg"><label>Доставка €</label><input id="fDe" type="number" oninput="calc()"></div></div>
     <div class="fg"><label>Сума TTC €</label><input id="fTt" class="ro-yel" readonly></div>
-    <div class="grid fin-only"><div class="fg"><label>Ціна Фабрики 1 €</label><input id="fCo" type="number" step="any" oninput="onCost()"></div><div class="fg"><label>Передплата фабриці 1 €</label><input id="fFaPa" type="number"></div></div>
+    <div class="grid fin-only"><div class="fg"><label>Ціна Фабрики 1 €</label><input id="fCo" type="number" step="any" oninput="onCost()"></div><div class="fg"><label>Залишок фабриці 1 €</label><input id="facLeft1" class="ro-blu" readonly><input id="fFaPa" type="hidden"></div></div>
     <div id="fac2Toggle" class="fin-only" onclick="toggleFac2()" style="color:var(--p2);cursor:pointer;font-size:13px;font-weight:600;margin:2px 0 14px">+ Додати другу фабрику</div>
     <div id="fac2Block" class="fin-only" style="display:none">
-      <div class="fg"><label>Фабрика 2</label><select id="fFa2"></select></div>
-      <div class="grid"><div class="fg"><label>Ціна Фабрики 2 €</label><input id="fCo2" type="number" step="any" oninput="onCost()"></div><div class="fg"><label>Передплата фабриці 2 €</label><input id="fFaPa2" type="number"></div></div>
+      <div class="fg"><label>Фабрика 2</label><select id="fFa2" onchange="renderFacPay()"></select></div>
+      <div class="grid"><div class="fg"><label>Ціна Фабрики 2 €</label><input id="fCo2" type="number" step="any" oninput="onCost()"></div><div class="fg"><label>Залишок фабриці 2 €</label><input id="facLeft2" class="ro-blu" readonly><input id="fFaPa2" type="hidden"></div></div>
+    </div>
+    <div class="fg fin-only"><label>Оплати фабрикам (кілька платежів)</label>
+      <div id="facPayList" class="file-list"></div>
+      <div class="pay-add" style="grid-template-columns:1fr 1fr">
+        <input type="date" id="facPayDate" title="Дата платежу">
+        <select id="facPayWho" title="Якій фабриці"></select>
+        <input type="number" step="any" id="facPayAmt" placeholder="Сума €" onkeydown="if(event.key==='Enter'){event.preventDefault();addFacPay()}">
+        <button type="button" onclick="addFacPay()" title="Додати оплату фабриці" style="width:auto;height:46px"><i class="fa fa-plus"></i> Додати</button>
+      </div>
+      <div class="pay-total" id="facSum1" style="margin-top:8px"></div>
+      <div class="pay-total" id="facSum2" style="margin-top:6px;display:none"></div>
     </div>
     <div class="grid fin-only"><div class="fg"><label>Чистий прибуток</label><input id="fMr" class="ro-grn" readonly></div><div class="fg"><label>Націнка % (ціна продажу рахується сама)</label><input id="fMk" class="ro-blu" type="number" step="any" inputmode="decimal" placeholder="напр. 30" oninput="onMk()"></div></div>
 
@@ -1076,6 +1093,20 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
 
 <div id="toast"></div>
 
+<!-- МОДАЛКА: ДАТИ ЗАМОВЛЕННЯ -->
+<div id="mDt" class="modal-w">
+  <div class="mbox">
+    <div style="display:flex;justify-content:space-between;"><h3>Дати замовлення</h3><i class="fa fa-times" onclick="closeM('mDt')"></i></div>
+    <div id="dtHead" style="margin-bottom:14px"></div>
+    <div class="fg"><label>Монтаж / дедлайн</label><input id="dtDl" type="date"></div>
+    <div class="fg"><label>Очікується з фабрики (ETA)</label><input id="dtEta" type="date"></div>
+    <div class="fg"><label>Передзвонити (нагадування)</label><input id="dtRe" type="date"></div>
+    <button class="btn-s" onclick="saveDates()">Зберегти дати</button>
+    <button class="btn-alt" style="display:block" onclick="dtGo('order')"><i class="fa fa-arrow-up-right-from-square"></i> Відкрити замовлення</button>
+    <button class="btn-alt" style="display:block" onclick="dtGo('event')"><i class="fa fa-calendar-plus"></i> Подія для цього замовлення</button>
+  </div>
+</div>
+
 <!-- МОДАЛКА ПОДІЇ (календар) -->
 <div id="mE" class="modal-w">
   <div class="mbox">
@@ -1091,7 +1122,12 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
       <div class="fg"><label>Дата</label><input id="evDate" type="date"></div>
       <div class="fg"><label>Час (необовʼязково)</label><input id="evTime" type="time"></div>
     </div>
-    <div class="fg"><label>Замовлення (необовʼязково)</label><select id="evOrder"></select></div>
+    <div class="fg"><label>Замовлення (необовʼязково): знайдіть за телефоном, імʼям чи №</label>
+      <input id="evOrderQ" placeholder="🔍 Телефон, імʼя або номер замовлення" autocomplete="off" oninput="evOrderSearch()">
+      <div id="evOrderRes" class="ev-res"></div>
+      <input type="hidden" id="evOrder">
+      <div id="evOrderSel"></div>
+    </div>
     <div class="fg"><label>Відповідальний</label><select id="evAs"></select></div>
     <div class="fg"><label>Нотатки</label><textarea id="evNotes" rows="2" oninput="autoGrow(this)"></textarea></div>
     <button class="btn-s" onclick="saveEv()">Зберегти</button>
@@ -1154,7 +1190,8 @@ function toggleFac2(show) {
   const on = show === undefined ? document.getElementById('fac2Block').style.display === 'none' : !!show;
   document.getElementById('fac2Block').style.display = on ? 'block' : 'none';
   document.getElementById('fac2Toggle').textContent = on ? '− Прибрати другу фабрику' : '+ Додати другу фабрику';
-  if (!on) { ['fFa2','fCo2','fFaPa2'].forEach(i=>document.getElementById(i).value=''); onCost(); }
+  if (!on) { ['fFa2','fCo2','fFaPa2'].forEach(i=>document.getElementById(i).value=''); curFacPay = curFacPay.filter(p => (p.f || 1) === 1); onCost(); }
+  renderFacPay();
 }
 // Сумарний борг фабрикам по одному замовленню (обидві фабрики)
 const orderFacDebt = o => (n(o.cost_price)-n(o.factory_prepay)) + (o.factory2 ? (n(o.cost_price2)-n(o.factory_prepay2)) : 0);
@@ -1167,7 +1204,7 @@ const isDebtor = o => DEBT_STATUSES.includes(o.status) && (n(o.total_ttc) - n(o.
 const isRem = o => !!o.reminder_date && o.reminder_date <= new Date().toISOString().split('T')[0] && o.status !== 'Виконано' && o.status !== 'Скасовано';
 
 let co='heimek', orders=[], clients=[], editId=null, curT='orders', curS='Усі';
-let curFiles=[], curPay=[], statPeriod='all';
+let curFiles=[], curPay=[], curFacPay=[], statPeriod='all';
 const TVA_OPTS = { heimek: [0, 5.5, 20], luxwin: [0, 6, 21] };
 const n = v => parseFloat(v) || 0;
 const fN = v => n(v).toLocaleString('uk-UA');
@@ -1262,13 +1299,13 @@ const clientOf = o => (o.client_id && clients.find(c => c.id === o.client_id)) |
 const orderPhone = o => o.phone || (clientOf(o) || {}).phone || '';   // телефон із заявки або з картки клієнта
 
 // Запис замовлення. Якщо в базі ще немає нової колонки (client_id, assignee — SQL не виконано), повторюємо без неї, щоб збереження не ламалось
-const OPT_COLS = { client_id: "прив'язка до клієнта", assignee: 'відповідальний', factory_ordered: 'дата замовлення на фабриці', eta_date: 'очікувана дата', last_contact: 'останній контакт' };
+const OPT_COLS = { factory_payments: 'список оплат фабрикам (загальні суми оплат збережено)', client_id: "прив'язка до клієнта", assignee: 'відповідальний', factory_ordered: 'дата замовлення на фабриці', eta_date: 'очікувана дата', last_contact: 'останній контакт' };
 async function writeOrder(o, mode) {
   const run = row => mode === 'insert' ? _sb.from('orders').insert(row) : _sb.from('orders').upsert(row);
   const row = { ...o }, dropped = [];
   let r = await run(row);
   for (let i = 0; i < 6 && r.error; i++) {
-    const m = /\b(client_id|assignee|factory_ordered|eta_date|last_contact)\b/.exec(r.error.message || '');
+    const m = /\b(client_id|assignee|factory_ordered|eta_date|last_contact|factory_payments)\b/.exec(r.error.message || '');
     if (!m || !(m[1] in row)) break;
     dropped.push(m[1]); delete row[m[1]]; r = await run(row);
   }
@@ -1570,6 +1607,51 @@ function addPay() {
   renderPay(); saveDraft();
 }
 function rmPay(i) { curPay.splice(i,1); renderPay(); saveDraft(); }
+
+// ---- Оплати фабрикам (кілька платежів; суми по кожній фабриці йдуть у factory_prepay / factory_prepay2, як і раніше) ----
+function parseFacPay(o) {
+  let a = o.factory_payments;
+  if (typeof a === 'string') { try { a = JSON.parse(a); } catch (e) { a = null; } }
+  if (Array.isArray(a) && a.length) return a.filter(p => n(p.amount)).map(p => ({ date: p.date || null, amount: n(p.amount), f: p.f === 2 ? 2 : 1 }));
+  const r = [];     // старі замовлення: одна передплата → один платіж
+  if (n(o.factory_prepay) > 0) r.push({ date: null, amount: n(o.factory_prepay), f: 1 });
+  if (n(o.factory_prepay2) > 0) r.push({ date: null, amount: n(o.factory_prepay2), f: 2 });
+  return r;
+}
+const facPaid = f => curFacPay.filter(p => (p.f || 1) === f).reduce((t, p) => t + n(p.amount), 0);
+function updFacLeft() {
+  const g = id => document.getElementById(id); if (!g('facLeft1')) return;
+  const on2 = g('fac2Block').style.display !== 'none', r2 = x => Math.round(x * 100) / 100;
+  const nm1 = g('fFa').value || 'Фабрика 1', nm2 = g('fFa2').value || 'Фабрика 2';
+  const c1 = n(g('fCo').value), c2 = n(g('fCo2').value), p1 = facPaid(1), p2 = on2 ? facPaid(2) : 0;
+  g('fFaPa').value = p1 || ''; g('fFaPa2').value = on2 ? (p2 || '') : '';
+  g('facLeft1').value = (c1 || p1) ? fN(r2(c1 - p1)) : '';
+  g('facLeft2').value = on2 && (c2 || p2) ? fN(r2(c2 - p2)) : '';
+  const line = (nm, c, p) => { const d = c - p;
+    return `<span>${esc(nm)}: оплачено ${fN(p)} з ${fN(c)} €</span><b style="color:${d > 0.5 ? 'var(--danger)' : 'var(--success)'}">${d > 0.5 ? 'залишок ' + fN(r2(d)) + ' €' : d < -0.5 ? 'переплата ' + fN(r2(-d)) + ' €' : 'розраховано'}</b>`; };
+  g('facSum1').innerHTML = line(nm1, c1, p1);
+  g('facSum2').style.display = on2 ? 'flex' : 'none'; g('facSum2').innerHTML = on2 ? line(nm2, c2, p2) : '';
+}
+function renderFacPay() {
+  const g = id => document.getElementById(id), box = g('facPayList'); if (!box) return;
+  const on2 = g('fac2Block').style.display !== 'none', nm1 = g('fFa').value || 'Фабрика 1', nm2 = g('fFa2').value || 'Фабрика 2';
+  const shown = curFacPay.filter(p => on2 || (p.f || 1) === 1);
+  box.innerHTML = shown.length
+    ? curFacPay.map((p, i) => (on2 || (p.f || 1) === 1) ? `<div class="pay-row"><span class="pd">${p.date ? new Date(p.date).toLocaleDateString('uk-UA') : '—'}</span><span style="flex:1;color:var(--muted);font-size:12px">${esc(p.f === 2 ? nm2 : nm1)}</span><span class="pa" style="margin-left:0">${fN(p.amount)} €</span><i class="fa fa-trash" onclick="rmFacPay(${i})"></i></div>` : '').join('')
+    : '<small style="color:var(--muted2)">Оплат фабрикам немає</small>';
+  const sel = g('facPayWho'), cur = sel.value || '1';
+  sel.innerHTML = `<option value="1">${esc(nm1)}</option>` + (on2 ? `<option value="2">${esc(nm2)}</option>` : ''); sel.value = (cur === '2' && !on2) ? '1' : cur;
+  updFacLeft();
+}
+function addFacPay() {
+  const a = n(document.getElementById('facPayAmt').value);
+  if (!a) return alert('Вкажіть суму оплати фабриці');
+  curFacPay.push({ date: document.getElementById('facPayDate').value || todayStr(), amount: a, f: document.getElementById('facPayWho').value === '2' ? 2 : 1 });
+  curFacPay.sort((x, y) => (x.date || '').localeCompare(y.date || ''));
+  document.getElementById('facPayDate').value = ''; document.getElementById('facPayAmt').value = '';
+  renderFacPay(); saveDraft();
+}
+function rmFacPay(i) { curFacPay.splice(i, 1); renderFacPay(); saveDraft(); }
 
 /* ================= АУТЕНТИФІКАЦІЯ ================= */
 async function checkUser() {
@@ -2081,7 +2163,7 @@ const OT = {
   eta: { ico: 'fa-truck',              c: 'var(--store)',  lbl: 'Очікується з фабрики' }
 };
 const evTime = e => (e.event_time || '').slice(0, 5);
-let events = [], EV_OK = true, calY = new Date().getFullYear(), calM = new Date().getMonth(), calSel = null, calWho = 'all', calKind = 'all', evType = 'call', evId = null;
+let events = [], EV_OK = true, calY = new Date().getFullYear(), calM = new Date().getMonth(), calSel = null, calWho = 'all', calKind = 'all', calQ = '', calFocus = null, evType = 'call', evId = null;
 async function loadEvents() {
   try {
     const r = await _sb.from('events').select('*').eq('company', co).order('event_date');
@@ -2100,6 +2182,7 @@ function calItems(ignoreKind) {
   });
   events.forEach(e => { if (e.event_date) items.push({ d: e.event_date, t: 'ev', e }); });
   if (calWho === 'mine' && ME()) items = items.filter(i => (i.o ? i.o.assignee : i.e.assignee) === ME());
+  if (calFocus && !ignoreKind) items = items.filter(i => (i.o ? i.o.id : i.e.order_id) === calFocus);
   if (!ignoreKind && calKind !== 'all') items = items.filter(i => (i.e ? (i.e.kind || 'task') : i.t) === calKind);
   const key = i => i.d + ' ' + (i.e ? (evTime(i.e) || '99:98') : '99:99');
   return items.sort((a, b) => key(a).localeCompare(key(b)));
@@ -2124,6 +2207,7 @@ function calItemHtml(i) {
     <div class="ci" style="background:${t.c}"><i class="fa ${t.ico}"></i></div>
     <div><div class="cn">${esc(o.client || 'Без імені')}</div><div class="cs">${t.lbl} · ${esc(o.product || '---')} · ${esc(o.status)}${o.assignee ? ' · ' + esc(o.assignee) : ''}</div></div>
     <div class="cv">${fN(o.total_ttc)} €</div>
+    <button class="ev-chk" style="margin-left:0" data-id="${esc(o.id)}" onclick="event.stopPropagation();openDates(this.dataset.id)" title="Змінити дату"><i class="fa fa-pen-to-square"></i></button>
   </div>`;
 }
 
@@ -2157,7 +2241,8 @@ function renderCal() {
     return `<div class="cal-day"><div class="cal-head"><span class="cal-date">${dayLabel(d)}</span>${rel ? `<span class="cal-rel ${cls}">${rel}</span>` : ''}</div>${groups[d].map(calItemHtml).join('')}</div>`;
   }).join('') : `<div class="empty"><i class="fa fa-calendar-check"></i>${calSel ? 'На цей день нічого не заплановано' : 'Немає запланованих справ'}</div>`;
   const mineBtn = ME() ? `<div class="seg" style="margin:0;min-width:140px;max-width:200px;flex:none"><button type="button" class="${calWho === 'all' ? 'on' : ''}" onclick="calSetWho('all')">Усі</button><button type="button" class="${calWho === 'mine' ? 'on' : ''}" onclick="calSetWho('mine')">Мої</button></div>` : '';
-  box.innerHTML = `<div class="cal-wrap">
+  box.innerHTML = `<div class="cal-find"><input id="calSearch" value="${esc(calQ)}" placeholder="🔍 Знайти замовлення за телефоном, імʼям або №, щоб змінити дату" autocomplete="off" oninput="calFind(this.value)"><div class="res" id="calFindRes"></div></div>
+    <div class="cal-wrap">
     <div class="cal-mon">
       <div class="cm-head"><b>${monthName}</b><button type="button" class="cm-btn txt" onclick="calToday()">Сьогодні</button><button type="button" class="cm-btn" onclick="calMove(-1)"><i class="fa fa-chevron-left"></i></button><button type="button" class="cm-btn" onclick="calMove(1)"><i class="fa fa-chevron-right"></i></button></div>
       <div class="cm-grid">${['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'].map(x => `<div class="cm-dow">${x}</div>`).join('')}${cells}</div>
@@ -2166,6 +2251,7 @@ function renderCal() {
     <div>
       <div class="cal-tools"><button type="button" class="cal-add" onclick="openEv(null)"><i class="fa fa-plus"></i> Подія</button>${mineBtn}
         <div class="cal-sel-info grow">${calSel ? `${dayLabel(calSel)} <button type="button" onclick="calPick(null)">Показати все</button>` : 'Найближчі справи та поставки'}</div></div>
+      ${calFocusHtml()}
       ${EV_OK ? '' : '<div class="empty" style="margin-bottom:12px"><i class="fa fa-triangle-exclamation"></i>Щоб планувати дзвінки й зустрічі, виконайте SQL для таблиці events (див. інструкцію)</div>'}
       ${agenda}
     </div></div>`;
@@ -2229,6 +2315,66 @@ function renderToday() {
     </div></div>`;
 }
 
+// Фокус на одному замовленні: у календарі лишаються лише його дати та події
+function calFocusHtml() {
+  if (!calFocus) return '';
+  const o = orders.find(x => x.id === calFocus); if (!o) return '';
+  return `<div class="cal-focus"><span>Показано лише: <b>${esc(o.client || 'Без імені')}${o.product ? ' · №' + esc(o.product) : ''}</b> · ${esc(o.status)}</span><button type="button" onclick="openDates('${esc(o.id)}')">Змінити дати</button><button type="button" onclick="calUnfocus()">Показати все</button></div>`;
+}
+function calUnfocus() { calFocus = null; renderCal(); }
+const dateTxt = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' }) : '';
+function orderFindRows(q, fnName) {
+  const match = makeMatcher(q); if (!q.trim() || !match) return '';
+  const list = orders.filter(o => match([o.client, o.product, o.factory, o.factory2, o.assignee], [orderPhone(o), o.client])).slice(0, 7);
+  if (!list.length) return '<div class="sa-empty" style="padding:10px">Нічого не знайдено</div>';
+  return list.map(o => {
+    const dates = [o.deadline ? 'монтаж ' + dateTxt(o.deadline) : '', o.eta_date ? 'ETA ' + dateTxt(o.eta_date) : '', o.reminder_date ? 'дзвінок ' + dateTxt(o.reminder_date) : ''].filter(Boolean).join(' · ');
+    return `<div class="k-item" data-id="${esc(o.id)}" onclick="${fnName}(this.dataset.id)"><div class="ki"><i class="fa fa-file-lines"></i></div><div class="kt">${esc(o.client || 'Без імені')}${o.product ? ' · №' + esc(o.product) : ''}<small>${esc([orderPhone(o), o.status, dates || 'без дат'].filter(Boolean).join(' · '))}</small></div></div>`;
+  }).join('');
+}
+function calFind(q) { calQ = q; const r = document.getElementById('calFindRes'); if (r) r.innerHTML = orderFindRows(q, 'calPickOrder'); }
+function calPickOrder(id) { calFocus = id; calQ = ''; calSel = null; renderCal(); openDates(id); }
+
+// --- Зміна дат замовлення прямо з календаря ---
+let dtId = null;
+function openDates(id) {
+  const o = orders.find(x => x.id === id); if (!o) return; dtId = id;
+  document.getElementById('dtHead').innerHTML = `<div style="display:flex;gap:11px;align-items:center">${avatarHtml(o.client || '?')}<div><div style="font-weight:700">${esc(o.client || 'Без імені')}${o.product ? ' · №' + esc(o.product) : ''}</div><div style="font-size:12.5px;color:var(--muted)">${esc([orderPhone(o), o.status, fN(o.total_ttc) + ' €'].filter(Boolean).join(' · '))}</div></div></div>`;
+  document.getElementById('dtDl').value = o.deadline || ''; document.getElementById('dtEta').value = o.eta_date || ''; document.getElementById('dtRe').value = o.reminder_date || '';
+  showModal('mDt');
+}
+async function saveDates() {
+  const o = orders.find(x => x.id === dtId); if (!o) return;
+  const patch = { deadline: document.getElementById('dtDl').value || null, eta_date: document.getElementById('dtEta').value || null, reminder_date: document.getElementById('dtRe').value || null };
+  const prev = { deadline: o.deadline ?? null, eta_date: o.eta_date ?? null, reminder_date: o.reminder_date ?? null };
+  let r = await _sb.from('orders').update(patch).eq('id', o.id);
+  if (r.error && /eta_date/.test(r.error.message || '')) { delete patch.eta_date; r = await _sb.from('orders').update(patch).eq('id', o.id); alert('Дату ETA не збережено: у базі немає колонки eta_date. Виконайте SQL з інструкції.'); }
+  if (r.error) return alert('Помилка збереження: ' + r.error.message);
+  const ch = {}; Object.keys(patch).forEach(k => { if ((prev[k] || '') !== (patch[k] || '')) ch[k] = [prev[k] || '', patch[k] || '']; });
+  Object.assign(o, patch);
+  if (Object.keys(ch).length) logHistory(o.id, o.company, 'updated', ch);
+  closeM('mDt'); renderCal(); render(); if (curT === 'today') renderToday();
+  if (Object.keys(ch).length) toast('Дати замовлення оновлено', async () => {
+    const back = {}; Object.keys(ch).forEach(k => back[k] = prev[k]);
+    const u = await _sb.from('orders').update(back).eq('id', o.id); if (u.error) return alert('Не вдалося скасувати: ' + u.error.message);
+    Object.assign(o, back); logHistory(o.id, o.company, 'updated', Object.fromEntries(Object.keys(ch).map(k => [k, [ch[k][1], ch[k][0]]]))); renderCal(); render();
+  });
+}
+function dtGo(what) {
+  const id = dtId; closeM('mDt');
+  setTimeout(() => { if (what === 'order') openO(id); else openEv(null, { order_id: id }); }, 80);
+}
+
+// --- Прикріплення події до замовлення: пошук за телефоном, імʼям, № ---
+function evPickOrder(id) {
+  const o = id ? orders.find(x => x.id === id) : null;
+  document.getElementById('evOrder').value = o ? o.id : '';
+  document.getElementById('evOrderQ').value = ''; document.getElementById('evOrderRes').innerHTML = '';
+  document.getElementById('evOrderSel').innerHTML = o ? `<div class="file-chip" style="margin-top:6px"><span style="color:var(--txt);flex:1;cursor:default">${esc(o.client || 'Без імені')}${o.product ? ' · №' + esc(o.product) : ''} · ${esc(o.status)}</span><i class="fa fa-xmark" onclick="evPickOrder('')" title="Відкріпити"></i></div>` : '';
+  document.getElementById('btnEvOrd').style.display = o ? 'block' : 'none';
+}
+function evOrderSearch() { document.getElementById('evOrderRes').innerHTML = orderFindRows(document.getElementById('evOrderQ').value, 'evPickOrder'); }
+
 // --- Модалка події ---
 function setEvType(k) {
   evType = k;
@@ -2246,10 +2392,7 @@ function openEv(id, preset) {
   document.getElementById('evTime').value = e ? evTime(e) : '';
   document.getElementById('evNotes').value = e ? (e.notes || '') : '';
   const oid = e ? e.order_id : (pr.order_id || '');
-  const sorted = orders.slice().sort((a, b) => orderTs(b) - orderTs(a)).slice(0, 300);
-  document.getElementById('evOrder').innerHTML = '<option value="">— без замовлення —</option>' + sorted.map(o => `<option value="${esc(o.id)}">${esc(o.client || 'Без імені')}${o.product ? ' · №' + esc(o.product) : ''} · ${esc(o.status)}</option>`).join('');
-  document.getElementById('evOrder').value = oid || '';
-  if (oid && !sorted.some(o => o.id === oid)) document.getElementById('evOrder').value = '';
+  evPickOrder(oid || '');
   fillSel('evAs', '<option value="">— не призначено —</option>');
   setAs('evAs', e ? e.assignee : ME());
   document.getElementById('btnEvDel').style.display = e ? 'block' : 'none';
@@ -2996,7 +3139,7 @@ function exportCSV() {
 
 /* ================= ЗБЕРЕЖЕННЯ ================= */
 async function saveO() {
-  const o = { id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value, factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value, assignee: document.getElementById('fAs').value || null, factory_ordered: document.getElementById('fOr').value || null, eta_date: document.getElementById('fEta').value || null, sale_price_ht: n(document.getElementById('fSa').value), tva_rate: n(document.getElementById('fTv').value), total_ttc: n(document.getElementById('fTt').value), cost_price: n(document.getElementById('fCo').value), install_cost: n(document.getElementById('fIn').value), delivery: n(document.getElementById('fDe').value), paid_amount: payTotal(), payments: curPay, factory_prepay: n(document.getElementById('fFaPa').value), factory2: document.getElementById('fFa2').value || null, cost_price2: n(document.getElementById('fCo2').value), factory_prepay2: n(document.getElementById('fFaPa2').value), deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value, cancel_reason: document.getElementById('fCan').value, file_url: JSON.stringify(curFiles), check_measured: document.getElementById('fChM').checked, check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked };
+  const o = { id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value, factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value, assignee: document.getElementById('fAs').value || null, factory_ordered: document.getElementById('fOr').value || null, eta_date: document.getElementById('fEta').value || null, sale_price_ht: n(document.getElementById('fSa').value), tva_rate: n(document.getElementById('fTv').value), total_ttc: n(document.getElementById('fTt').value), cost_price: n(document.getElementById('fCo').value), install_cost: n(document.getElementById('fIn').value), delivery: n(document.getElementById('fDe').value), paid_amount: payTotal(), payments: curPay, factory_payments: curFacPay, factory_prepay: n(document.getElementById('fFaPa').value), factory2: document.getElementById('fFa2').value || null, cost_price2: n(document.getElementById('fCo2').value), factory_prepay2: n(document.getElementById('fFaPa2').value), deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value, cancel_reason: document.getElementById('fCan').value, file_url: JSON.stringify(curFiles), check_measured: document.getElementById('fChM').checked, check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked };
   // Дата створення виставляється автоматично: нове замовлення — зараз; наявне — зберігаємо стару
   // (якщо в старого запису її немає — відновлюємо з часу в id, інакше ставимо зараз)
   const prev = editId ? orders.find(x => x.id == editId) : null;
@@ -3060,6 +3203,7 @@ const openO = id => {
   priceSrc = 'sale'; document.getElementById('fMk').value = '';
   curFiles = id ? parseFiles(o.file_url) : [];
   curPay   = id ? parsePay(o.payments) : [];
+  if (!id) curFacPay = [];
   // сумісність: старі замовлення без журналу платежів
   if (id && !curPay.length && n(o.paid_amount) > 0) curPay = [{ date: null, amount: n(o.paid_amount) }];
   renderFiles(); renderPay();
@@ -3092,6 +3236,8 @@ const openO = id => {
   // Чернетка: якщо раніше закрили форму нового замовлення без збереження — пропонуємо відновити
   if (!id) { tryRestoreDraft(); renderPay(); }
   document.getElementById('fCr').value = (id && orderTs(o)) ? fmtDateTime(orderTs(o)) : 'Встановиться автоматично при збереженні';
+  curFacPay = id ? parseFacPay(o) : curFacPay;
+  renderFacPay();
   tglCan(); calc(); showModal('mO');
 }
 
@@ -3101,7 +3247,7 @@ function dupO() {
   document.getElementById('fSt').value = 'Кошторис';
   ['fDl','fRe','fFaPa','fFaPa2','fOr','fEta'].forEach(i => document.getElementById(i).value = '');
   document.getElementById('btnWa').style.display = 'none'; document.getElementById('btnEv').style.display = 'none'; document.getElementById('logWrap').style.display = 'none';
-  curPay = []; curFiles = []; renderPay(); renderFiles();
+  curPay = []; curFacPay = []; curFiles = []; renderPay(); renderFacPay(); renderFiles();
   document.getElementById('btnD').style.display = 'none';
   document.getElementById('btnDup').style.display = 'none';
   document.getElementById('histBox').style.display = 'none';
@@ -3294,7 +3440,7 @@ const calc = () => {
   const c = n(document.getElementById('fCo').value) + n(document.getElementById('fCo2').value); // обидві фабрики
   document.getElementById('fTt').value = ((h+i+d)*(1+t/100)).toFixed(2);
   document.getElementById('fMr').value = ((h-c)+i+d).toFixed(2) + ' €';
-  updPayLeft();
+  updPayLeft(); updFacLeft();
   // Націнка = наскільки продано дорожче за ціну фабрик (у %). Поки людина вводить націнку сама — поле не чіпаємо
   if (priceSrc !== 'mk') document.getElementById('fMk').value = c > 0 && h > 0 ? String(Math.round((h - c) / c * 1000) / 10) : '';
 }
@@ -3406,7 +3552,7 @@ function saveDraft() {
   const mo = document.getElementById('mO'); if (!mo || mo.style.display !== 'flex') return;
   clearTimeout(draftTimer);
   draftTimer = setTimeout(() => {
-    const d = { t: Date.now(), pay: curPay };
+    const d = { t: Date.now(), pay: curPay, facpay: curFacPay };
     DRAFT_IDS.forEach(i => d[i] = document.getElementById(i).value);
     DRAFT_CHK.forEach(i => d[i] = document.getElementById(i).checked);
     if (d.fCl || d.fPr || d.fSa || d.fNo) LS.set(draftKey(), JSON.stringify(d)); else LS.del(draftKey());
@@ -3420,6 +3566,7 @@ function tryRestoreDraft() {
   DRAFT_IDS.forEach(i => { if (d[i] !== undefined) document.getElementById(i).value = d[i]; });
   DRAFT_CHK.forEach(i => { document.getElementById(i).checked = !!d[i]; });
   curPay = Array.isArray(d.pay) ? d.pay : [];
+  curFacPay = Array.isArray(d.facpay) ? d.facpay : [];
   if (d.fAs) setAs('fAs', d.fAs);
   if (d.fFa2) toggleFac2(true);
 }
