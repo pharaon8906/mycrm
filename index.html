@@ -379,6 +379,13 @@ select { cursor: pointer; }
 .pay-add button { background: var(--p2); color: #fff; border: none; border-radius: var(--r-sm); width: 46px; font-size: 16px; cursor: pointer; }
 .pay-total { display: flex; justify-content: space-between; margin-top: 10px; padding: 11px 13px; background: var(--line-soft); border-radius: var(--r-sm); font-size: 13px; font-weight: 600; }
 .pay-total b { font-variant-numeric: tabular-nums; }
+.pay-left { margin-top: 6px; font-size: 14px; }
+.pay-left.debt { background: #fdecef; color: var(--danger); }
+.pay-left.ok { background: #e8f6f1; color: #0a5c42; }
+.pay-left.over { background: #fdf8e3; color: #7a5c00; }
+html.dark .pay-left.debt { background: #3b1c26; }
+html.dark .pay-left.ok { background: #133428; color: #6fe0b5; }
+html.dark .pay-left.over { background: #3a3316; color: #f1d36a; }
 
 .fab-add { position: fixed; right: 18px; bottom: 88px; width: 56px; height: 56px; border-radius: var(--r-lg); background: var(--p2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; border: none; box-shadow: var(--sh-2); z-index: 1000; cursor: pointer; transition: .18s; }
 .fab-add:hover { transform: translateY(-2px); }
@@ -809,6 +816,7 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
         <button type="button" onclick="addPay()" title="Додати платіж"><i class="fa fa-plus"></i></button>
       </div>
       <div class="pay-total"><span>Оплачено разом</span><b id="payTotal">0 €</b></div>
+      <div class="pay-total pay-left" id="payLeft"><span id="payLeftL">Залишок до сплати</span><b id="payLeftV">0 €</b></div>
       <input id="fPa" type="hidden">
     </div>
 
@@ -1451,6 +1459,15 @@ function renderPay() {
   const t = payTotal();
   document.getElementById('payTotal').textContent = fN(t) + ' €';
   document.getElementById('fPa').value = t;
+  updPayLeft();
+}
+// Залишок до сплати = сума TTC мінус усі платежі; оновлюється після кожного платежу і при зміні суми замовлення
+function updPayLeft() {
+  const box = document.getElementById('payLeft'); if (!box) return;
+  const ttc = n(document.getElementById('fTt').value), left = Math.round((ttc - payTotal()) * 100) / 100;
+  box.className = 'pay-total pay-left ' + (ttc <= 0 ? '' : left > 0.5 ? 'debt' : left < -0.5 ? 'over' : 'ok');
+  document.getElementById('payLeftL').textContent = ttc <= 0 ? 'Залишок до сплати' : left > 0.5 ? 'Залишок до сплати' : left < -0.5 ? 'Переплата' : 'Сплачено повністю';
+  document.getElementById('payLeftV').textContent = ttc <= 0 ? '—' : (left < -0.5 ? fN(-left) : left > 0.5 ? fN(left) : '0') + ' €';
 }
 function addPay() {
   const d = document.getElementById('payDate').value;
@@ -2880,6 +2897,7 @@ const calc = () => {
   const c = n(document.getElementById('fCo').value) + n(document.getElementById('fCo2').value); // обидві фабрики
   document.getElementById('fTt').value = ((h+i+d)*(1+t/100)).toFixed(2);
   document.getElementById('fMr').value = ((h-c)+i+d).toFixed(2) + ' €';
+  updPayLeft();
   // Націнка = наскільки продано дорожче за ціну фабрик (у %). Поки людина вводить націнку сама — поле не чіпаємо
   if (priceSrc !== 'mk') document.getElementById('fMk').value = c > 0 && h > 0 ? String(Math.round((h - c) / c * 1000) / 10) : '';
 }
