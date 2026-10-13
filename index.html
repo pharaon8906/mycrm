@@ -310,6 +310,8 @@ html.dark #splash { background: #0b101c; --ink: #f2f5fb; }
 .pl-date { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-xs); padding: 8px 10px; font-size: 12px; color: var(--muted); }
 .pl-date b { display: block; color: var(--txt); font-size: 13px; margin-bottom: 2px; }
 @media (max-width: 640px) { .pl-row { flex-wrap: wrap; } .pl-row select { flex: 1; } .n-i { padding-left: 2px; padding-right: 2px; font-size: 10px; min-width: 0; } .n-i span { display: block; overflow: hidden; text-overflow: ellipsis; } }
+.nbadge { position: absolute; top: 5px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 4px; box-sizing: border-box; border-radius: 9px; background: var(--danger); color: #fff; font-size: 10px; font-weight: 700; font-style: normal; display: grid; place-items: center; line-height: 1; }
+@media (min-width: 900px) { .nbadge { top: 50%; left: auto; right: 12px; transform: translateY(-50%); } }
 .cal-day { margin-bottom: 20px; }
 .cal-head { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
 .cal-date { font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
@@ -325,7 +327,7 @@ html.dark #splash { background: #0b101c; --ink: #f2f5fb; }
 
 /* ============ НАВІГАЦІЯ ============ */
 .bottom-nav { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,.94); backdrop-filter: blur(14px); display: flex; border-top: 1px solid var(--line); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-.n-i { flex: 1; padding: 11px 5px; border: none; background: none; text-align: center; color: var(--muted2); font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; transition: .14s; }
+.n-i { position: relative; flex: 1; padding: 11px 5px; border: none; background: none; text-align: center; color: var(--muted2); font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; transition: .14s; }
 .n-i.active { color: var(--p2); }
 .n-i i { display: block; font-size: 18px; margin-bottom: 5px; }
 
@@ -906,6 +908,16 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
       </div>
     </div>
 
+    <div class="sec">Сповіщення</div>
+    <div class="fg"><label>Нагадувати про події, поки CRM відкрита в браузері</label>
+      <div class="seg" id="notifSeg" style="margin-bottom:8px">
+        <button type="button" data-v="1" onclick="setNotif('1')">Увімкнено</button>
+        <button type="button" data-v="0" onclick="setNotif('0')">Вимкнено</button>
+      </div>
+      <small id="notifNote" style="color:var(--muted);display:block;margin-bottom:8px"></small>
+      <button type="button" class="btn-alt" style="display:block;margin:0" onclick="testNotif()"><i class="fa fa-bell"></i> Показати тестове сповіщення</button>
+    </div>
+
     <div class="sec fin-only">Контроль</div>
     <div class="fg fin-only"><label>Поріг низької націнки, % (0 — вимкнути)</label><input id="setMk" type="number" min="0" step="1" onchange="setMinMk(this.value)"></div>
 
@@ -1048,7 +1060,7 @@ const CO_NAME = { heimek: 'Heimek', luxwin: 'Lux Win' };
 function setBrand() {
   const sw = document.getElementById('coSwitch');
   document.getElementById('brd').innerHTML = 'Axis' + (sw && sw.style.display === 'none' && CO_NAME[co] ? ` <small style="font-weight:500;color:var(--muted)">· ${CO_NAME[co]}</small>` : '');
-  document.title = 'Axis' + (CO_NAME[co] ? ' · ' + CO_NAME[co] : '');
+  document.title = 'Axis' + (CO_NAME[co] ? ' · ' + CO_NAME[co] : ''); refreshAlerts();
 }
 const BUCKET = 'order-files';
 const FACTORIES = ['Eko-okna','Seharia','Ukraine','Optimedia','S.C. GERE&CO S.R.L.','Vindovkii','WDC'];
@@ -1548,7 +1560,7 @@ async function sync() {
   clients = cData || [];
   await loadTeam(); await loadEvents(); await loadLeads();
   selIds.forEach(id => { if (!orders.some(o => o.id === id)) selIds.delete(id); });
-  updateDl(); render(); updateBulk(); renderSide();
+  updateDl(); render(); updateBulk(); renderSide(); startNotifs();
   if (curT==='stats') renderStats();
   if (curT==='calendar') renderCal();
   if (curT==='partners') renderPartners();
@@ -2055,6 +2067,7 @@ function calSetKind(k) { calKind = (k === calKind && k !== 'all') ? 'all' : k; r
 
 // Права панель «Найближче»: 7 днів уперед + прострочене
 function renderSide() {
+  refreshAlerts();
   const box = document.getElementById('sideAgenda'); if (!box) return;
   const today = todayStr(), end = ymd(Date.now() + 7 * 864e5);
   const items = calItems(true).filter(i => i.e ? (!i.e.done && i.d <= end) : i.d <= end);
@@ -2266,6 +2279,72 @@ async function delLead() {
   const { error } = await _sb.from('partner_leads').delete().eq('id', leId);
   if (error) return alert('Помилка: ' + error.message);
   await loadLeads(); closeM('mLe'); renderPartners();
+}
+
+/* ================= СПОВІЩЕННЯ ПРО ПОДІЇ (поки CRM відкрита в браузері) ================= */
+const NOTIF_SUP = () => 'Notification' in window;
+const NOTIF_ON = () => LS.get('crm_notif', '0') === '1' && NOTIF_SUP() && Notification.permission === 'granted';
+// Що потребує уваги саме зараз: невиконані події на сьогодні й раніше та нагадування «передзвонити» (мої або без відповідального)
+function alertItems() {
+  const t = todayStr(), me = ME(), mine = a => !me || !a || a === me;
+  return { ev: events.filter(e => !e.done && e.event_date && e.event_date <= t && mine(e.assignee)), rem: orders.filter(o => isRem(o) && mine(o.assignee)) };
+}
+// Лічильник на вкладці «Календар» і в заголовку вкладки браузера
+function refreshAlerts() {
+  const a = alertItems(), n = a.ev.length + a.rem.length, nav = document.getElementById('ni-calendar');
+  if (nav) { nav.querySelectorAll('.nbadge').forEach(x => x.remove()); if (n) { const b = document.createElement('b'); b.className = 'nbadge'; b.textContent = n > 99 ? '99+' : n; nav.appendChild(b); } }
+  document.title = (n ? `(${n}) ` : '') + document.title.replace(/^\(\d+\)\s*/, '');
+}
+function notify(title, body, tag) {
+  if (!NOTIF_ON()) return;
+  try { const nt = new Notification(title, { body, tag, icon: 'icon-192.png' }); nt.onclick = () => { window.focus(); tab('calendar'); nt.close(); }; } catch (e) {}
+}
+const notifiedMap = () => { try { return JSON.parse(LS.get('crm_notified', '{}')) || {}; } catch (e) { return {}; } };
+function markNotified(k) {
+  const m = notifiedMap(), t = todayStr(); m[k] = t;
+  Object.keys(m).forEach(x => { if (m[x] < t) delete m[x]; });
+  LS.set('crm_notified', JSON.stringify(m));
+}
+function checkNotifs() {
+  refreshAlerts();
+  if (!NOTIF_ON() || !curLoaded) return;
+  const m = notifiedMap(), now = new Date(), t = todayStr(), mins = now.getHours() * 60 + now.getMinutes(), me = ME();
+  events.forEach(e => {
+    if (e.done || e.event_date !== t || !evTime(e) || (me && e.assignee && e.assignee !== me)) return;
+    const [h, mm] = evTime(e).split(':').map(Number), em = h * 60 + mm, T = EV_T[e.kind || 'task'].lbl, who = [e.client, e.assignee].filter(Boolean).join(' · ');
+    if (mins >= em && mins <= em + 30 && !m[e.id + '|0']) { notify(`${T} зараз · ${evTime(e)}`, e.title + (who ? '\n' + who : ''), e.id + '|0'); markNotified(e.id + '|0'); }
+    else if (mins >= em - 10 && mins < em && !m[e.id + '|10']) { notify(`Через ${em - mins} хв: ${T.toLowerCase()}`, e.title + (who ? '\n' + who : ''), e.id + '|10'); markNotified(e.id + '|10'); }
+  });
+  if (!m['sum|' + t]) {      // раз на день: підсумок при відкритті
+    const a = alertItems(), parts = [];
+    if (a.ev.length) parts.push(`подій: ${a.ev.length}`); if (a.rem.length) parts.push(`передзвонити: ${a.rem.length}`);
+    if (parts.length) notify('На сьогодні заплановано', parts.join(', ') + ' (з урахуванням прострочених)', 'sum|' + t);
+    markNotified('sum|' + t);
+  }
+}
+let curLoaded = false, _notifTimer = null;
+function startNotifs() { curLoaded = true; if (!_notifTimer) _notifTimer = setInterval(checkNotifs, 30000); checkNotifs(); }
+function renderNotifSettings() {
+  const on = NOTIF_ON(), note = document.getElementById('notifNote'); if (!note) return;
+  document.querySelectorAll('#notifSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === (on ? '1' : '0')));
+  note.textContent = !NOTIF_SUP() ? 'Цей браузер не підтримує сповіщення.'
+    : Notification.permission === 'denied' ? 'Сповіщення заблоковано в браузері: натисніть на замок у адресному рядку → Сповіщення → Дозволити, потім увімкніть тут знову.'
+    : on ? 'Увімкнено: за 10 хв до події, у момент події та підсумок дня. Працює, поки сторінка CRM відкрита (можна у фоновій вкладці).'
+    : 'Вимкнено. Лічильник на вкладці «Календар» і число в заголовку вкладки працюють завжди.';
+}
+async function setNotif(v) {
+  if (v === '1') {
+    if (!NOTIF_SUP()) return renderNotifSettings();
+    let perm = Notification.permission;
+    if (perm === 'default') { try { perm = await Notification.requestPermission(); } catch (e) {} }
+    if (perm === 'granted') LS.set('crm_notif', '1'); else LS.set('crm_notif', '0');
+  } else LS.set('crm_notif', '0');
+  renderNotifSettings();
+}
+function testNotif() {
+  if (!NOTIF_SUP()) return alert('Цей браузер не підтримує сповіщення.');
+  if (!NOTIF_ON()) return alert('Спершу увімкніть сповіщення.');
+  notify('Сповіщення працюють', 'Так виглядатиме нагадування про дзвінок чи зустріч.', 'test');
 }
 
 /* ================= НОВІ ЗАЯВКИ ================= */
@@ -3062,7 +3141,7 @@ function resetScale() { LS.del('crm_zoom'); applyScale(); renderSettings(); }
 function setMinMk(v) { LS.set('crm_min_markup', String(Math.max(0, parseFloat(v) || 0))); render(); }
 function openSettings() { renderSettings(); showModal('mS'); }
 function renderSettings() {
-  renderTeamSettings(); renderPoolSettings();
+  renderTeamSettings(); renderNotifSettings(); renderPoolSettings();
   document.querySelectorAll('#autoSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === (AUTO_ON() ? '1' : '0')));
   document.getElementById('setAutoDays').value = AUTO_DAYS();
   const pref = LS.get('crm_theme', 'auto');
