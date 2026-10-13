@@ -3277,7 +3277,7 @@ const closeM = (id, fromPop) => {
   if (id === 'mO' || id === 'mC') editId = null;     // допоміжні вікна (шаблони, кошик тощо) не скидають відкрите замовлення
   if(id==='mO') { document.querySelector('#mO h3').textContent='Замовлення'; finishFiles(); }
   // якщо закрили вручну — прибрати запис з історії
-  if (!fromPop && history.state && history.state.m === id) history.back();
+  if (!fromPop && history.state && history.state.m === id) { _progBack++; history.back(); }
 }
 const tglCan = () => { document.getElementById('canB').style.display = document.getElementById('fSt').value === 'Скасовано' ? 'block' : 'none'; autoGrow(document.getElementById('fCan')); };
 const updateDl = () => { document.getElementById('dlC').innerHTML = clients.map(c=>`<option value="${esc(c.name)}">`).join(''); }
@@ -3633,7 +3633,10 @@ const topModal = () => [...document.querySelectorAll('.modal-w')].filter(m => m.
 document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; const m = topModal(); if (m) closeM(m.id); });
 
 // Кнопка "Назад": спершу закриває модалку, потім повертає на попередню вкладку
+// Закриття вікна кнопкою/хрестиком саме викликає history.back(): таке «Назад» не має закривати наступне вікно в стеку
+let _progBack = 0;
 window.addEventListener('popstate', e => {
+  if (_progBack > 0) { _progBack--; return; }
   const openModalEl = topModal();
   if (openModalEl) { closeM(openModalEl.id, true); return; }
   const st = e.state;
