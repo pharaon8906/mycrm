@@ -224,6 +224,60 @@ html.dark #splash { background: #0b101c; --ink: #f2f5fb; }
 .btn-ghost:hover { border-color: var(--muted2); color: var(--txt); }
 
 /* ============ КАЛЕНДАР ============ */
+/* ===== Календар і події ===== */
+.cal-wrap { display: grid; gap: 18px; }
+@media (min-width: 1000px) { .cal-wrap { grid-template-columns: minmax(340px, 430px) 1fr; align-items: start; } .cal-mon { position: sticky; top: 76px; } }
+.cal-mon { max-width: 460px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; box-shadow: var(--sh-1); }
+.cm-head { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.cm-head b { flex: 1; font-size: 15px; text-transform: capitalize; }
+.cm-btn { width: 34px; height: 34px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-xs); cursor: pointer; color: var(--muted); font-family: inherit; font-size: 12px; font-weight: 600; }
+.cm-btn.txt { width: auto; padding: 0 10px; }
+.cm-btn:hover { border-color: var(--muted2); color: var(--txt); }
+.cm-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.cm-dow { font-size: 10.5px; font-weight: 700; color: var(--muted2); text-align: center; padding: 4px 0; text-transform: uppercase; }
+.cm-d { aspect-ratio: 1 / .82; border-radius: var(--r-xs); border: 1px solid transparent; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 13px; font-weight: 600; color: var(--txt); font-family: inherit; padding: 0; }
+.cm-d.other { color: var(--muted2); opacity: .55; }
+.cm-d:hover { background: var(--line-soft); }
+.cm-d.today { border-color: var(--p2); color: var(--p2); }
+.cm-d.sel, .cm-d.sel:hover { background: var(--p2); color: #fff; border-color: var(--p2); }
+.cm-dots { display: flex; gap: 2px; height: 5px; }
+.cm-dots i { width: 5px; height: 5px; border-radius: 50%; display: block; }
+.cm-leg { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 12px; font-size: 11px; color: var(--muted); }
+.cm-leg span { display: inline-flex; align-items: center; gap: 5px; }
+.cm-leg i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.cal-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+.cal-tools .grow { flex: 1; }
+.cal-add { height: 40px; padding: 0 16px; border: none; border-radius: var(--r-sm); background: var(--p2); color: #fff; font-weight: 600; font-size: 13.5px; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 7px; }
+.cal-add:hover { filter: brightness(1.08); }
+.cal-sel-info { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.cal-sel-info button { border: 0; background: none; color: var(--p2); font-weight: 600; cursor: pointer; font-family: inherit; font-size: 13px; }
+.cal-item.ev.done .cn { text-decoration: line-through; color: var(--muted); }
+.cal-item.ev.done { opacity: .7; }
+.ev-chk { margin-left: auto; border: 0; background: none; font-size: 22px; color: var(--muted2); cursor: pointer; padding: 4px; line-height: 1; }
+.ev-chk.on { color: var(--success); }
+.cal-item .cv.tm { font-size: 13px; color: var(--muted); }
+/* права панель «Найближче» (лише на широкому екрані) */
+#sideAgenda { display: none; }
+@media (min-width: 1280px) {
+  body.agenda-on { padding-right: 320px; }
+  body.agenda-on #sideAgenda { display: block; position: fixed; top: 0; right: 0; width: 320px; height: 100vh; overflow-y: auto; background: var(--surface); border-left: 1px solid var(--line); padding: 20px 16px 28px; z-index: 900; box-sizing: border-box; }
+  body.agenda-on .bulk-bar { right: 320px; }
+  body.agenda-on .fab-add { right: 348px; }
+}
+.sa-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.sa-head b { font-size: 15px; }
+.sa-head button { border: 0; background: var(--p2); color: #fff; border-radius: var(--r-xs); height: 30px; padding: 0 10px; font-weight: 600; font-size: 12px; cursor: pointer; font-family: inherit; }
+.sa-day { font-size: 11px; font-weight: 700; color: var(--muted2); text-transform: uppercase; letter-spacing: .06em; margin: 14px 0 6px; display: flex; gap: 6px; align-items: center; }
+.sa-day .late { color: var(--danger); }
+.sa-day .today { color: var(--p2); }
+.sa-row { display: flex; gap: 9px; align-items: center; padding: 8px 9px; border: 1px solid var(--line); border-radius: var(--r-xs); margin-bottom: 6px; cursor: pointer; background: var(--surface); }
+.sa-row:hover { border-color: var(--muted2); }
+.sa-row .si { width: 26px; height: 26px; border-radius: 7px; color: #fff; display: grid; place-items: center; font-size: 11px; flex-shrink: 0; }
+.sa-row .st { font-size: 12.5px; font-weight: 600; line-height: 1.25; min-width: 0; flex: 1; }
+.sa-row .st small { display: block; font-weight: 500; color: var(--muted); font-size: 11px; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sa-row .tm { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.sa-row.done .st { text-decoration: line-through; color: var(--muted); }
+.sa-empty { font-size: 12.5px; color: var(--muted); padding: 18px 4px; text-align: center; }
 .cal-day { margin-bottom: 20px; }
 .cal-head { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
 .cal-date { font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
@@ -658,6 +712,8 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
   <div class="credit">Created by <b>GHERMAN</b> for <b id="creditCo">HEIMEK</b></div>
 </div>
 
+<aside id="sideAgenda"></aside>
+
 <div class="bottom-nav" id="bottomNav" style="display:none">
   <button class="n-i active" id="ni-orders" onclick="tab('orders')"><i class="fa fa-list-ul"></i><span>Замовлення</span></button>
   <button class="n-i" id="ni-new" onclick="tab('new')"><i class="fa fa-inbox"></i><span>Нові</span></button>
@@ -756,6 +812,7 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
     </details>
 
     <button class="btn-s" onclick="saveO()">Зберегти</button>
+    <button id="btnEv" class="btn-alt" onclick="openEv(null, { order_id: editId })"><i class="fa fa-calendar-plus"></i> Запланувати (дзвінок, зустріч, справа)</button>
     <button id="btnWa" class="btn-alt" onclick="openWa(editId)"><i class="fab fa-whatsapp"></i> Написати клієнту (шаблони, французькою)</button>
     <button id="btnDup" class="btn-alt" onclick="dupO()"><i class="fa fa-copy"></i> Дублювати замовлення</button>
     <button id="btnD" onclick="delO()" style="color:var(--danger);border:none;background:none;width:100%;margin-top:8px;font-weight:600;cursor:pointer;display:none;font-family:inherit;font-size:13.5px">Видалити замовлення</button>
@@ -845,6 +902,30 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
 
     <div class="sec">Акаунт</div>
     <div class="fg"><small id="accInfo" style="color:var(--muted)"></small></div>
+  </div>
+</div>
+
+<!-- МОДАЛКА ПОДІЇ (календар) -->
+<div id="mE" class="modal-w">
+  <div class="mbox">
+    <div style="display:flex;justify-content:space-between;"><h3 id="evH">Нова подія</h3><i class="fa fa-times" onclick="closeM('mE')"></i></div>
+    <div class="seg" id="evTypeSeg">
+      <button type="button" data-k="call" onclick="setEvType('call')"><i class="fa fa-phone"></i> Дзвінок</button>
+      <button type="button" data-k="meeting" onclick="setEvType('meeting')"><i class="fa fa-handshake"></i> Зустріч</button>
+      <button type="button" data-k="reminder" onclick="setEvType('reminder')"><i class="fa fa-bell"></i> Нагадування</button>
+      <button type="button" data-k="task" onclick="setEvType('task')"><i class="fa fa-list-check"></i> Справа</button>
+    </div>
+    <div class="fg"><label>Що потрібно зробити</label><input id="evTitle" placeholder=""></div>
+    <div class="grid">
+      <div class="fg"><label>Дата</label><input id="evDate" type="date"></div>
+      <div class="fg"><label>Час (необовʼязково)</label><input id="evTime" type="time"></div>
+    </div>
+    <div class="fg"><label>Замовлення (необовʼязково)</label><select id="evOrder"></select></div>
+    <div class="fg"><label>Відповідальний</label><select id="evAs"></select></div>
+    <div class="fg"><label>Нотатки</label><textarea id="evNotes" rows="2" oninput="autoGrow(this)"></textarea></div>
+    <button class="btn-s" onclick="saveEv()">Зберегти</button>
+    <button id="btnEvOrd" class="btn-alt" style="display:none" onclick="openEvOrder()"><i class="fa fa-arrow-up-right-from-square"></i> Відкрити замовлення</button>
+    <button id="btnEvDel" onclick="delEv()" style="color:var(--danger);border:none;background:none;width:100%;margin-top:8px;font-weight:600;cursor:pointer;display:none;font-family:inherit;font-size:13.5px">Видалити подію</button>
   </div>
 </div>
 
@@ -1335,7 +1416,7 @@ async function checkUser() {
     document.body.setAttribute('data-co', co);
     setBrand();
     document.getElementById('creditCo').textContent = co.toUpperCase();
-    history.replaceState({ t: 'orders' }, '');   // базовий запис для кнопки "Назад"
+    document.body.classList.add('agenda-on'); history.replaceState({ t: 'orders' }, '');   // базовий запис для кнопки "Назад"
     fillFactories(); updateTva(); applyView(); sync();
   } else {
     document.getElementById('loader').style.display = 'none';
@@ -1376,9 +1457,9 @@ async function sync() {
   orders = await loadOrders();
   const { data: cData } = await _sb.from('clients').select('*').eq('company', co);
   clients = cData || [];
-  await loadTeam();
+  await loadTeam(); await loadEvents();
   selIds.forEach(id => { if (!orders.some(o => o.id === id)) selIds.delete(id); });
-  updateDl(); render(); updateBulk();
+  updateDl(); render(); updateBulk(); renderSide();
   if (curT==='stats') renderStats();
   if (curT==='calendar') renderCal();
   document.getElementById('loader').style.display = 'none';
@@ -1771,38 +1852,182 @@ async function copyWa() {
 }
 
 /* ================= КАЛЕНДАР ================= */
-function renderCal() {
-  const box = document.getElementById('calDisplay');
-  const today = new Date().toISOString().split('T')[0];
-  const items = [];
+/* ================= КАЛЕНДАР І ПОДІЇ ================= */
+const ymd = d => { const x = new Date(d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
+const todayStr = () => ymd(new Date());
+const EV_T = {
+  call:     { ico: 'fa-phone',      lbl: 'Дзвінок',      c: 'var(--cyan)',    ph: 'напр. Зателефонувати щодо замірів' },
+  meeting:  { ico: 'fa-handshake',  lbl: 'Зустріч',      c: 'var(--violet)',  ph: 'напр. Зустріч з клієнтом на обʼєкті' },
+  reminder: { ico: 'fa-bell',       lbl: 'Нагадування',  c: 'var(--warning)', ph: 'напр. Перевірити оплату' },
+  task:     { ico: 'fa-list-check', lbl: 'Справа',       c: 'var(--success)', ph: 'напр. Підготувати кошторис' }
+};
+const OT = {
+  dl:  { ico: 'fa-screwdriver-wrench', c: 'var(--p2)',    lbl: 'Дедлайн' },
+  rem: { ico: 'fa-phone',              c: 'var(--danger)', lbl: 'Передзвонити' },
+  eta: { ico: 'fa-truck',              c: 'var(--store)',  lbl: 'Очікується з фабрики' }
+};
+const evTime = e => (e.event_time || '').slice(0, 5);
+let events = [], EV_OK = true, calY = new Date().getFullYear(), calM = new Date().getMonth(), calSel = null, calWho = 'all', evType = 'call', evId = null;
+async function loadEvents() {
+  try {
+    const r = await _sb.from('events').select('*').eq('company', co).order('event_date');
+    if (r.error) { EV_OK = false; events = []; return; }
+    EV_OK = true; events = r.data || [];
+  } catch (e) { EV_OK = false; events = []; }
+}
+// Усе, що заплановано: дедлайни, нагадування, очікувані поставки та власні події
+function calItems() {
+  let items = [];
   orders.forEach(o => {
     if (o.status === 'Виконано' || o.status === 'Скасовано') return;
     if (o.deadline) items.push({ d: o.deadline, t: 'dl', o });
     if (o.reminder_date) items.push({ d: o.reminder_date, t: 'rem', o });
     if (o.eta_date && SUPPLY_WAIT.includes(o.status)) items.push({ d: o.eta_date, t: 'eta', o });
   });
-  if (!items.length) { box.innerHTML = `<div class="empty"><i class="fa fa-calendar-check"></i>Немає запланованих дат</div>`; return; }
-  items.sort((a,b) => a.d.localeCompare(b.d));
+  events.forEach(e => { if (e.event_date) items.push({ d: e.event_date, t: 'ev', e }); });
+  if (calWho === 'mine' && ME()) items = items.filter(i => (i.o ? i.o.assignee : i.e.assignee) === ME());
+  const key = i => i.d + ' ' + (i.e ? (evTime(i.e) || '99:98') : '99:99');
+  return items.sort((a, b) => key(a).localeCompare(key(b)));
+}
+const itemColor = i => i.e ? EV_T[i.e.kind || 'task'].c : OT[i.t].c;
+const itemIco = i => i.e ? EV_T[i.e.kind || 'task'].ico : OT[i.t].ico;
+const dayRel = d => { const t = todayStr(), tm = ymd(Date.now() + 864e5); return d < t ? ['Прострочено', 'late'] : d === t ? ['Сьогодні', 'today'] : d === tm ? ['Завтра', ''] : ['', '']; };
+const dayLabel = d => new Date(d + 'T00:00:00').toLocaleDateString('uk-UA', { weekday: 'short', day: 'numeric', month: 'long' });
 
-  const groups = {};
-  items.forEach(i => { (groups[i.d] = groups[i.d] || []).push(i); });
+function calItemHtml(i) {
+  if (i.e) {
+    const e = i.e, T = EV_T[e.kind || 'task'], ord = e.order_id ? orders.find(x => x.id === e.order_id) : null;
+    const who = [e.client || (ord && ord.client), e.assignee].filter(Boolean).map(esc).join(' · ');
+    return `<div class="cal-item ev ${e.done ? 'done' : ''}" data-ev="${esc(e.id)}" onclick="openEv(this.dataset.ev)">
+      <div class="ci" style="background:${T.c}"><i class="fa ${T.ico}"></i></div>
+      <div><div class="cn">${esc(e.title)}</div><div class="cs">${T.lbl}${evTime(e) ? ' · ' + evTime(e) : ''}${who ? ' · ' + who : ''}</div></div>
+      <button class="ev-chk ${e.done ? 'on' : ''}" data-ev="${esc(e.id)}" onclick="event.stopPropagation();toggleEv(this.dataset.ev)" title="${e.done ? 'Повернути в роботу' : 'Позначити виконаним'}"><i class="fa ${e.done ? 'fa-circle-check' : 'fa-circle'}"></i></button>
+    </div>`;
+  }
+  const o = i.o, t = OT[i.t];
+  return `<div class="cal-item" data-id="${esc(o.id)}" onclick="openO(this.dataset.id)">
+    <div class="ci" style="background:${t.c}"><i class="fa ${t.ico}"></i></div>
+    <div><div class="cn">${esc(o.client || 'Без імені')}</div><div class="cs">${t.lbl} · ${esc(o.product || '---')} · ${esc(o.status)}${o.assignee ? ' · ' + esc(o.assignee) : ''}</div></div>
+    <div class="cv">${fN(o.total_ttc)} €</div>
+  </div>`;
+}
 
-  const tomorrow = new Date(Date.now() + 864e5).toISOString().split('T')[0];
-  const relLabel = d => d < today ? ['Прострочено','late'] : d === today ? ['Сьогодні','today'] : d === tomorrow ? ['Завтра',''] : ['',''];
+function renderCal() {
+  const box = document.getElementById('calDisplay'), today = todayStr();
+  const all = calItems();
+  // --- місяць ---
+  const byDay = {}; all.forEach(i => { (byDay[i.d] = byDay[i.d] || []).push(i); });
+  const first = new Date(calY, calM, 1), start = new Date(calY, calM, 1 - ((first.getDay() + 6) % 7));
+  let cells = '';
+  for (let k = 0; k < 42; k++) {
+    const dt = new Date(start.getFullYear(), start.getMonth(), start.getDate() + k), key = ymd(dt), its = byDay[key] || [];
+    const cols = [...new Set(its.filter(i => !(i.e && i.e.done)).map(itemColor))].slice(0, 4);
+    cells += `<button type="button" class="cm-d ${dt.getMonth() !== calM ? 'other' : ''} ${key === today ? 'today' : ''} ${key === calSel ? 'sel' : ''}" data-d="${key}" onclick="calPick(this.dataset.d)">${dt.getDate()}<span class="cm-dots">${cols.map(c => `<i style="background:${key === calSel ? '#fff' : c}"></i>`).join('')}</span></button>`;
+  }
+  const monthName = new Date(calY, calM, 1).toLocaleDateString('uk-UA', { month: 'long', year: 'numeric' });
+  const legend = [...Object.values(EV_T).map(t => [t.c, t.lbl]), [OT.eta.c, 'Поставка'], [OT.rem.c, 'Передзвонити'], [OT.dl.c, 'Дедлайн']].map(([c, l]) => `<span><i style="background:${c}"></i>${l}</span>`).join('');
+  // --- список ---
+  let list;
+  if (calSel) list = all.filter(i => i.d === calSel);
+  else list = all.filter(i => i.d >= today || (i.e ? !i.e.done : true));      // минуле показуємо лише невиконане
+  const groups = {}; list.forEach(i => { (groups[i.d] = groups[i.d] || []).push(i); });
+  const days = Object.keys(groups).sort();
+  const agenda = days.length ? days.map(d => {
+    const [rel, cls] = dayRel(d);
+    return `<div class="cal-day"><div class="cal-head"><span class="cal-date">${dayLabel(d)}</span>${rel ? `<span class="cal-rel ${cls}">${rel}</span>` : ''}</div>${groups[d].map(calItemHtml).join('')}</div>`;
+  }).join('') : `<div class="empty"><i class="fa fa-calendar-check"></i>${calSel ? 'На цей день нічого не заплановано' : 'Немає запланованих справ'}</div>`;
+  const mineBtn = ME() ? `<div class="seg" style="margin:0;min-width:140px;max-width:200px;flex:none"><button type="button" class="${calWho === 'all' ? 'on' : ''}" onclick="calSetWho('all')">Усі</button><button type="button" class="${calWho === 'mine' ? 'on' : ''}" onclick="calSetWho('mine')">Мої</button></div>` : '';
+  box.innerHTML = `<div class="cal-wrap">
+    <div class="cal-mon">
+      <div class="cm-head"><b>${monthName}</b><button type="button" class="cm-btn txt" onclick="calToday()">Сьогодні</button><button type="button" class="cm-btn" onclick="calMove(-1)"><i class="fa fa-chevron-left"></i></button><button type="button" class="cm-btn" onclick="calMove(1)"><i class="fa fa-chevron-right"></i></button></div>
+      <div class="cm-grid">${['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'].map(x => `<div class="cm-dow">${x}</div>`).join('')}${cells}</div>
+      <div class="cm-leg">${legend}</div>
+    </div>
+    <div>
+      <div class="cal-tools"><button type="button" class="cal-add" onclick="openEv(null)"><i class="fa fa-plus"></i> Подія</button>${mineBtn}
+        <div class="cal-sel-info grow">${calSel ? `${dayLabel(calSel)} <button type="button" onclick="calPick(null)">Показати все</button>` : 'Найближчі справи та поставки'}</div></div>
+      ${EV_OK ? '' : '<div class="empty" style="margin-bottom:12px"><i class="fa fa-triangle-exclamation"></i>Щоб планувати дзвінки й зустрічі, виконайте SQL для таблиці events (див. інструкцію)</div>'}
+      ${agenda}
+    </div></div>`;
+  renderSide();
+}
+function calMove(dir) { const d = new Date(calY, calM + dir, 1); calY = d.getFullYear(); calM = d.getMonth(); renderCal(); }
+function calToday() { const d = new Date(); calY = d.getFullYear(); calM = d.getMonth(); calSel = todayStr(); renderCal(); }
+function calPick(d) { calSel = (d && d !== calSel) ? d : null; if (calSel) { const x = new Date(calSel + 'T00:00:00'); calY = x.getFullYear(); calM = x.getMonth(); } renderCal(); }
+function calSetWho(w) { calWho = w; renderCal(); }
 
-  box.innerHTML = Object.keys(groups).map(d => {
-    const [rel, cls] = relLabel(d);
-    const dt = new Date(d).toLocaleDateString('uk-UA', { weekday:'short', day:'numeric', month:'long' });
-    const rows = groups[d].map(({t,o}) => {
-      const isRem = t === 'rem';
-      return `<div class="cal-item" data-id="${esc(o.id)}" onclick="openO(this.dataset.id)">
-        <div class="ci" style="background:${isRem ? 'var(--danger)' : t === 'eta' ? 'var(--store)' : 'var(--p2)'}"><i class="fa ${isRem ? 'fa-phone' : t === 'eta' ? 'fa-truck' : 'fa-screwdriver-wrench'}"></i></div>
-        <div><div class="cn">${esc(o.client||'Без імені')}</div><div class="cs">${isRem ? 'Передзвонити' : t === 'eta' ? 'Очікується з фабрики' : 'Дедлайн'} · ${esc(o.product||'---')} · ${esc(o.status)}${o.assignee ? ' · ' + esc(o.assignee) : ''}</div></div>
-        <div class="cv">${fN(o.total_ttc)} €</div>
-      </div>`;
-    }).join('');
-    return `<div class="cal-day"><div class="cal-head"><span class="cal-date">${dt}</span>${rel?`<span class="cal-rel ${cls}">${rel}</span>`:''}</div>${rows}</div>`;
-  }).join('');
+// Права панель «Найближче»: 7 днів уперед + прострочене
+function renderSide() {
+  const box = document.getElementById('sideAgenda'); if (!box) return;
+  const today = todayStr(), end = ymd(Date.now() + 7 * 864e5);
+  const items = calItems().filter(i => i.e ? (!i.e.done && i.d <= end) : i.d <= end);
+  const groups = {}; items.forEach(i => { const k = i.d < today ? 'late' : i.d; (groups[k] = groups[k] || []).push(i); });
+  const keys = Object.keys(groups).sort((a, b) => a === 'late' ? -1 : b === 'late' ? 1 : a.localeCompare(b));
+  const row = i => {
+    const o = i.o || (i.e && i.e.order_id ? orders.find(x => x.id === i.e.order_id) : null);
+    const title = i.e ? i.e.title : (i.o.client || 'Без імені'), sub = i.e ? [EV_T[i.e.kind || 'task'].lbl, i.e.client || (o && o.client)].filter(Boolean).join(' · ') : OT[i.t].lbl + ' · ' + (i.o.product || '---');
+    const click = i.e ? `openEv('${esc(i.e.id)}')` : `openO('${esc(i.o.id)}')`;
+    return `<div class="sa-row" onclick="${click}"><div class="si" style="background:${itemColor(i)}"><i class="fa ${itemIco(i)}"></i></div><div class="st">${esc(title)}<small>${esc(sub)}</small></div>${i.e && evTime(i.e) ? `<span class="tm">${evTime(i.e)}</span>` : ''}</div>`;
+  };
+  box.innerHTML = `<div class="sa-head"><b>Найближче</b><button type="button" onclick="openEv(null)"><i class="fa fa-plus"></i> Подія</button></div>`
+    + (keys.length ? keys.map(k => {
+        const [rel, cls] = k === 'late' ? ['Прострочено', 'late'] : dayRel(k);
+        return `<div class="sa-day"><span class="${cls}">${k === 'late' ? 'Прострочено' : (rel ? rel + ' · ' : '') + dayLabel(k)}</span></div>${groups[k].map(row).join('')}`;
+      }).join('') : '<div class="sa-empty">На 7 днів уперед нічого не заплановано</div>')
+    + `<button type="button" class="btn-alt" style="display:block;margin-top:14px" onclick="tab('calendar')"><i class="fa fa-calendar-days"></i> Відкрити календар</button>`;
+}
+
+// --- Модалка події ---
+function setEvType(k) {
+  evType = k;
+  document.querySelectorAll('#evTypeSeg button').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+  document.getElementById('evTitle').placeholder = EV_T[k].ph;
+}
+function openEv(id, preset) {
+  if (!EV_OK) return alert('Таблиці подій ще немає в базі. Виконайте SQL з інструкції (таблиця events), і календар запрацює.');
+  const e = id ? events.find(x => x.id === id) : null, pr = preset || {};
+  evId = e ? e.id : null;
+  document.getElementById('evH').textContent = e ? 'Подія' : 'Нова подія';
+  setEvType(e ? (e.kind || 'task') : (pr.kind || 'call'));
+  document.getElementById('evTitle').value = e ? e.title : (pr.title || '');
+  document.getElementById('evDate').value = e ? e.event_date : (calSel || todayStr());
+  document.getElementById('evTime').value = e ? evTime(e) : '';
+  document.getElementById('evNotes').value = e ? (e.notes || '') : '';
+  const oid = e ? e.order_id : (pr.order_id || '');
+  const sorted = orders.slice().sort((a, b) => orderTs(b) - orderTs(a)).slice(0, 300);
+  document.getElementById('evOrder').innerHTML = '<option value="">— без замовлення —</option>' + sorted.map(o => `<option value="${esc(o.id)}">${esc(o.client || 'Без імені')}${o.product ? ' · №' + esc(o.product) : ''} · ${esc(o.status)}</option>`).join('');
+  document.getElementById('evOrder').value = oid || '';
+  if (oid && !sorted.some(o => o.id === oid)) document.getElementById('evOrder').value = '';
+  fillSel('evAs', '<option value="">— не призначено —</option>');
+  setAs('evAs', e ? e.assignee : ME());
+  document.getElementById('btnEvDel').style.display = e ? 'block' : 'none';
+  document.getElementById('btnEvOrd').style.display = oid ? 'block' : 'none';
+  showModal('mE');
+}
+function openEvOrder() { const id = document.getElementById('evOrder').value; if (id) { closeM('mE'); setTimeout(() => openO(id), 60); } }
+async function saveEv() {
+  const title = document.getElementById('evTitle').value.trim(), date = document.getElementById('evDate').value;
+  if (!title) return alert('Вкажіть, що потрібно зробити');
+  if (!date) return alert('Вкажіть дату');
+  const oid = document.getElementById('evOrder').value || null, ord = oid ? orders.find(x => x.id === oid) : null, prev = evId ? events.find(x => x.id === evId) : null;
+  const row = { kind: evType, title, event_date: date, event_time: document.getElementById('evTime').value || null, order_id: oid, client: ord ? ord.client : null,
+                assignee: document.getElementById('evAs').value || null, notes: document.getElementById('evNotes').value.trim() || null };
+  const r = prev ? await _sb.from('events').update(row).eq('id', prev.id)
+                 : await _sb.from('events').insert({ ...row, id: 'EV' + Date.now(), company: co, done: false, created_by: USER_EMAIL });
+  if (r.error) return alert('Помилка збереження: ' + r.error.message);
+  await loadEvents(); closeM('mE'); renderCal();
+}
+async function toggleEv(id) {
+  const e = events.find(x => x.id === id); if (!e) return;
+  const { error } = await _sb.from('events').update({ done: !e.done }).eq('id', id);
+  if (error) return alert('Помилка: ' + error.message);
+  e.done = !e.done; renderCal();
+}
+async function delEv() {
+  if (!evId || !confirm('Видалити цю подію?')) return;
+  const { error } = await _sb.from('events').delete().eq('id', evId);
+  if (error) return alert('Помилка: ' + error.message);
+  await loadEvents(); closeM('mE'); renderCal();
 }
 
 /* ================= НОВІ ЗАЯВКИ ================= */
@@ -2224,6 +2449,7 @@ const openO = id => {
   }
   document.getElementById('autoHint').textContent = '';
   document.getElementById('btnWa').style.display = id ? 'block' : 'none';
+  document.getElementById('btnEv').style.display = id ? 'block' : 'none';
   document.getElementById('logWrap').style.display = id ? 'block' : 'none';
   document.getElementById('logList').innerHTML = ''; if (id) loadLog(id);
   setAs('fAs', id ? o.assignee : ME());     // нове замовлення за замовчуванням призначається на мене
@@ -2242,7 +2468,7 @@ function dupO() {
   editId = null;
   document.getElementById('fSt').value = 'Кошторис';
   ['fDl','fRe','fFaPa','fFaPa2','fOr','fEta'].forEach(i => document.getElementById(i).value = '');
-  document.getElementById('btnWa').style.display = 'none'; document.getElementById('logWrap').style.display = 'none';
+  document.getElementById('btnWa').style.display = 'none'; document.getElementById('btnEv').style.display = 'none'; document.getElementById('logWrap').style.display = 'none';
   curPay = []; curFiles = []; renderPay(); renderFiles();
   document.getElementById('btnD').style.display = 'none';
   document.getElementById('btnDup').style.display = 'none';
@@ -2253,7 +2479,7 @@ function dupO() {
   document.querySelector('#mO h3').textContent = 'Замовлення (копія)';
 }
 
-const fab = () => curT === 'clients'
+const fab = () => curT === 'calendar' ? openEv(null) : curT === 'clients'
   ? (editId=null, ['cNa','cPh','cAd','cNo'].forEach(i=>document.getElementById(i).value=''), document.getElementById('hSec').style.display='none', document.getElementById('btnDC').style.display='none', showModal('mC'))
   : openO(null);
 // Показ модалки + запис в історію (щоб "Назад" її закривав)
@@ -2280,6 +2506,7 @@ const tab = (t, fromPop) => {
   document.getElementById('ni-'+t).classList.add('active');
   if(t==='clients') renderC(); if(t==='stats') renderStats(); if(t==='calendar') renderCal(); if(t==='new') { renderNew(); growAll(); }
   document.getElementById('navS').style.display = t === 'orders' ? 'flex' : 'none';
+  document.body.classList.toggle('agenda-on', ['orders', 'clients', 'new'].includes(t)); renderSide();
   // запис в історію, щоб "Назад" повертав на попередню вкладку
   if (!fromPop && !(history.state && history.state.t === t)) history.pushState({ t }, '');
 }
