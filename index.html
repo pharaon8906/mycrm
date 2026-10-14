@@ -370,6 +370,8 @@ body.drop-on::after { content: 'Відпустіть файл, щоб прикр
 .cal-focus { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--p2-soft); border: 1px solid var(--p2); border-radius: var(--r-sm); padding: 10px 12px; margin-bottom: 12px; font-size: 13px; }
 .cal-focus b { font-weight: 700; }
 .cal-focus button { border: 0; background: none; color: var(--p2); font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit; padding: 2px 4px; }
+@media (max-width: 899px) { #ni-trash { display: none; } }
+.nbadge.gray { background: var(--muted2); }
 .cal-day { margin-bottom: 20px; }
 .cal-head { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
 .cal-date { font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
@@ -672,6 +674,11 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
 .cmp .dl { display: block; font-size: 10.5px; font-weight: 700; } .cmp .up { color: var(--success); } .cmp .dn { color: var(--danger); }
 #waSend:disabled { opacity: .5; }
 @media (max-width: 640px) { .kb-col { flex-basis: 80vw; max-width: 300px; } .view-bar .seg { max-width: none; } }
+/* ===== Поля пошуку: помітніші за фон ===== */
+#q, #qc, #calSearch, #plSearch, #trashSearch, #evOrderQ, #kIn { border: 1.5px solid #9aa7bd; box-shadow: 0 2px 8px rgba(11,18,32,.12); background: var(--surface); }
+#q:hover, #qc:hover, #calSearch:hover, #plSearch:hover, #trashSearch:hover, #evOrderQ:hover, #kIn:hover { border-color: #6f7e99; }
+#q:focus, #qc:focus, #calSearch:focus, #plSearch:focus, #trashSearch:focus, #evOrderQ:focus, #kIn:focus { border-color: var(--p2); box-shadow: 0 0 0 3px color-mix(in srgb, var(--p2) 22%, transparent), 0 2px 8px rgba(11,18,32,.12); }
+html.dark #q, html.dark #qc, html.dark #calSearch, html.dark #plSearch, html.dark #trashSearch, html.dark #evOrderQ, html.dark #kIn { border-color: #55658a; box-shadow: 0 2px 10px rgba(0,0,0,.45); }
 </style>
 </head>
 <body>
@@ -755,6 +762,7 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
         <option value="deadline">⇅ Дедлайн</option>
       </select>
       <button class="tbtn" id="fltBtn" onclick="toggleFlt()" title="Фільтри: фабрика, дати"><i class="fa fa-sliders"></i> <span>Фільтри</span></button>
+      <button class="tbtn fin-only" id="trashBtn" onclick="tab('trash')" title="Кошик видалених замовлень"><i class="fa fa-trash-can"></i> <span>Кошик</span></button>
       <button class="tbtn" id="selBtn" onclick="toggleSel()" title="Вибрати кілька замовлень"><i class="fa fa-check-double"></i> <span>Вибрати</span></button>
     </div>
     <div class="flt-panel" id="fltPanel">
@@ -810,6 +818,8 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
 
   <div id="p-partners" class="panel"><div id="partnersDisplay"></div></div>
 
+  <div id="p-trash" class="panel"><div id="trashPage"></div></div>
+
   <div id="p-stats" class="panel"><div id="statsDisplay"></div></div>
 
   <div class="credit">Created by <b>GHERMAN</b> for <b id="creditCo">HEIMEK</b></div>
@@ -822,6 +832,7 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
   <button class="n-i" id="ni-calendar" onclick="tab('calendar')"><i class="fa fa-calendar-days"></i><span data-s="Календар">Календар</span></button>
   <button class="n-i" id="ni-today" onclick="tab('today')"><i class="fa fa-sun"></i><span data-s="Сьогодні">Сьогодні</span></button>
   <button class="n-i fin-only" id="ni-partners" onclick="tab('partners')"><i class="fa fa-handshake-angle"></i><span data-s="Партнери">Партнери</span></button>
+  <button class="n-i fin-only" id="ni-trash" onclick="tab('trash')"><i class="fa fa-trash-can"></i><span data-s="Кошик">Кошик</span></button>
   <button class="n-i" id="ni-stats" onclick="tab('stats')"><i class="fa fa-chart-line"></i><span data-s="Звіт">Звіт</span></button>
 </div>
 
@@ -866,6 +877,7 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
       <div class="fg"><label>Фабрика 2</label><select id="fFa2" onchange="renderFacPay()"></select></div>
       <div class="grid"><div class="fg"><label>Ціна Фабрики 2 €</label><input id="fCo2" type="number" step="any" oninput="onCost()"></div><div class="fg"><label>Залишок фабриці 2 €</label><input id="facLeft2" class="ro-blu" readonly><input id="fFaPa2" type="hidden"></div></div>
     </div>
+    <div class="grid fin-only"><div class="fg"><label>Чистий прибуток</label><input id="fMr" class="ro-grn" readonly></div><div class="fg"><label>Націнка % (ціна продажу рахується сама)</label><input id="fMk" class="ro-blu" type="number" step="any" inputmode="decimal" placeholder="напр. 30" oninput="onMk()"></div></div>
     <div class="fg fin-only"><label>Оплати фабрикам (кілька платежів)</label>
       <div id="facPayList" class="file-list"></div>
       <div class="pay-add" style="grid-template-columns:1fr 1fr">
@@ -877,7 +889,6 @@ body.kb-dragging #kanban { scroll-snap-type: none; }   /* інакше авто�
       <div class="pay-total" id="facSum1" style="margin-top:8px"></div>
       <div class="pay-total" id="facSum2" style="margin-top:6px;display:none"></div>
     </div>
-    <div class="grid fin-only"><div class="fg"><label>Чистий прибуток</label><input id="fMr" class="ro-grn" readonly></div><div class="fg"><label>Націнка % (ціна продажу рахується сама)</label><input id="fMk" class="ro-blu" type="number" step="any" inputmode="decimal" placeholder="напр. 30" oninput="onMk()"></div></div>
 
     <div class="sec">Платежі клієнта</div>
     <div class="fg">
@@ -1721,7 +1732,7 @@ async function sync() {
   clients = cData || [];
   await loadTeam(); await loadEvents(); await loadLeads();
   selIds.forEach(id => { if (!orders.some(o => o.id === id)) selIds.delete(id); });
-  updateDl(); render(); updateBulk(); renderSide(); startNotifs();
+  updateDl(); render(); updateBulk(); renderSide(); startNotifs(); refreshTrashCount();
   if (curT==='stats') renderStats();
   if (curT==='calendar') renderCal();
   if (curT==='partners') renderPartners();
@@ -3288,7 +3299,7 @@ const tab = (t, fromPop) => {
   document.getElementById('p-'+t).style.display='block';
   document.querySelectorAll('.n-i').forEach(i=>i.classList.remove('active'));
   document.getElementById('ni-'+t).classList.add('active');
-  if(t==='clients') renderC(); if(t==='stats') renderStats(); if(t==='calendar') renderCal(); if(t==='today') renderToday(); if(t==='partners') renderPartners(); if(t==='new') { renderNew(); growAll(); }
+  if(t==='clients') renderC(); if(t==='stats') renderStats(); if(t==='calendar') renderCal(); if(t==='trash') loadTrash(); if(t==='today') renderToday(); if(t==='partners') renderPartners(); if(t==='new') { renderNew(); growAll(); }
   document.getElementById('navS').style.display = t === 'orders' ? 'flex' : 'none';
   renderSide();
   // запис в історію, щоб "Назад" повертав на попередню вкладку
@@ -3401,26 +3412,49 @@ async function mergeGroup(gi) {
 /* ================= КОШИК ================= */
 let trashData = [];
 const TRASH_DAYS = 30;
-async function openTrash() {
-  if (!TRASH_OK) return alert('Кошик ще не ввімкнено: у базі немає колонки deleted_at. Виконайте SQL з інструкції.');
+// Кошик: окрема сторінка (меню «Кошик»), видалені замовлення зберігаються 30 днів
+let trashQ = '';
+function openTrash() {          // з налаштувань і пошуку (Ctrl+F)
+  const m = document.getElementById('mS');
+  if (m && m.style.display === 'flex') { closeM('mS'); setTimeout(() => tab('trash'), 80); } else tab('trash');
+}
+async function loadTrash() {
+  const box = document.getElementById('trashPage'); if (!box) return;
+  if (!TRASH_OK) { box.innerHTML = '<div class="empty"><i class="fa fa-triangle-exclamation"></i>Кошик ще не ввімкнено: у базі немає колонки deleted_at. Виконайте SQL з інструкції.</div>'; return; }
+  box.innerHTML = '<div class="empty"><i class="fa fa-spinner fa-spin"></i>Завантаження…</div>';
   const r = await _sb.from('orders').select('*').eq('company', co).not('deleted_at', 'is', null).order('deleted_at', { ascending: false });
-  if (r.error) { if (/deleted_at/.test(r.error.message || '')) TRASH_OK = false; return alert('Кошик недоступний: ' + r.error.message); }
+  if (r.error) { if (/deleted_at/.test(r.error.message || '')) TRASH_OK = false; box.innerHTML = '<div class="empty"><i class="fa fa-triangle-exclamation"></i>Кошик недоступний: ' + esc(r.error.message) + '</div>'; return; }
   let list = r.data || [];
   const old = list.filter(o => Date.now() - Date.parse(o.deleted_at) > TRASH_DAYS * 864e5);   // старше 30 днів — стираємо остаточно
   if (old.length) { const e = await purgeOrders(old); if (!e) list = list.filter(o => !old.includes(o)); }
-  trashData = list; renderTrash(); showModal('mT');
+  trashData = list;
+  box.innerHTML = `<div class="td-top"><h2>Кошик<small>Видалені замовлення зберігаються ${TRASH_DAYS} днів, потім стираються назавжди разом з файлами</small></h2></div>
+    <div class="cal-tools"><input type="text" id="trashSearch" value="${esc(trashQ)}" placeholder="🔍 Клієнт, № замовлення, телефон…" oninput="trashQ=this.value; renderTrashRows()" style="flex:1 1 220px;min-width:0"></div>
+    <div id="trashRows"></div>`;
+  renderTrash(); refreshTrashCount();
 }
-function renderTrash() {
-  const box = document.getElementById('trashList');
-  if (!trashData.length) { box.innerHTML = '<div class="empty" style="padding:30px 0"><i class="fa fa-trash-can"></i>Кошик порожній</div>'; return; }
-  box.innerHTML = trashData.map(o => {
+function renderTrash() { renderTrashRows(); refreshTrashCount(); }
+function renderTrashRows() {
+  const box = document.getElementById('trashRows'); if (!box) return;
+  const match = makeMatcher(trashQ);
+  const list = trashData.filter(o => !trashQ.trim() || !match || match([o.client, o.product, o.factory], [orderPhone(o), o.client]));
+  if (!trashData.length) { box.innerHTML = '<div class="empty"><i class="fa fa-trash-can"></i>Кошик порожній</div>'; return; }
+  box.innerHTML = (list.map(o => {
     const left = Math.max(0, TRASH_DAYS - Math.floor((Date.now() - Date.parse(o.deleted_at)) / 864e5));
-    return `<div class="file-chip" style="flex-wrap:wrap" data-id="${esc(o.id)}">
-      <div style="flex:1;min-width:160px"><b>${esc(o.client || 'Без імені')}</b><div style="font-size:11.5px;color:var(--muted)">${esc(o.product || '—')} · ${fN(o.total_ttc)} € · ${esc(o.status || '')}</div><div style="font-size:11px;color:var(--muted2)">видалено ${fmtDate(Date.parse(o.deleted_at))} · лишилось ${left} дн.</div></div>
-      <button class="tbtn" style="height:36px" onclick="restoreOrder(this.closest('[data-id]').dataset.id)"><i class="fa fa-rotate-left"></i> Відновити</button>
+    return `<div class="pl-row" style="cursor:default" data-id="${esc(o.id)}">${avatarHtml(o.client || '?')}
+      <div class="pm"><div class="pn">${esc(o.client || 'Без імені')}</div><div class="ps">${esc(o.product ? '№' + o.product + ' · ' : '')}${fN(o.total_ttc)} € · ${esc(o.status || '')} · видалено ${fmtDate(Date.parse(o.deleted_at))} · <b style="color:${left <= 5 ? 'var(--danger)' : 'inherit'}">лишилось ${left} дн.</b></div></div>
+      <button class="tbtn" style="height:36px" onclick="restoreOrder(this.closest('[data-id]').dataset.id)"><i class="fa fa-rotate-left"></i> <span style="display:inline">Відновити</span></button>
       <button class="tbtn" style="height:36px;color:var(--danger)" onclick="purgeFromTrash(this.closest('[data-id]').dataset.id)" title="Видалити назавжди"><i class="fa fa-xmark"></i></button>
     </div>`;
-  }).join('') + `<button class="btn-alt" style="display:block;color:var(--danger)" onclick="emptyTrash()">Очистити кошик назавжди</button>`;
+  }).join('') || '<div class="empty"><i class="fa fa-magnifying-glass"></i>Нічого не знайдено</div>') + `<button class="btn-alt" style="display:block;color:var(--danger);margin-top:14px" onclick="emptyTrash()">Очистити кошик назавжди</button>`;
+}
+// Лічильник біля пункту меню «Кошик»
+async function refreshTrashCount() {
+  let n0 = trashData.length;
+  if (curT !== 'trash' && TRASH_OK) { try { const r = await _sb.from('orders').select('id', { count: 'exact', head: true }).eq('company', co).not('deleted_at', 'is', null); if (!r.error && r.count != null) n0 = r.count; } catch (e) {} }
+  const nav = document.getElementById('ni-trash'); if (!nav) return;
+  nav.querySelectorAll('.nbadge').forEach(x => x.remove());
+  if (n0 > 0) { const b = document.createElement('b'); b.className = 'nbadge gray'; b.textContent = n0 > 99 ? '99+' : n0; nav.appendChild(b); }
 }
 async function restoreOrder(id) {
   const o = trashData.find(x => x.id === id); if (!o) return;
