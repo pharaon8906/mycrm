@@ -22,7 +22,7 @@
   var dark = t === 'dark' || (t === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
   if (dark) document.documentElement.classList.add('dark');
   var z = parseFloat(localStorage.getItem('crm_zoom'));
-  if (z) document.documentElement.style.zoom = z;
+  if (z) { document.documentElement.style.zoom = z; document.documentElement.style.setProperty('--zm', z); }
 } catch(e){} })();
 </script>
 
@@ -505,7 +505,7 @@ html.dark { --g-wait: #9aa7bd; --g-off: #7b869b; }
 .modal-w { position: fixed; inset: 0; background: rgba(11,18,32,.5); backdrop-filter: blur(6px); z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
 .modal-w[style*="flex"] .mbox { animation: slideUp .3s cubic-bezier(.16,1,.3,1); }
 @keyframes slideUp { from { transform: translateY(28px); opacity: 0; } to { transform: none; opacity: 1; } }
-.mbox { background: var(--surface); width: 100%; max-width: 560px; border-radius: var(--r-xl) var(--r-xl) 0 0; padding: 26px 24px 28px; max-height: 94vh; overflow-y: auto; }
+.mbox { background: var(--surface); width: 100%; max-width: 560px; border-radius: var(--r-xl) var(--r-xl) 0 0; padding: 26px 24px 28px; max-height: calc(94vh / var(--zm, 1)); overflow-y: auto; }
 .mbox > div:first-child { margin-bottom: 22px !important; align-items: center; }
 .mbox h3 { font-weight: 700; font-size: 18px; letter-spacing: -.02em; }
 .mbox .fa-times { color: var(--muted2); font-size: 18px; cursor: pointer; padding: 6px; transition: .14s; }
@@ -619,7 +619,7 @@ html.dark .pay-left.over { background: #3a3316; color: #f1d36a; }
 /* ============ ДЕСКТОП ============ */
 @media (min-width: 900px) {
   body { padding-left: var(--side-w); padding-bottom: 0; }
-  .bottom-nav { top: 0; left: 0; width: var(--side-w); height: 100vh; flex-direction: column; padding: 20px 12px; border-right: 1px solid var(--line); border-top: none; background: var(--surface); backdrop-filter: none; align-items: stretch; gap: 2px; }
+  .bottom-nav { top: 0; left: 0; width: var(--side-w); height: calc(100vh / var(--zm, 1)); flex-direction: column; padding: 20px 12px; border-right: 1px solid var(--line); border-top: none; background: var(--surface); backdrop-filter: none; align-items: stretch; gap: 2px; }
   .n-i { flex: none; text-align: left; padding: 11px 12px; font-size: 13.5px; border-radius: var(--r-xs); display: flex; align-items: center; gap: 12px; color: var(--muted); }
   .n-i:hover { background: var(--line-soft); color: var(--txt); }
   .n-i i { margin: 0; font-size: 15px; width: 20px; text-align: center; }
@@ -628,7 +628,7 @@ html.dark .pay-left.over { background: #3a3316; color: #f1d36a; }
   .cnt-grid { grid-template-columns: repeat(4, 1fr); }
   .fab-add { right: 28px; bottom: 28px; }
   .modal-w { align-items: center; padding: 32px; }
-  .mbox { border-radius: var(--r-xl); max-width: 740px; max-height: 88vh; padding: 28px; }
+  .mbox { border-radius: var(--r-xl); max-width: 740px; max-height: calc(88vh / var(--zm, 1)); padding: 28px; }
   .modal-w[style*="flex"] .mbox { animation: popIn .24s cubic-bezier(.16,1,.3,1); }
   @keyframes popIn { from { transform: scale(.97); opacity: 0; } to { transform: none; opacity: 1; } }
   .grid { grid-template-columns: 1fr 1fr; }
@@ -932,7 +932,7 @@ header.scrolled { box-shadow: 0 1px 0 var(--line), 0 10px 28px -14px rgba(16,24,
 /* на широкому екрані замовлення й картка клієнта відкриваються панеллю справа, список лишається доступним */
 @media (min-width: 1100px) {
   #mO, #mCc { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; pointer-events: none; justify-content: flex-end; align-items: stretch; padding: 0; animation: none !important; }
-  #mO .mbox, #mCc .mbox { pointer-events: auto; width: min(880px, 62vw); max-width: none; height: 100vh; max-height: none; border-radius: 28px 0 0 28px; box-shadow: -30px 0 70px -24px rgba(16,24,40,.38); animation: drawerIn .4s cubic-bezier(.16,1,.3,1) both !important; }
+  #mO .mbox, #mCc .mbox { pointer-events: auto; width: min(880px, 62vw); max-width: none; height: 100%; max-height: none; border-radius: 28px 0 0 28px; box-shadow: -30px 0 70px -24px rgba(16,24,40,.38); animation: drawerIn .4s cubic-bezier(.16,1,.3,1) both !important; }
   #mO.closing .mbox, #mCc.closing .mbox { animation: drawerOut .22s ease both !important; }
 }
 /* меню «+» у шапці */
@@ -4548,7 +4548,9 @@ function applyTheme() {
 }
 function setTheme(v) {
   document.documentElement.classList.add('theme-anim'); setTimeout(() => document.documentElement.classList.remove('theme-anim'), 500); LS.set('crm_theme', v); applyTheme(); renderSettings(); }
-function applyScale() { const z = parseFloat(LS.get('crm_zoom', '')); if (z) document.documentElement.style.zoom = z; else document.documentElement.style.removeProperty('zoom'); }
+function syncZm() { document.documentElement.style.setProperty('--zm', parseFloat(getComputedStyle(document.documentElement).zoom) || 1); }
+window.addEventListener('resize', syncZm); window.addEventListener('load', syncZm);
+function applyScale() { const z = parseFloat(LS.get('crm_zoom', '')); if (z) document.documentElement.style.zoom = z; else document.documentElement.style.removeProperty('zoom'); syncZm(); }
 function stepScale(dir) {
   let z = parseFloat(LS.get('crm_zoom', ''));
   if (!z) z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;   // стартуємо з поточного масштабу
@@ -4578,6 +4580,14 @@ document.querySelectorAll('.modal-w').forEach(m => { m.addEventListener('click',
 // Esc закриває лише верхню відкриту модалку
 const topModal = () => [...document.querySelectorAll('.modal-w')].filter(m => m.style.display === 'flex' && !m.classList.contains('closing')).pop();
 document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; const m = topModal(); if (m) closeM(m.id); });
+// Подвійний клік поза карткою закриває бічну панель (замовлення / клієнт); по кнопках, полях і картках списку — ні
+document.addEventListener('dblclick', e => {
+  const m = topModal(); if (!m || (m.id !== 'mO' && m.id !== 'mCc' && m.id !== 'mC')) return;
+  const t = e.target; if (!(t instanceof Element) || m.querySelector('.mbox').contains(t)) return;
+  if (t.closest('button, a, input, select, textarea, label, summary, [onclick], [draggable=true], .cal-ev, .qa-menu, #tip, #toast, .toast, .modal-w:not(#' + m.id + ')')) return;
+  window.getSelection && getSelection().removeAllRanges();
+  closeM(m.id);
+});
 
 // Кнопка "Назад": спершу закриває модалку, потім повертає на попередню вкладку
 // Закриття вікна кнопкою/хрестиком саме викликає history.back(): таке «Назад» не має закривати наступне вікно в стеку
