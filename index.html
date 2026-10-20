@@ -1277,6 +1277,13 @@ body.bg-tint { background: radial-gradient(900px 520px at 88% -140px, color-mix(
 .cl-stb:hover { color: var(--sc); border-color: color-mix(in srgb, var(--sc) 40%, transparent); }
 .cl-stb:active { transform: scale(.95); }
 .cl-stb.on { color: var(--sc); background: color-mix(in srgb, var(--sc) 15%, var(--surface)); border-color: color-mix(in srgb, var(--sc) 45%, transparent); }
+/* кнопка налаштувань у світлій шапці була білою на білому */
+#setBtn { background: var(--surface); border-color: var(--line); color: var(--muted); }
+#setBtn:hover { background: var(--line-soft); color: var(--txt); }
+.fc-hint { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); }
+.fc-hint:empty { display: none; }
+.fc-hint b { color: var(--txt); }
+.fc-hint.ok { color: var(--success); }
 </style>
 </head>
 <body>
@@ -1494,7 +1501,7 @@ body.bg-tint { background: radial-gradient(900px 520px at 88% -140px, color-mix(
       <div class="o-main">
         <div class="otab on" data-t="main">
     <div class="fg"><label>Дата створення</label><input id="fCr" readonly></div>
-    <div class="fg"><label>Клієнт</label><input id="fCl" list="dlC"><datalist id="dlC"></datalist></div>
+    <div class="fg"><label>Клієнт <small style="color:var(--muted2);font-weight:500">(імʼя або номер телефону)</small></label><input id="fCl" list="dlC" oninput="clHint()" autocomplete="off"><datalist id="dlC"></datalist><small class="fc-hint" id="fClHint"></small></div>
     <div class="grid"><div class="fg"><label>Номер замовлення</label><input id="fPr" placeholder="напр. WEB/26/0947426"></div><div class="fg"><label>Фабрика 1</label><select id="fFa" onchange="renderFacPay()"></select></div></div>
     <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan(); autoOnStatus(); oChip()"><option>Нова</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
     <div id="autoHint" style="font-size:12px;color:var(--p2);margin:-6px 0 10px"></div>
@@ -4388,6 +4395,21 @@ function exportCSV() {
 }
 
 /* ================= ЗБЕРЕЖЕННЯ ================= */
+// У поле «Клієнт» можна вставити номер телефону: клієнта буде створено, а номер піде в його телефон
+const phoneLike = v => { const t = String(v || '').trim(); return /^[+()\d\s.\-]+$/.test(t) && t.replace(/\D/g, '').length >= 7; };
+const samePhone = (a, b) => { const x = String(a || '').replace(/\D/g, ''), y = String(b || '').replace(/\D/g, ''); return x.length >= 7 && y.length >= 7 && x.slice(-9) === y.slice(-9); };
+function clHint() {
+  const el = document.getElementById('fClHint'); if (!el) return;
+  const v = document.getElementById('fCl').value.trim();
+  if (!v) { el.textContent = ''; el.className = 'fc-hint'; return; }
+  const byName = clients.find(c => (c.name || '').trim().toLowerCase() === v.toLowerCase());
+  if (byName) { el.textContent = ''; el.className = 'fc-hint'; return; }
+  if (phoneLike(v)) {
+    const byPh = clients.find(c => samePhone(c.phone, v));
+    el.className = 'fc-hint ok';
+    el.innerHTML = byPh ? `Номер уже є в клієнта <b>${esc(byPh.name)}</b> — підставлю його` : 'Це номер телефону: створю клієнта і збережу номер. Імʼя можна вказати потім у «Клієнти».';
+  } else { el.className = 'fc-hint'; el.textContent = 'Нового клієнта буде додано в розділ «Клієнти».'; }
+}
 async function saveO() {
   const o = { id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value, factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value, assignee: document.getElementById('fAs').value || null, factory_ordered: document.getElementById('fOr').value || null, eta_date: document.getElementById('fEta').value || null, sale_price_ht: n(document.getElementById('fSa').value), tva_rate: n(document.getElementById('fTv').value), total_ttc: n(document.getElementById('fTt').value), cost_price: n(document.getElementById('fCo').value), install_cost: n(document.getElementById('fIn').value), delivery: n(document.getElementById('fDe').value), paid_amount: payTotal(), payments: curPay, factory_payments: curFacPay, factory_prepay: n(document.getElementById('fFaPa').value), factory2: document.getElementById('fFa2').value || null, cost_price2: n(document.getElementById('fCo2').value), factory_prepay2: n(document.getElementById('fFaPa2').value), deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value, cancel_reason: document.getElementById('fCan').value, file_url: JSON.stringify(curFiles), check_measured: document.getElementById('fChM').checked, check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked };
   // Дата створення виставляється автоматично: нове замовлення — зараз; наявне — зберігаємо стару
@@ -4400,6 +4422,16 @@ async function saveO() {
   const cname = (o.client || '').trim();
   if (prev && prev.client_id && (prev.client || '').trim() === cname) o.client_id = prev.client_id;
   else { const cl = clients.find(c => (c.name || '').trim().toLowerCase() === cname.toLowerCase()); o.client_id = cl ? cl.id : null; }
+  // Клієнта ще немає: якщо в полі номер телефону — шукаємо за номером, інакше створюємо клієнта (і телефон, якщо це номер)
+  if (!o.client_id && cname) {
+    const isPh = phoneLike(cname), byPh = isPh ? clients.find(c => samePhone(c.phone, cname)) : null;
+    if (byPh) { o.client_id = byPh.id; if (byPh.name) o.client = byPh.name; }
+    else {
+      const nc = { id: 'CNEW' + Date.now(), company: co, name: cname, phone: isPh ? cname : '', address: '', notes: '' };
+      const r = await _sb.from('clients').upsert(nc);
+      if (!r.error) { clients.push(nc); o.client_id = nc.id; }
+    }
+  }
 
   const { error } = await writeOrder(o, 'upsert');
   if (error) return alert('Помилка збереження: ' + error.message);
@@ -4493,7 +4525,7 @@ const openO = id => {
   document.getElementById('fCr').value = (id && orderTs(o)) ? fmtDateTime(orderTs(o)) : 'Встановиться автоматично при збереженні';
   curFacPay = id ? parseFacPay(o) : curFacPay;
   renderFacPay();
-  tglCan(); calc(); oChip(); oTab('main');
+  tglCan(); calc(); oChip(); oTab('main'); clHint();
   document.querySelector('#oTabs [data-t=log]').style.display = id ? '' : 'none';
   showModal('mO');
 }
