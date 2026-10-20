@@ -1056,6 +1056,227 @@ body.dense .ot td { padding: 6px 12px; } body.dense .sum-tile { padding: 10px 14
 .bar { border-radius: 10px 10px 4px 4px !important; transform-origin: bottom; animation: barUp .9s cubic-bezier(.2,.8,.2,1) both; } @keyframes barUp { from { transform: scaleY(0); } }
 .st-h { margin: 28px 0 14px; }
 .cmp { border-collapse: separate; border-spacing: 0; } .cmp th { border-bottom: 1px solid var(--line); } .cmp td { border-bottom: 1px solid var(--line-soft); } .cmp tbody tr:hover td { background: var(--line-soft); }
+/* ============================================================
+   ВІЗУАЛЬНИЙ ПРОХІД: єдина шкала відступів, типографіка, темна тема,
+   шапка списку, часова лінія, «Сьогодні», аватари, вигляд шапки
+   ============================================================ */
+:root {
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s45: 20px; --s5: 24px; --s6: 32px;
+  --r-xs: 8px; --r-sm: 12px; --r: 16px; --r-lg: 20px; --r-xl: 28px;
+  --fs-xs: 11.5px; --fs-sm: 12.5px; --fs-md: 14px; --fs-lg: 16px; --fs-xl: 20px; --fs-2xl: 28px;
+  --surface-2: #ffffff; --edge: rgba(16,24,40,.05);
+}
+/* --- типографіка --- */
+body { font-feature-settings: 'calt' 1, 'kern' 1; font-optical-sizing: auto; text-rendering: optimizeLegibility; }
+h1, h2, h3 { letter-spacing: -.02em; line-height: 1.2; }
+.mbox h3 { font-size: var(--fs-xl); font-weight: 700; letter-spacing: -.025em; }
+.td-card h3 { font-size: var(--fs-lg); font-weight: 700; letter-spacing: -.02em; margin-bottom: var(--s2); }
+.sn, .tn, .hero-n, .o-big, .am .val, .tm-big, .cv, .tm, .tm-amt, .lh-sum b { font-variant-numeric: tabular-nums lining-nums; }
+.sum-tile .sn, .td-tile .tn { font-size: 24px; font-weight: 700; letter-spacing: -.035em; line-height: 1.1; }
+.sum-tile .sl, .td-tile .tl { font-size: var(--fs-sm); color: var(--muted); margin-top: var(--s1); }
+.am .val { font-size: var(--fs-xl); }
+.c-sub, .am-sub { font-size: var(--fs-sm); }
+.fg label { font-size: var(--fs-sm); letter-spacing: .005em; }
+.st-h, .sec, .n-g, .st-card-h { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+/* --- відступи і радіуси: 4 / 8 / 12 / 16 / 24 / 32, панелі 20, вікна 28 --- */
+.container { padding: var(--s4) var(--s4) 40px; }
+@media (min-width: 900px) { .container { padding: var(--s5) var(--s6) 60px; } }
+#list { gap: var(--s4); }
+.sum-strip, .td-tiles { gap: var(--s3); margin-bottom: var(--s5); }
+.st-top { gap: var(--s4); margin-bottom: var(--s5); }
+.card { border-radius: var(--r-lg); padding: var(--s45) var(--s45) var(--s4); gap: var(--s4); }
+.sum-tile, .td-tile { padding: var(--s4) var(--s45); }
+.td-card { padding: var(--s45) var(--s45) var(--s3); margin-bottom: var(--s5); }
+.st-hero, .st-donut-card { border-radius: var(--r-lg); }
+.mbox { border-radius: var(--r-xl) var(--r-xl) 0 0; }
+@media (min-width: 900px) { .mbox { border-radius: var(--r-xl); } }
+.td-grid { gap: 0 var(--s5); }
+@media (max-width: 640px) {
+  .sum-strip, .td-tiles { gap: var(--s2); margin-bottom: var(--s4); }
+  .card, .td-card { padding: var(--s4); }
+  .sum-tile, .td-tile { padding: var(--s3) var(--s4); }
+}
+input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 4px color-mix(in srgb, var(--p2) 16%, transparent); }
+
+/* --- темна тема: глибші поверхні, тонкі межі, перевірений контраст --- */
+html.dark {
+  --bg: #090d17; --surface: #121929; --surface-2: #18223a;
+  --line: #202b44; --line-soft: #182138; --line-in: #2e3b5c;
+  --txt: #e9edf3; --muted: #a8b3c9; --muted2: #8793ab;
+  --p2: #7f98ff; --p2-soft: #1b2650;
+  --danger: #ff7d93; --canc: #ff7d93; --success: #3ccb98;
+  --edge: rgba(255,255,255,.06);
+  --sh-card: 0 1px 2px rgba(0,0,0,.5), 0 16px 34px -18px rgba(0,0,0,.75);
+  --sh-card-h: 0 2px 4px rgba(0,0,0,.5), 0 24px 44px -18px rgba(0,0,0,.9);
+}
+html.dark :where(.card, .sum-tile, .td-tile, .td-card, .st-box, .chart-box, .cc-tile, .pl-card, .ot-wrap, .cal-mon, .kc, .st-hero, .st-donut-card, .bal-bar) { outline: 1px solid var(--edge); outline-offset: -1px; }
+.mbox, .qa-menu, .bell-panel { background: var(--surface-2); }
+.o-tabs { background: color-mix(in srgb, var(--surface-2) 80%, transparent); }
+.o-foot { background: color-mix(in srgb, var(--surface-2) 84%, transparent); }
+html.dark .modal-w { background: rgba(2,5,12,.6); }
+html.dark input.ro-yel, html.dark input.ro-grn, html.dark input.ro-blu { border-color: transparent; }
+
+/* --- шапка списку замовлень --- */
+.list-head { display: flex; flex-direction: column; gap: var(--s3); margin: var(--s1) 0 var(--s4); }
+.lh-main { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+.lh-search { position: relative; flex: 1 1 300px; min-width: 220px; display: block; margin: 0; }
+.lh-search > i.fa-magnifying-glass { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted2); font-size: 14px; pointer-events: none; }
+.lh-search input#q { width: 100%; height: 46px; padding: 0 44px 0 44px; border-radius: 14px; background: var(--surface); box-shadow: var(--sh-1); font-size: 14.5px; font-weight: 500; }
+.lh-clear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border: 0; border-radius: 50%; background: var(--line-soft); color: var(--muted); cursor: pointer; display: grid; place-items: center; font-size: 12px; }
+.lh-clear:hover { color: var(--txt); background: var(--line); }
+#q:placeholder-shown ~ .lh-clear { display: none; }
+.lh-tools { display: flex; gap: var(--s2); align-items: center; flex-wrap: wrap; }
+.lh-tools #sortSel { width: auto; min-width: 150px; height: 46px; font-size: 13.5px; font-weight: 600; color: var(--muted); border-radius: 14px; background-color: var(--surface); box-shadow: var(--sh-1); }
+.lh-tools .seg { display: inline-flex; width: auto; max-width: none; height: 46px; margin: 0; padding: 4px; flex: none; }
+.lh-tools .seg button { flex: none; height: 38px; padding: 0 14px; display: inline-flex; align-items: center; gap: 7px; }
+.lh-tools .seg button i { margin: 0; }
+.lh-tools .tbtn { height: 46px; border-radius: 14px; }
+@media (max-width: 1399px) { .lh-tools .seg button span { display: none; } .lh-tools .seg button { padding: 0 13px; } }
+@media (max-width: 1299px) { .lh-tools .tbtn { width: 46px; padding: 0; } .lh-tools .tbtn span { display: none; } }
+@media (max-width: 640px) {
+  .lh-search input#q { font-size: 16px; }
+  .lh-tools { width: 100%; justify-content: space-between; flex-wrap: wrap; }
+  .lh-tools #sortSel { flex: 1 1 100%; order: -1; min-width: 0; font-size: 14px; height: 44px; }
+  .lh-tools .tbtn { width: 46px; padding: 0; flex: none; }
+}
+.lh-sum { display: flex; flex-wrap: wrap; gap: var(--s1) 0; font-size: 13px; color: var(--muted); padding: 0 var(--s1); min-height: 20px; }
+.lh-sum > span + span::before { content: "·"; margin: 0 var(--s3); color: var(--muted2); }
+.lh-sum b { color: var(--txt); font-weight: 700; }
+.lh-sum em { font-style: normal; color: var(--muted2); }
+.lh-sum .bad, .lh-sum .bad b { color: var(--danger); }
+
+/* --- аватари --- */
+.mav { flex: none; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 9px; font-weight: 700; letter-spacing: 0; line-height: 1; background: hsl(var(--h, 220) 75% 88%); color: hsl(var(--h, 220) 55% 28%); }
+html.dark .mav { background: hsl(var(--h, 220) 38% 26%); color: hsl(var(--h, 220) 85% 84%); }
+.chip.as { padding-left: 4px; gap: 6px; }
+.chip.as .mav { width: 18px; height: 18px; font-size: 8px; }
+.ot-cl { display: flex; align-items: center; gap: var(--s3); min-width: 0; }
+.ot-cl .avatar { width: 34px; height: 34px; font-size: 11.5px; }
+.sa-row .avatar { width: 30px; height: 30px; font-size: 10.5px; }
+.sa-row { gap: var(--s3); padding: var(--s2) var(--s3); border-radius: var(--r-sm); border-color: var(--line-soft); }
+.hdr-me { display: inline-grid; place-items: center; cursor: default; }
+.hdr-me .avatar { width: 36px; height: 36px; border-radius: 12px; font-size: 12px; }
+@media (max-width: 640px) { .hdr-me { display: none !important; } .co-switch button { white-space: nowrap; } }
+@media (max-width: 480px) {
+  header { padding-left: 12px; padding-right: 12px; }
+  #brd { display: none; }
+  header > div:last-child { gap: 5px !important; }
+  .hdr-add, .hdr-bell, .hdr-search, #setBtn, #logoutBtn { width: 34px; height: 34px; }
+  .co-switch button { padding: 5px 8px; font-size: 11.5px; }
+}
+
+/* --- історія змін: часова лінія --- */
+.hist summary { border-top: 0; padding: var(--s3) 0 var(--s2); margin-top: var(--s3); }
+.tl { position: relative; padding-top: var(--s1); }
+.tl-day { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted2); margin: var(--s3) 0 var(--s3) 44px; }
+.tl-day:first-child { margin-top: 0; }
+.tl-i { position: relative; display: flex; gap: var(--s3); padding-bottom: var(--s4); --c: var(--muted2); }
+.tl-i::before { content: ""; position: absolute; left: 15px; top: 34px; bottom: 2px; width: 2px; background: var(--line); border-radius: 2px; }
+.tl-i:last-child::before { display: none; }
+.tl-ic { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; z-index: 1; color: var(--c); background: color-mix(in srgb, var(--c) 14%, var(--surface-2)); box-shadow: 0 0 0 4px var(--surface-2); }
+.tl-b { min-width: 0; flex: 1; padding-top: 2px; font-size: 13px; line-height: 1.5; }
+.tl-m { display: flex; align-items: center; gap: 6px; color: var(--muted2); font-size: 11.5px; margin-bottom: 2px; }
+.tl-m .mav { width: 16px; height: 16px; font-size: 7px; }
+.tl-t s { color: var(--muted2); }
+.tl-arrow { color: var(--muted2); margin: 0 6px; font-size: 10px; }
+.tl-pill { display: inline-block; padding: 1px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--pc, var(--muted)); background: color-mix(in srgb, var(--pc, var(--muted2)) 14%, var(--surface-2)); }
+.tl-i.k-ok { --c: var(--g-ok); } .tl-i.k-bad { --c: var(--danger); } .tl-i.k-st { --c: var(--g-work); } .tl-i.k-money { --c: var(--success); }
+.tl-i.k-as { --c: var(--cyan); } .tl-i.k-date { --c: var(--violet); } .tl-i.k-fac { --c: var(--warning); }
+
+/* --- «Сьогодні» --- */
+.td-hero { position: relative; overflow: hidden; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s4); padding: var(--s5) var(--s6); margin-bottom: var(--s5); border-radius: var(--r-lg); color: #fff; background: linear-gradient(115deg, var(--p) 0%, color-mix(in srgb, var(--p2) 78%, var(--p)) 100%); box-shadow: var(--sh-card); }
+.td-hero::after { content: ""; position: absolute; right: -70px; top: -90px; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.2), transparent); pointer-events: none; }
+.th-l { position: relative; z-index: 1; min-width: 0; }
+.th-hi { font-size: var(--fs-2xl); font-weight: 800; letter-spacing: -.03em; line-height: 1.15; }
+.th-date { opacity: .72; font-size: 13px; margin-top: var(--s1); }
+.th-date::first-letter { text-transform: uppercase; }
+.th-sub { margin-top: var(--s3); font-size: 14px; opacity: .94; }
+.th-sub i { font-style: normal; opacity: .55; margin: 0 4px; }
+.th-sub b { font-weight: 700; }
+.th-btns { margin-left: auto; display: flex; gap: var(--s2); flex-wrap: wrap; position: relative; z-index: 1; }
+.th-btns button { height: 42px; padding: 0 var(--s4); border-radius: var(--r-sm); border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.14); color: #fff; font: inherit; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; gap: var(--s2); align-items: center; }
+.th-btns button:hover { background: rgba(255,255,255,.24); }
+.th-btns button.pri { background: #fff; color: #101a2c; border-color: #fff; }
+.th-btns button.pri:hover { background: #f1f4fb; }
+@media (max-width: 640px) { .td-hero { padding: var(--s45); } .th-hi { font-size: 22px; } .th-btns { margin-left: 0; width: 100%; } .th-btns button { flex: 1; justify-content: center; } }
+.td-tiles { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.td-money .tm-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4); margin: var(--s2) 0 var(--s1); }
+.tm-lbl { font-size: var(--fs-sm); color: var(--muted); }
+.tm-big { font-size: 26px; font-weight: 800; letter-spacing: -.035em; line-height: 1.15; margin-top: 2px; }
+.tm-big.bad { color: var(--danger); } .tm-big.ok { color: var(--success); }
+.tm-spk { display: block; width: 100%; height: 64px; margin: var(--s2) 0 var(--s3); }
+.tm-deb { display: flex; align-items: center; gap: var(--s3); padding: var(--s3) 0; border-top: 1px solid var(--line-soft); cursor: pointer; }
+.tm-deb:hover .td-n { color: var(--p2); }
+.tm-deb .avatar { width: 34px; height: 34px; font-size: 11.5px; }
+.td-n { flex: 1; min-width: 0; font-weight: 600; font-size: 13px; transition: color .15s; }
+.td-n small { display: block; color: var(--muted); font-weight: 500; font-size: var(--fs-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pbar { height: 4px; border-radius: 4px; background: var(--line); margin-top: 6px; overflow: hidden; }
+.pbar i { display: block; height: 100%; border-radius: 4px; background: var(--g-ok); }
+.tm-amt { text-align: right; font-weight: 700; font-size: 13px; white-space: nowrap; }
+.tm-amt small { display: block; color: var(--muted2); font-weight: 500; font-size: var(--fs-xs); }
+.dl-strip { display: flex; gap: var(--s3); overflow-x: auto; padding: var(--s1) 2px var(--s3); scroll-snap-type: x proximity; scrollbar-width: thin; }
+.dl-c { flex: 0 0 236px; scroll-snap-align: start; background: var(--line-soft); border-radius: var(--r); padding: var(--s3) var(--s4); cursor: pointer; display: flex; flex-direction: column; gap: var(--s3); transition: transform .18s ease, box-shadow .18s ease, background-color .18s; }
+.dl-c:hover { background: var(--surface); box-shadow: var(--sh-card-h); transform: translateY(-2px); }
+.dl-date { display: flex; align-items: center; gap: var(--s3); min-width: 0; }
+.dl-day { flex: none; width: 44px; height: 48px; border-radius: var(--r-sm); background: var(--c); color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1; }
+.dl-day b { font-size: 18px; font-weight: 800; } .dl-day small { font-size: 9.5px; text-transform: uppercase; opacity: .88; margin-top: 3px; letter-spacing: .04em; }
+.dl-who { min-width: 0; }
+.dl-n { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dl-t { font-size: var(--fs-sm); color: var(--muted); margin-top: 2px; }
+.dl-f { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); font-size: var(--fs-sm); color: var(--muted); }
+.dl-f span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* --- вигляд шапки й тла (налаштування) --- */
+body:is(.hd-grad, .hd-dark, .hd-solid) header { color: #fff; -webkit-backdrop-filter: none; backdrop-filter: none; border-top-color: transparent; box-shadow: 0 10px 30px -16px rgba(10,16,32,.55); }
+body.hd-grad header { background: linear-gradient(105deg, var(--p) 0%, color-mix(in srgb, var(--p2) 74%, var(--p)) 100%); }
+body.hd-dark header { background: var(--p); }
+body.hd-solid header { background: var(--p2); }
+body:is(.hd-grad, .hd-dark, .hd-solid) #pgTitle { color: rgba(255,255,255,.74); border-left-color: rgba(255,255,255,.24); }
+body:is(.hd-grad, .hd-dark, .hd-solid) :is(.hdr-search, .hdr-bell, #setBtn, #logoutBtn) { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.22); color: #fff; box-shadow: none; }
+body:is(.hd-grad, .hd-dark, .hd-solid) :is(.hdr-search, .hdr-bell, #setBtn, #logoutBtn):hover { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.34); color: #fff; }
+body:is(.hd-grad, .hd-dark, .hd-solid) .hdr-search kbd { background: rgba(255,255,255,.18); color: #fff; }
+body:is(.hd-grad, .hd-dark, .hd-solid) .co-switch { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.22); }
+body:is(.hd-grad, .hd-dark, .hd-solid) .co-switch button { color: rgba(255,255,255,.76); }
+body:is(.hd-grad, .hd-dark, .hd-solid) .co-switch button.on { background: #fff; color: #101a2c; }
+body.hd-solid .hdr-add { background: #fff; color: var(--p2); }
+body.bg-tint { background: radial-gradient(900px 520px at 88% -140px, color-mix(in srgb, var(--p2) 14%, transparent), transparent 72%), radial-gradient(760px 460px at -8% 8%, color-mix(in srgb, var(--p2) 9%, transparent), transparent 72%), var(--bg); background-attachment: fixed; }
+
+/* --- живі дрібниці (вимикаються при «зменшити рух») --- */
+@media (prefers-reduced-motion: no-preference) {
+  .btn-s { position: relative; overflow: hidden; }
+  .btn-s::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,.3) 50%, transparent 70%); transform: translateX(-120%); transition: transform .7s ease; pointer-events: none; }
+  .btn-s:hover::after { transform: translateX(120%); }
+  .hdr-add, .hdr-bell, .hdr-search, #setBtn, #logoutBtn, .cm-btn, .lh-clear, .th-btns button, .tbtn { transition: transform .16s ease, background-color .2s, border-color .2s, color .2s, box-shadow .2s; }
+  .hdr-bell:hover, .hdr-search:hover, #setBtn:hover, #logoutBtn:hover, .th-btns button:hover { transform: translateY(-1px); }
+  .hdr-bell:active, .hdr-search:active, #setBtn:active, #logoutBtn:active, .hdr-add:active, .th-btns button:active, .lh-clear:active { transform: scale(.94); }
+  .avatar { transition: transform .22s cubic-bezier(.34,1.56,.64,1); }
+  .card:hover .avatar, .tm-deb:hover .avatar, .sa-row:hover .avatar { transform: scale(1.08); }
+  .s-t.active { animation: pillIn .3s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes pillIn { from { transform: scale(.9); } to { transform: none; } }
+  .ev-chk.on i { animation: popChk .38s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes popChk { 0% { transform: scale(.55); } 60% { transform: scale(1.28); } 100% { transform: none; } }
+  .tl-i { animation: tlIn .42s ease both; } @keyframes tlIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .td-hero { animation: cardIn .6s cubic-bezier(.2,.8,.2,1) both; }
+  .o-tabs button { transition: color .15s, border-color .2s; }
+}
+
+/* --- статуси клієнтів --- */
+:root { --gold: #b7791f; } html.dark { --gold: #f0b13a; }
+.cl-st { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; padding: 2px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; line-height: 1.5; color: var(--sc); background: color-mix(in srgb, var(--sc) 14%, var(--surface)); white-space: nowrap; vertical-align: middle; }
+.cl-st::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--sc); }
+.cl-st.sm { padding: 1px 8px; font-size: 10.5px; }
+.cl-filter { display: flex; gap: var(--s2); flex-wrap: wrap; margin: var(--s3) 0 0; }
+.cl-fc { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 var(--s3); border: 0; border-radius: 999px; background: var(--surface); box-shadow: var(--sh-1); color: var(--muted); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: background-color .15s, color .15s, transform .15s; }
+.cl-fc i { width: 8px; height: 8px; border-radius: 50%; background: var(--sc); }
+.cl-fc b { font-size: 11px; padding: 1px 7px; border-radius: 999px; background: var(--line-soft); color: var(--muted); }
+.cl-fc:hover { color: var(--txt); } .cl-fc:active { transform: scale(.96); }
+.cl-fc.zero { opacity: .55; }
+.cl-fc.on { background: var(--txt); color: var(--bg); } .cl-fc.on b { background: color-mix(in srgb, var(--bg) 24%, transparent); color: var(--bg); }
+.cl-sts { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 var(--s3); }
+.cl-stb { height: 30px; padding: 0 12px; border: 1px solid transparent; border-radius: 999px; background: var(--line-soft); color: var(--muted); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: background-color .15s, color .15s, border-color .15s, transform .15s; }
+.cl-stb:hover { color: var(--sc); border-color: color-mix(in srgb, var(--sc) 40%, transparent); }
+.cl-stb:active { transform: scale(.95); }
+.cl-stb.on { color: var(--sc); background: color-mix(in srgb, var(--sc) 15%, var(--surface)); border-color: color-mix(in srgb, var(--sc) 45%, transparent); }
 </style>
 </head>
 <body>
@@ -1103,6 +1324,7 @@ body.dense .ot td { padding: 6px 12px; } body.dense .sum-tile { padding: 10px 14
         <button type="button" class="fin-only" onclick="quickDo('lead')"><i class="fa fa-handshake-angle"></i> Передати клієнтів партнеру</button>
       </div></div>
     <button type="button" class="hdr-search" onclick="openPalette()" title="Пошук і команди"><i class="fa fa-magnifying-glass"></i><span>Пошук</span><kbd>Ctrl+F</kbd></button>
+    <span class="hdr-me" id="hdrMe" style="display:none"></span>
     <div class="co-switch" id="coSwitch" style="display:none">
       <button id="b-hmk" class="on" onclick="setCo('heimek')">Heimek</button>
       <button id="b-lux" onclick="setCo('luxwin')">Lux Win</button>
@@ -1130,29 +1352,35 @@ body.dense .ot td { padding: 6px 12px; } body.dense .sum-tile { padding: 10px 14
 
 <div class="container" id="mainUI" style="display:none">
   <div id="p-orders" class="panel on">
-    <div class="view-bar">
-      <div class="seg" id="viewSeg">
-        <button type="button" data-v="list" class="on" onclick="setView('list')"><i class="fa fa-list-ul"></i>Список</button>
-        <button type="button" data-v="table" onclick="setView('table')"><i class="fa fa-table"></i>Таблиця</button>
-        <button type="button" data-v="board" onclick="setView('board')"><i class="fa fa-table-columns"></i>Канбан</button>
-      </div>
-    </div>
     <div id="balBar"></div>
     <div class="sum-strip" id="sumStrip"></div>
-    <div class="tool-row">
-      <input type="text" id="q" placeholder="🔍 Пошук: клієнт, № замовлення, телефон..." oninput="render()">
-      <select id="sortSel" onchange="render()">
-        <option value="new">⇅ Спочатку нові</option>
-        <option value="old">⇅ Спочатку старі</option>
-        <option value="price">⇅ Сума: більші</option>
-        <option value="priceAsc">⇅ Сума: менші</option>
-        <option value="debt">⇅ Борг: більший</option>
-        <option value="status">⇅ Статус</option>
-        <option value="deadline">⇅ Дедлайн</option>
-      </select>
-      <button class="tbtn" id="fltBtn" onclick="toggleFlt()" title="Фільтри: фабрика, дати"><i class="fa fa-sliders"></i> <span>Фільтри</span></button>
-      <button class="tbtn fin-only" id="trashBtn" onclick="tab('trash')" title="Кошик видалених замовлень"><i class="fa fa-trash-can"></i> <span>Кошик</span></button>
-      <button class="tbtn" id="selBtn" onclick="toggleSel()" title="Вибрати кілька замовлень"><i class="fa fa-check-double"></i> <span>Вибрати</span></button>
+    <div class="list-head">
+      <div class="lh-main">
+        <label class="lh-search"><i class="fa fa-magnifying-glass"></i>
+          <input type="text" id="q" placeholder="Клієнт, № замовлення, телефон…" oninput="render()" autocomplete="off">
+          <button type="button" class="lh-clear" onclick="document.getElementById('q').value='';render();document.getElementById('q').focus()" title="Очистити пошук"><i class="fa fa-xmark"></i></button>
+        </label>
+        <div class="lh-tools">
+          <select id="sortSel" onchange="render()" title="Сортування">
+            <option value="new">Спочатку нові</option>
+            <option value="old">Спочатку старі</option>
+            <option value="price">Сума: більші</option>
+            <option value="priceAsc">Сума: менші</option>
+            <option value="debt">Борг: більший</option>
+            <option value="status">За статусом</option>
+            <option value="deadline">За дедлайном</option>
+          </select>
+          <div class="seg" id="viewSeg">
+            <button type="button" data-v="list" class="on" onclick="setView('list')" title="Картки"><i class="fa fa-list-ul"></i><span>Список</span></button>
+            <button type="button" data-v="table" onclick="setView('table')" title="Таблиця"><i class="fa fa-table"></i><span>Таблиця</span></button>
+            <button type="button" data-v="board" onclick="setView('board')" title="Канбан"><i class="fa fa-table-columns"></i><span>Канбан</span></button>
+          </div>
+          <button class="tbtn" id="fltBtn" onclick="toggleFlt()" title="Фільтри: фабрика, дати"><i class="fa fa-sliders"></i> <span>Фільтри</span></button>
+          <button class="tbtn" id="selBtn" onclick="toggleSel()" title="Вибрати кілька замовлень"><i class="fa fa-check-double"></i> <span>Вибрати</span></button>
+          <button class="tbtn fin-only" id="trashBtn" onclick="tab('trash')" title="Кошик видалених замовлень"><i class="fa fa-trash-can"></i></button>
+        </div>
+      </div>
+      <div class="lh-sum" id="lhSum"></div>
     </div>
     <div class="flt-panel" id="fltPanel">
       <div class="flt-grid">
@@ -1170,6 +1398,7 @@ body.dense .ot td { padding: 6px 12px; } body.dense .sum-tile { padding: 10px 14
 
   <div id="p-clients" class="panel">
     <input type="text" id="qc" placeholder="🔍 Пошук: ім'я або телефон..." oninput="renderC()">
+    <div class="cl-filter" id="clFilter"></div>
     <div id="listC" style="margin-top:18px"></div>
   </div>
 
@@ -1381,6 +1610,7 @@ body.dense .ot td { padding: 6px 12px; } body.dense .sum-tile { padding: 10px 14
     <div style="display:flex;justify-content:space-between;"><h3>Клієнт</h3><i class="fa fa-times" onclick="closeM('mC')"></i></div>
     <div class="fg"><label>ПІБ / Компанія</label><input id="cNa"></div>
     <div class="grid"><div class="fg"><label>Телефон</label><input id="cPh" type="tel"></div><div class="fg"><label>Адреса</label><input id="cAd"></div></div>
+    <div class="fg"><label>Статус клієнта</label><select id="cSt"></select></div>
     <div class="fg"><label>Нотатки</label><textarea id="cNo" rows="2"></textarea></div>
     <div id="hSec" style="display:none;"><div class="sec">Історія замовлень</div><div id="hList"></div></div>
     <button class="btn-s" onclick="saveC()">Зберегти клієнта</button>
@@ -1417,6 +1647,20 @@ body.dense .ot td { padding: 6px 12px; } body.dense .sum-tile { padding: 10px 14
     </div>
     <div class="fg"><label>Акцентний колір <small style="color:var(--muted2);font-weight:500">(на цьому пристрої)</small></label>
       <div id="accSw" class="acc-sw"></div>
+    </div>
+    <div class="fg"><label>Шапка <small style="color:var(--muted2);font-weight:500">(на цьому пристрої)</small></label>
+      <div class="seg" id="hdrSeg" style="margin-bottom:0">
+        <button type="button" data-v="glass" onclick="setHdr('glass')">Скло</button>
+        <button type="button" data-v="grad" onclick="setHdr('grad')">Градієнт</button>
+        <button type="button" data-v="dark" onclick="setHdr('dark')">Темна</button>
+        <button type="button" data-v="solid" onclick="setHdr('solid')">Колір</button>
+      </div>
+    </div>
+    <div class="fg"><label>Тло сторінки</label>
+      <div class="seg" id="bgSeg" style="margin-bottom:0">
+        <button type="button" data-v="0" onclick="setBg('0')">Чисте</button>
+        <button type="button" data-v="1" onclick="setBg('1')">З відтінком компанії</button>
+      </div>
     </div>
     <div class="fg"><button type="button" class="btn-alt" style="display:block;margin:0" onclick="closeM('mS'); setTimeout(openTour, 120)"><i class="fa fa-circle-question"></i> Показати підказки по програмі</button></div>
 
@@ -1720,6 +1964,27 @@ const initialsOf = nm => { const w = String(nm || '').split(/\s+/).map(x => (x.m
 const avatarHtml = nm => /\p{L}/u.test(String(nm || ''))
   ? `<span class="avatar" style="--h:${hueOf(nm)}">${esc(initialsOf(nm))}</span>`
   : `<span class="avatar" style="--h:215"><i class="fa fa-user"></i></span>`;
+// Малий аватар співробітника (колір за іменем); notip — без підказки, коли всередині вже є підпис
+const mavHtml = (nm, notip) => nm ? `<span class="mav" style="--h:${hueOf(nm)}"${notip ? '' : ` title="${esc(nm)}"`}>${esc(initialsOf(nm))}</span>` : '';
+// Українська множина: 1 замовлення, 2 замовлення, 5 замовлень
+const uaPl = (k, a, b, c) => { const m10 = k % 10, m100 = k % 100; return m10 === 1 && m100 !== 11 ? a : (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) ? b : c; };
+// Плавна зміна числа (при перемиканні фільтрів сума «перебігає» до нового значення)
+const _tw = {};
+function tween(el, key, to, fmt) {
+  if (!el) return;
+  const from = _tw[key]; _tw[key] = to;
+  if (typeof REDUCED !== 'undefined' && REDUCED || from == null || from === to) { el.textContent = fmt(to); return; }
+  const t0 = performance.now(), D = 480;
+  const step = t => { const k = Math.min(1, (t - t0) / D), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(Math.round(from + (to - from) * e)); if (k < 1 && el.isConnected) requestAnimationFrame(step); };
+  el.textContent = fmt(from); requestAnimationFrame(step);
+}
+function renderMe() {
+  const el = document.getElementById('hdrMe'); if (!el) return;
+  const nm = ME() || (USER_EMAIL || '').split('@')[0];
+  if (!USER_EMAIL || !nm) { el.style.display = 'none'; return; }
+  el.style.display = ''; el.title = 'Ви: ' + (ME() ? ME() + ' · ' : '') + USER_EMAIL;
+  el.innerHTML = `<span class="avatar" style="--h:${hueOf(nm)}">${esc(initialsOf(nm))}</span>`;
+}
 // Етапи виконання
 const STEPS = [['check_measured', 'Замір'], ['check_ordered', 'Завод'], ['check_storage', 'Склад'], ['check_installed', 'Монтаж']];
 const PROG_STATUSES = ['Підтверджено', 'Перевірка', 'В роботі', 'На складі', 'Виконано'];
@@ -1953,7 +2218,7 @@ function renderBalBar() {
     : '';
 }
 // Мітка відповідального на картці
-const asChip = o => o.assignee ? `<span class="chip as" style="--h:${hueOf(o.assignee)}" title="Відповідальний"><i class="fa fa-user"></i> ${esc(o.assignee)}</span>` : '';
+const asChip = o => o.assignee ? `<span class="chip as" style="--h:${hueOf(o.assignee)}" title="Відповідальний">${mavHtml(o.assignee, true)}${esc(o.assignee)}</span>` : '';
 
 // Націнка замовлення, % (від ціни фабрик); null — якщо собівартість не вказана
 const markupOf = o => { const c = orderCost(o), s = n(o.sale_price_ht); return c > 0 && s > 0 ? (s - c) / c * 100 : null; };
@@ -2245,7 +2510,7 @@ async function sync() {
 /* ================= ЛІЧИЛЬНИКИ НА ФІЛЬТРАХ ================= */
 // Панель-підсумок: що вимагає уваги просто зараз
 function renderSummary() {
-  renderBalBar();
+  renderBalBar(); renderMe();
   const box = document.getElementById('sumStrip'); if (!box) return;
   const waiting = orders.filter(o => o.status === 'Нова').length;
   const inWork  = orders.filter(o => o.status === 'В роботі').length;
@@ -2258,8 +2523,21 @@ function renderSummary() {
     { s:'Боржники',    n: fN(Math.round(debt)) + ' €', l:'Борги клієнтів', dot:'var(--danger)', alert: debt > 1 }
   ];
   box.innerHTML = tiles.map(t =>
-    `<div class="sum-tile ${t.alert?'alert':''}" style="--dot:${t.dot}" onclick="flt('${t.s}', document.querySelector('[data-s=\\'${t.s}\\']'))"><div class="sn">${t.n}</div><div class="sl">${t.l}</div></div>`
+    `<div class="sum-tile ${t.alert?'alert':''}" style="--dot:${t.dot}" onclick="flt('${t.s}', document.querySelector('[data-s=\\'${t.s}\\']'))"><div class="sn" data-k="${t.s}" data-v="${typeof t.n === 'number' ? t.n : (parseInt(String(t.n).replace(/\D/g, ''), 10) || 0)}"${typeof t.n === 'number' ? '' : ' data-eur="1"'}>${t.n}</div><div class="sl">${t.l}</div></div>`
   ).join('');
+  box.querySelectorAll('.sn').forEach(el => tween(el, 'sn_' + el.dataset.k, +el.dataset.v, v => el.dataset.eur ? fN(v) + ' €' : String(v)));
+}
+// Рядок під пошуком: скільки замовлень показано, на яку суму і який борг
+function lhSummary(f) {
+  const el = document.getElementById('lhSum'); if (!el) return;
+  const sum = f.filter(o => o.status !== 'Скасовано').reduce((a, o) => a + n(o.total_ttc), 0);
+  const debt = f.filter(isDebtor).reduce((a, o) => a + (n(o.total_ttc) - n(o.paid_amount)), 0);
+  const lbl = curS === 'Усі' ? '' : ` <em>· ${esc(({ 'Нагадування': 'дзвінки', 'Боржники': 'боржники', 'Затримка': 'затримки', 'Мої': 'мої' })[curS] || curS)}</em>`;
+  el.innerHTML = `<span><b id="lhN"></b> ${uaPl(f.length, 'замовлення', 'замовлення', 'замовлень')}${lbl}</span>`
+    + (sum > 0 ? '<span>на <b id="lhS"></b></span>' : '') + (debt > 1 ? '<span class="bad">борг <b id="lhD"></b></span>' : '');
+  tween(document.getElementById('lhN'), 'lh_n', f.length, v => String(v));
+  tween(document.getElementById('lhS'), 'lh_s', Math.round(sum), v => fN(v) + ' €');
+  tween(document.getElementById('lhD'), 'lh_d', Math.round(debt), v => fN(v) + ' €');
 }
 
 function updateChips() {
@@ -2311,6 +2589,7 @@ const render = () => {
 
   updateChips();
   renderSummary();
+  lhSummary(f);
 
   if (document.body.classList.contains('board-mode')) { renderBoard(f); return; }   // канбан замість списку
   if (document.body.classList.contains('table-mode')) { renderTable(f); return; }   // таблиця замість списку
@@ -2345,7 +2624,7 @@ const render = () => {
           ${selMode ? '<span class="sel-box"></span>' : ''}
           ${avatarHtml(o.client)}
           <div class="c-id">
-            <div class="c-name"><span class="nm">${esc(o.client||'Без імені')}</span>${rem ? '<span title="Передзвонити">⏰</span>' : ''}</div>
+            <div class="c-name"><span class="nm">${esc(o.client||'Без імені')}</span>${clBadge(o)}${rem ? '<span title="Передзвонити">⏰</span>' : ''}</div>
             <div class="c-sub">${esc(o.product||'—')} · ${esc(o.factory||'—')}${o.factory2 ? ' + '+esc(o.factory2) : ''}</div>
           </div>
           <div class="status-badge">${esc(o.status)}</div>
@@ -2784,7 +3063,7 @@ function agendaRow(i) {
   const o = i.o || (i.e && i.e.order_id ? orders.find(x => x.id === i.e.order_id) : null);
   const title = i.e ? i.e.title : (i.o.client || 'Без імені'), sub = i.e ? [EV_T[i.e.kind || 'task'].lbl, i.e.client || (o && o.client)].filter(Boolean).join(' · ') : OT[i.t].lbl + ' · ' + (i.o.product || '---');
   const click = i.e ? `openEv('${esc(i.e.id)}')` : `openO('${esc(i.o.id)}')`;
-  return `<div class="sa-row" onclick="${click}"><div class="si" style="background:${itemColor(i)}"><i class="fa ${itemIco(i)}"></i></div><div class="st">${esc(title)}<small>${esc(sub)}</small></div>${i.e && evTime(i.e) ? `<span class="tm">${evTime(i.e)}</span>` : ''}</div>`;
+  return `<div class="sa-row" onclick="${click}"><div class="si" style="background:${itemColor(i)}"><i class="fa ${itemIco(i)}"></i></div><div class="st">${esc(title)}<small>${esc(sub)}</small></div>${mavHtml(i.o ? i.o.assignee : i.e.assignee)}${i.e && evTime(i.e) ? `<span class="tm">${evTime(i.e)}</span>` : ''}</div>`;
 }
 function agendaGroups(items, lateFirst) {
   const t = todayStr(), groups = {}; items.forEach(i => { const k = (lateFirst && i.d < t) ? 'late' : i.d; (groups[k] = groups[k] || []).push(i); });
@@ -2811,33 +3090,49 @@ function renderToday() {
   const byDay = f => { const m = {}; days.forEach(d => m[d] = 0); f(m); return days.map(d => m[d]); };
   const newSeries = byDay(m => orders.forEach(o => { const k = o.created_at ? ymd(orderTs(o)) : ''; if (k in m) m[k]++; }));
   const paySeries = byDay(m => orders.forEach(o => parsePay(o.payments).forEach(p => { const k = String(p.date || '').slice(0, 10); if (k in m) m[k] += n(p.amount); })));
-  const paySum = paySeries.reduce((a, b) => a + b, 0);
+  const paySum = paySeries.reduce((x, y) => x + y, 0);
   const spark = (vals, color) => { const w = 100, h = 26, mx = Math.max(...vals, 1), st = w / (vals.length - 1 || 1);
     const pts = vals.map((v, i) => (i * st).toFixed(1) + ',' + (h - 3 - (v / mx) * (h - 7)).toFixed(1)).join(' ');
     return `<svg class="spk" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/></svg>`; };
+  const sparkArea = (vals, color) => { const w = 100, h = 40, mx = Math.max(...vals, 1), st = w / (vals.length - 1 || 1);
+    const line = vals.map((v, i) => (i ? 'L' : 'M') + (i * st).toFixed(1) + ' ' + (h - 4 - (v / mx) * (h - 10)).toFixed(1)).join(' ');
+    return `<svg class="tm-spk" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><path d="${line} L${w} ${h} L0 ${h} Z" fill="${color}" opacity=".14"/><path d="${line}" fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/></svg>`; };
   const tile = (num, lbl, cls, act, sp) => `<button type="button" class="td-tile ${cls || ''}" onclick="${act}"><div class="tn">${num}</div><div class="tl">${lbl}</div>${sp || ''}</button>`;
-  const dateTxt = new Date().toLocaleDateString('uk-UA', { weekday: 'long', day: 'numeric', month: 'long' });
-  const orderRow = (o, sub) => `<div class="sa-row" onclick="openO('${esc(o.id)}')"><div class="si" style="background:var(--p2)"><i class="fa fa-file-lines"></i></div><div class="st">${esc(o.client || 'Без імені')}<small>${esc(sub)}</small></div></div>`;
-  box.innerHTML = `<div class="td-top"><h2>Сьогодні<small>${dateTxt}</small></h2>
-      <button type="button" class="cal-add" onclick="openEv(null)"><i class="fa fa-calendar-plus"></i> Подія</button>
-      <button type="button" class="cal-add" style="background:var(--txt)" onclick="openO(null)"><i class="fa fa-plus"></i> Замовлення</button></div>
+  const dateTxt2 = new Date().toLocaleDateString('uk-UA', { weekday: 'long', day: 'numeric', month: 'long' });
+  const hr = new Date().getHours(), hi = hr < 5 ? 'Доброї ночі' : hr < 12 ? 'Доброго ранку' : hr < 18 ? 'Доброго дня' : 'Доброго вечора';
+  const nm0 = me || (USER_EMAIL || '').split('@')[0].replace(/[^\p{L}]+/gu, ' ').trim() || '', who = nm0 ? nm0.charAt(0).toUpperCase() + nm0.slice(1) : '';
+  const attn = a.ev.length + a.rem.length, dlN = soon.filter(i => i.t === 'eta').length + now.filter(i => i.t === 'eta').length;
+  const subParts = [attn ? `<b>${attn}</b> ${uaPl(attn, 'справа потребує', 'справи потребують', 'справ потребують')} уваги` : 'Термінових справ немає',
+    newReq.length ? `<b>${newReq.length}</b> ${uaPl(newReq.length, 'нова заявка', 'нові заявки', 'нових заявок')}` : '',
+    lateSup ? `<b>${lateSup}</b> ${uaPl(lateSup, 'поставка', 'поставки', 'поставок')} із запізненням` : ''].filter(Boolean);
+  const orderRow = (o, sub) => `<div class="sa-row" onclick="openO('${esc(o.id)}')">${avatarHtml(o.client)}<div class="st">${esc(o.client || 'Без імені')}<small>${esc(sub)}</small></div>${mavHtml(o.assignee)}</div>`;
+  const debRow = o => { const ttc = n(o.total_ttc), paid = n(o.paid_amount), left = ttc - paid, pct = ttc > 0 ? Math.max(0, Math.min(100, Math.round(paid / ttc * 100))) : 0;
+    return `<div class="tm-deb" onclick="openO('${esc(o.id)}')">${avatarHtml(o.client)}<div class="td-n">${esc(o.client || 'Без імені')}<small>${esc(o.status)}${o.product ? ' · №' + esc(o.product) : ''}</small><div class="pbar"><i style="width:${pct}%"></i></div></div><div class="tm-amt">${fN(Math.round(left))} €<small>${pct}% сплачено</small></div></div>`; };
+  const dlI = mineI.filter(i => i.o && (i.t === 'eta' || i.t === 'dl') && i.d <= end).slice(0, 14);
+  const dlCard = i => { const o = i.o, dt = new Date(i.d + 'T00:00:00'), late = i.d < t;
+    return `<div class="dl-c" style="--c:${late ? 'var(--danger)' : itemColor(i)}" onclick="openO('${esc(o.id)}')"><div class="dl-date"><div class="dl-day"><b>${dt.getDate()}</b><small>${dt.toLocaleDateString('uk-UA', { month: 'short' })}</small></div><div class="dl-who"><div class="dl-n">${esc(o.client || 'Без імені')}</div><div class="dl-t">${OT[i.t].lbl}${late ? ' · прострочено' : ''}</div></div></div><div class="dl-f"><span>${o.product ? '№' + esc(o.product) + ' · ' : ''}${esc(o.status)}</span>${mavHtml(o.assignee)}</div></div>`; };
+  box.innerHTML = `<div class="td-hero"><div class="th-l"><div class="th-hi">${hi}${who ? ', ' + esc(who) : ''}</div><div class="th-date">${dateTxt2}</div><div class="th-sub">${subParts.join(' <i>·</i> ')}</div></div>
+      <div class="th-btns"><button type="button" onclick="openEv(null)"><i class="fa fa-calendar-plus"></i> Подія</button><button type="button" class="pri" onclick="openO(null)"><i class="fa fa-plus"></i> Замовлення</button></div></div>
     <div class="td-tiles">
-      ${tile(a.ev.length + a.rem.length, 'справ потребують уваги', (a.ev.length + a.rem.length) ? 'warn' : '', "tab('calendar')")}
+      ${tile(attn, 'справ потребують уваги', attn ? 'warn' : '', "tab('calendar')")}
       ${tile(newReq.length, 'нових заявок (графік за 14 днів)', '', "tab('orders'); flt('Нова')", spark(newSeries, 'var(--g-work)'))}
-      ${tile(soon.filter(i => i.t === 'eta').length + now.filter(i => i.t === 'eta').length, 'поставок за 7 днів' + (lateSup ? ` (${lateSup} із запізненням)` : ''), lateSup ? 'warn' : '', "tab('orders'); flt('Затримка')")}
-      ${tile(fN(Math.round(debtSum)) + ' €', 'борг клієнтів (' + debtors.length + ')', debtors.length ? 'warn' : '', "tab('orders'); flt('Боржники')")}
-      ${tile(fN(Math.round(paySum)) + ' €', 'оплат клієнтів за 14 днів', '', "tab('stats')", spark(paySeries, 'var(--g-ok)'))}
+      ${tile(dlN, 'поставок за 7 днів' + (lateSup ? ` (${lateSup} із запізненням)` : ''), lateSup ? 'warn' : '', "tab('orders'); flt('Затримка')")}
     </div>
     <div class="td-grid"><div>
       <div class="td-card"><h3>Зараз <span class="cnt">${now.length}</span></h3>${now.length ? agendaGroups(now, true) : '<div class="sa-empty">На сьогодні нічого термінового</div>'}</div>
       <div class="td-card"><h3>Найближчі 7 днів <span class="cnt">${soon.length}</span></h3>${soon.length ? agendaGroups(soon) : '<div class="sa-empty">Нічого не заплановано</div>'}
         <button type="button" class="btn-alt" style="display:block;margin:10px 0 8px" onclick="tab('calendar')"><i class="fa fa-calendar-days"></i> Відкрити календар</button></div>
     </div><div>
-      <div class="td-card"><h3>Нові заявки <span class="cnt">${newReq.length}</span></h3>${newReq.slice(0, 6).map(o => orderRow(o, (o.product ? '№' + o.product + ' · ' : '') + (o.assignee || 'без відповідального'))).join('') || '<div class="sa-empty">Нових заявок немає</div>'}
-        ${newReq.length > 6 ? `<button type="button" class="btn-alt" style="display:block;margin:6px 0 8px" onclick="tab('new')">Усі заявки (${newReq.length})</button>` : ''}</div>
-      <div class="td-card"><h3>Борги клієнтів <span class="cnt">${debtors.length}</span></h3>${debtors.slice(0, 6).map(o => orderRow(o, 'залишок ' + fN(Math.round(n(o.total_ttc) - n(o.paid_amount))) + ' € · ' + o.status)).join('') || '<div class="sa-empty">Боргів немає</div>'}
-        ${debtors.length > 6 ? `<button type="button" class="btn-alt" style="display:block;margin:6px 0 8px" onclick="tab('orders'); flt('Боржники')">Усі боржники (${debtors.length})</button>` : ''}</div>
-    </div></div>`;
+      <div class="td-card td-money"><h3>Гроші <span class="cnt">${debtors.length} боржн.</span></h3>
+        <div class="tm-row"><div><div class="tm-lbl">Очікуємо від клієнтів</div><div class="tm-big ${debtSum > 1 ? 'bad' : ''}">${fN(Math.round(debtSum))} €</div></div><div><div class="tm-lbl">Надійшло за 14 днів</div><div class="tm-big ok">${fN(Math.round(paySum))} €</div></div></div>
+        ${sparkArea(paySeries, 'var(--g-ok)')}
+        ${debtors.slice(0, 5).map(debRow).join('') || '<div class="sa-empty">Боргів немає</div>'}
+        ${debtors.length > 5 ? `<button type="button" class="btn-alt" style="display:block;margin:8px 0" onclick="tab('orders'); flt('Боржники')">Усі боржники (${debtors.length})</button>` : ''}</div>
+      <div class="td-card"><h3>Нові заявки <span class="cnt">${newReq.length}</span></h3>${newReq.slice(0, 5).map(o => orderRow(o, (o.product ? '№' + o.product + ' · ' : '') + (o.assignee || 'без відповідального'))).join('') || '<div class="sa-empty">Нових заявок немає</div>'}
+        ${newReq.length > 5 ? `<button type="button" class="btn-alt" style="display:block;margin:6px 0 8px" onclick="tab('new')">Усі заявки (${newReq.length})</button>` : ''}</div>
+    </div></div>
+    <div class="td-card"><h3>Поставки й монтажі найближчого тижня <span class="cnt">${dlI.length}</span></h3>
+      ${dlI.length ? `<div class="dl-strip">${dlI.map(dlCard).join('')}</div>` : '<div class="sa-empty">На найближчий тиждень поставок і монтажів немає</div>'}</div>`;
 }
 
 // Фокус на одному замовленні: у календарі лишаються лише його дати та події
@@ -3257,6 +3552,39 @@ document.addEventListener('keydown', e => {
   }
 });
 
+/* ================= СТАТУСИ КЛІЄНТІВ (вручну) ================= */
+const CL_ST = [
+  { k: 'lead',     l: 'Потенційний',   c: 'var(--g-wait)' },
+  { k: 'active',   l: 'Активний',      c: 'var(--g-work)' },
+  { k: 'regular',  l: 'Постійний',     c: 'var(--g-ok)' },
+  { k: 'vip',      l: 'VIP',           c: 'var(--gold)' },
+  { k: 'inactive', l: 'Неактивний',    c: 'var(--g-off)' },
+  { k: 'dnd',      l: 'Не турбувати',  c: 'var(--danger)' }
+];
+let CL_ST_OK = true, clSt = '';
+const clStOf = c => CL_ST.find(x => x.k === (c && c.status));
+const clPill = c => { const s = clStOf(c); return s ? `<span class="cl-st" style="--sc:${s.c}">${s.l}</span>` : ''; };
+// Помітка біля імені в списку замовлень — лише для тих, на кого варто звернути увагу
+const clBadge = o => { const c = clientOf(o), s = clStOf(c); return s && (s.k === 'vip' || s.k === 'dnd') ? `<span class="cl-st sm" style="--sc:${s.c}" title="Статус клієнта">${s.l}</span>` : ''; };
+const clStOptions = () => '<option value="">Без статусу</option>' + CL_ST.map(x => `<option value="${x.k}">${x.l}</option>`).join('');
+function ccStHtml(c) {
+  return CL_ST.map(x => `<button type="button" class="cl-stb ${c.status === x.k ? 'on' : ''}" style="--sc:${x.c}" data-k="${x.k}" onclick="ccSetStatus(this.dataset.k)">${x.l}</button>`).join('');
+}
+async function ccSetStatus(k) {
+  const c = clients.find(x => x.id == ccId); if (!c) return;
+  const prev = c.status || '', next = prev === k ? '' : k;
+  const { error } = await _sb.from('clients').update({ status: next || null }).eq('id', c.id);
+  if (error) return alert(/status/.test(error.message || '') ? 'У базі ще немає колонки для статусу клієнта. Виконайте SQL: alter table clients add column if not exists status text;' : 'Помилка: ' + error.message);
+  c.status = next || null;
+  const box = document.getElementById('ccSt'); if (box) box.innerHTML = ccStHtml(c);
+  renderC(); render();
+  toast(next ? `Статус «${clStOf(c).l}»` : 'Статус прибрано', async () => {
+    const r = await _sb.from('clients').update({ status: prev || null }).eq('id', c.id); if (r.error) return alert('Не вдалося скасувати: ' + r.error.message);
+    c.status = prev || null; const b2 = document.getElementById('ccSt'); if (b2 && ccId === c.id) b2.innerHTML = ccStHtml(c); renderC(); render();
+  });
+}
+function setClSt(k) { clSt = (k === clSt) ? '' : k; renderC(); }
+
 /* ================= КАРТКА КЛІЄНТА ================= */
 const CONF_ST = ['Підтверджено', 'Перевірка', 'В роботі', 'На складі', 'Виконано'];
 let ccId = null;
@@ -3272,6 +3600,7 @@ function openClient(id) {
       <div class="cv">${fN(o.total_ttc)} €${isConf ? `<small style="color:${debt > 1 ? 'var(--danger)' : 'var(--success)'}">${debt > 1 ? 'залишок ' + fN(Math.round(debt)) + ' €' : 'сплачено'}</small>` : ''}</div></div>`; };
   document.getElementById('ccBody').innerHTML = `
     <div class="cc-head">${avatarHtml(c.name)}<div><div class="nm">${esc(c.name || 'Без імені')}</div><div class="ph">${esc(c.phone || 'немає телефону')}${c.address ? ' · ' + esc(c.address) : ''}</div></div></div>
+    <div class="cl-sts" id="ccSt">${ccStHtml(c)}</div>
     <div class="cc-act">
       ${wa ? `<a class="tbtn" style="text-decoration:none" href="https://wa.me/${wa}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> WhatsApp</a>` : ''}
       ${c.phone ? `<a class="tbtn" style="text-decoration:none" href="tel:${esc(c.phone)}"><i class="fa fa-phone"></i> Подзвонити</a>` : ''}
@@ -3377,7 +3706,7 @@ function renderTable(f) {
     const asOpts = '<option value="">—</option>' + [...new Set([...TEAM, o.assignee].filter(Boolean))].map(t => `<option ${t === o.assignee ? 'selected' : ''}>${esc(t)}</option>`).join('');
     return `<tr class="r ${selMode && selIds.has(o.id) ? 'sel' : ''}" data-id="${esc(o.id)}" onclick="tbRow(event,this)">
       <td class="selcol"><span class="cb"></span></td>
-      <td><div class="nm">${esc(o.client || 'Без імені')}${tags}</div><div class="sb">${sub || '—'}</div></td>
+      <td><div class="ot-cl">${avatarHtml(o.client)}<div><div class="nm">${esc(o.client || 'Без імені')}${tags}</div><div class="sb">${sub || '—'}</div></div></div></td>
       <td class="num">${ttc > 0 ? fN(Math.round(ttc)) + ' €' : '<span class="dim">—</span>'}</td>
       <td class="num">${payOn ? fN(Math.round(paid)) + ' €' : '<span class="dim">—</span>'}</td>
       <td class="num ${payOn ? (debt > 1 ? 'bad' : 'ok') : ''}">${payOn ? (debt > 1 ? fN(Math.round(debt)) + ' €' : 'сплачено') : '<span class="dim">—</span>'}</td>
@@ -3589,11 +3918,17 @@ function applyLook() {
   document.body.classList.toggle('dense', LS.get('crm_dense', '0') === '1');
   const a = LS.get('crm_accent', ''); document.body.classList.toggle('has-accent', !!a);
   if (a) document.body.style.setProperty('--ua', a); else document.body.style.removeProperty('--ua');
+  const hd = LS.get('crm_hdr', 'glass'); ['grad', 'dark', 'solid'].forEach(k => document.body.classList.toggle('hd-' + k, hd === k));
+  document.body.classList.toggle('bg-tint', LS.get('crm_bg', '0') === '1');
 }
+function setHdr(v) { LS.set('crm_hdr', v); applyLook(); renderSettings(); }
+function setBg(v) { LS.set('crm_bg', v); applyLook(); renderSettings(); }
 function setDense(v) { LS.set('crm_dense', v); applyLook(); renderSettings(); render(); }
 function setAccent(c) { LS.set('crm_accent', c); applyLook(); renderSettings(); }
 function renderLookSettings() {
   document.querySelectorAll('#densSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === LS.get('crm_dense', '0')));
+  document.querySelectorAll('#hdrSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === LS.get('crm_hdr', 'glass')));
+  document.querySelectorAll('#bgSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === LS.get('crm_bg', '0')));
   const cur = LS.get('crm_accent', ''), box = document.getElementById('accSw'); if (!box) return;
   box.innerHTML = ACCENTS.map(c => `<button type="button" class="${cur === c ? 'on' : ''}" data-c="${c}" onclick="setAccent(this.dataset.c)" title="${c ? c : 'Колір компанії'}" style="${c ? 'background:' + c : ''}">${c ? '' : '<i class="fa fa-wand-magic-sparkles"></i>'}</button>`).join('');
 }
@@ -4088,7 +4423,12 @@ async function saveO() {
 async function saveC() {
   const old = editId ? clients.find(x => x.id === editId) : null;
   const c = { id: editId || 'CNEW'+Date.now(), company: co, name: document.getElementById('cNa').value, phone: document.getElementById('cPh').value, address: document.getElementById('cAd').value, notes: document.getElementById('cNo').value };
-  const { error } = await _sb.from('clients').upsert(c);
+  const stv = document.getElementById('cSt').value;
+  let { error } = await _sb.from('clients').upsert(Object.assign({}, c, { status: stv || null }));
+  if (error && /status/.test(error.message || '')) {
+    ({ error } = await _sb.from('clients').upsert(c));
+    if (!error && stv) alert('Клієнта збережено, але статус не записано: у базі немає колонки. Виконайте SQL: alter table clients add column if not exists status text;');
+  }
   if (error) return alert('Помилка збереження клієнта: ' + error.message);
   if (old && old.name !== c.name) await renameClientInOrders(c.id, old.name, c.name);
   closeM('mC'); sync();
@@ -4175,7 +4515,7 @@ function dupO() {
 }
 
 const fab = () => curT === 'partners' ? openLeads() : curT === 'calendar' ? openEv(null) : curT === 'clients'
-  ? (editId=null, ['cNa','cPh','cAd','cNo'].forEach(i=>document.getElementById(i).value=''), document.getElementById('hSec').style.display='none', document.getElementById('btnDC').style.display='none', showModal('mC'))
+  ? (editId=null, ['cNa','cPh','cAd','cNo','cSt'].forEach(i=>document.getElementById(i).value=''), document.getElementById('hSec').style.display='none', document.getElementById('btnDC').style.display='none', showModal('mC'))
   : openO(null);
 // Показ модалки + запис в історію (щоб "Назад" її закривав)
 function showModal(id) {
@@ -4218,15 +4558,21 @@ const tab = (t, fromPop) => {
 
 function renderC() {
   const match = makeMatcher(document.getElementById('qc').value);
-  const f = !match ? clients.slice() : clients.filter(c => match([c.name, c.address], [c.phone, c.name]));
+  const f0 = !match ? clients.slice() : clients.filter(c => match([c.name, c.address], [c.phone, c.name]));
+  const f = clSt ? f0.filter(c => (c.status || '') === clSt) : f0;
+  const cntBy = k => f0.filter(c => (c.status || '') === k).length;
+  const fb = document.getElementById('clFilter');
+  if (fb) fb.innerHTML = `<button type="button" class="cl-fc ${clSt ? '' : 'on'}" onclick="setClSt('')">Усі <b>${f0.length}</b></button>`
+    + CL_ST.map(x => `<button type="button" class="cl-fc ${clSt === x.k ? 'on' : ''} ${cntBy(x.k) ? '' : 'zero'}" style="--sc:${x.c}" onclick="setClSt('${x.k}')"><i></i>${x.l} <b>${cntBy(x.k)}</b></button>`).join('');
   document.getElementById('listC').innerHTML = f.length
-    ? f.map(c=>`<div class="card cl" data-id="${esc(c.id)}" onclick="openClient(this.dataset.id)">${avatarHtml(c.name)}<div class="c-id"><div class="c-name"><span class="nm">${esc(c.name||'Без імені')}</span></div><div class="c-sub">${esc(c.phone||'—')}</div></div><i class="fa fa-chevron-right cl-arrow"></i></div>`).join('')
+    ? f.map(c=>`<div class="card cl" data-id="${esc(c.id)}" onclick="openClient(this.dataset.id)">${avatarHtml(c.name)}<div class="c-id"><div class="c-name"><span class="nm">${esc(c.name||'Без імені')}</span>${clPill(c)}</div><div class="c-sub">${esc(c.phone||'—')}</div></div><i class="fa fa-chevron-right cl-arrow"></i></div>`).join('')
     : `<div class="empty"><i class="fa fa-user-slash"></i>Клієнтів не знайдено</div>`;
 }
 function openCE(id) {
   editId=id; const c=clients.find(x=>x.id==id);
   document.getElementById('cNa').value=c.name; document.getElementById('cPh').value=c.phone;
   document.getElementById('cAd').value=c.address; document.getElementById('cNo').value=c.notes;
+  document.getElementById('cSt').innerHTML = clStOptions(); document.getElementById('cSt').value = c.status || '';
   const h = orders.filter(o => o.client_id ? o.client_id === c.id : o.client === c.name);
   document.getElementById('hSec').style.display='block';
   document.getElementById('hList').innerHTML = h.map(o=>`<div class="file-chip" data-id="${esc(o.id)}" onclick="event.stopPropagation(); closeM('mC'); openO(this.dataset.id)" style="cursor:pointer"><span>${esc(o.product||'Замовлення')}</span><b style="font-variant-numeric:tabular-nums">${fN(o.total_ttc)} €</b></div>`).join('') || '<small style="color:var(--muted2)">Замовлень немає</small>';
@@ -4476,13 +4822,33 @@ async function logHistory(orderId, orderCo, action, details) {
   try { await _sb.from('order_history').insert({ order_id: orderId, company: orderCo, user_email: USER_EMAIL, action, details }); } catch (e) {}
 }
 const histVal = (k, v) => (v === '' || v == null) ? '—' : (HIST_NUM.has(k) ? fN(v) + ' €' : esc(v));
+const HIST_PILL = k => k === 'status';
 function histText(h) {
   const d = h.details || {};
-  if (h.action === 'created') return 'Створено' + (d.status ? ` · статус «${esc(d.status)}»` : '');
+  if (h.action === 'created') return 'Створено' + (d.status ? ` зі статусом <span class="tl-pill" style="--pc:${stColor(d.status)}">${esc(d.status)}</span>` : '');
   if (h.action === 'deleted') return 'Переміщено в кошик';
   if (h.action === 'restored') return 'Відновлено з кошика';
   return Object.keys(d).filter(k => Array.isArray(d[k]))
-    .map(k => `${esc(HIST_LBL[k] || k)}: <s>${histVal(k, d[k][0])}</s> → <b>${histVal(k, d[k][1])}</b>`).join('<br>') || 'Змінено';
+    .map(k => HIST_PILL(k)
+      ? `${esc(HIST_LBL[k] || k)}: ${d[k][0] ? `<span class="tl-pill" style="--pc:${stColor(d[k][0])}">${esc(d[k][0])}</span><i class="tl-arrow fa fa-arrow-right-long"></i>` : ''}<span class="tl-pill" style="--pc:${stColor(d[k][1])}">${esc(d[k][1])}</span>`
+      : `${esc(HIST_LBL[k] || k)}: <s>${histVal(k, d[k][0])}</s><i class="tl-arrow fa fa-arrow-right-long"></i><b>${histVal(k, d[k][1])}</b>`).join('<br>') || 'Змінено';
+}
+// Іконка й колір події на часовій лінії
+function histKind(h) {
+  const d = h.details || {}, ks = Object.keys(d);
+  if (h.action === 'created') return ['fa-plus', 'ok'];
+  if (h.action === 'deleted') return ['fa-trash-can', 'bad'];
+  if (h.action === 'restored') return ['fa-rotate-left', 'ok'];
+  if (ks.includes('status')) return ['fa-flag', 'st'];
+  if (ks.some(k => HIST_NUM.has(k))) return ['fa-euro-sign', 'money'];
+  if (ks.includes('assignee')) return ['fa-user-check', 'as'];
+  if (ks.some(k => /deadline|eta_date|reminder_date/.test(k))) return ['fa-calendar-day', 'date'];
+  if (ks.some(k => /^factory/.test(k))) return ['fa-industry', 'fac'];
+  return ['fa-pen', 'def'];
+}
+function histDayLabel(ts) {
+  const d = ymd(ts), t = todayStr();
+  return d === t ? 'Сьогодні' : d === ymd(Date.now() - 864e5) ? 'Вчора' : new Date(ts).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: new Date(ts).getFullYear() === new Date().getFullYear() ? undefined : 'numeric' });
 }
 async function loadHistory(id) {
   const box = document.getElementById('histList');
@@ -4491,7 +4857,12 @@ async function loadHistory(id) {
   const { data, error } = await _sb.from('order_history').select('*').eq('order_id', id).order('changed_at', { ascending: false }).limit(50);
   if (error || !data) { box.innerHTML = '<small style="color:var(--muted2)">Історія поки недоступна (треба виконати SQL для order_history)</small>'; return; }
   if (!data.length) { box.innerHTML = '<small style="color:var(--muted2)">Змін ще не записано</small>'; return; }
-  box.innerHTML = data.map(h => `<div class="h-row"><div class="h-meta">${fmtDateTime(Date.parse(h.changed_at))} · ${esc((h.user_email || '').split('@')[0] || '—')}</div>${histText(h)}</div>`).join('');
+  let lastDay = '';
+  box.innerHTML = '<div class="tl">' + data.map(h => {
+    const ts = Date.parse(h.changed_at), day = histDayLabel(ts), [ico, kind] = histKind(h), who = (h.user_email || '').split('@')[0] || '—';
+    const head = day !== lastDay ? `<div class="tl-day">${day}</div>` : ''; lastDay = day;
+    return `${head}<div class="tl-i k-${kind}"><div class="tl-ic"><i class="fa ${ico}"></i></div><div class="tl-b"><div class="tl-m">${mavHtml(who, true)}<span>${esc(who)}</span><span>·</span><span>${new Date(ts).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}</span></div><div class="tl-t">${histText(h)}</div></div></div>`;
+  }).join('') + '</div>';
 }
 
 /* ================= ЧЕРНЕТКИ (щоб не губити введене) ================= */
