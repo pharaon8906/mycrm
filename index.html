@@ -1476,7 +1476,7 @@ body.bg-tint { background: radial-gradient(900px 520px at 88% -140px, color-mix(
     </select>
     <button class="bulk-ok" onclick="applyBulk()">Змінити статус</button>
   </div>
-  <div class="bulk-row">
+  <div class="bulk-row fin-only">
     <select id="bulkAs"></select>
     <button class="bulk-ok" onclick="applyBulkAs()">Призначити</button>
   </div>
@@ -1505,7 +1505,7 @@ body.bg-tint { background: radial-gradient(900px 520px at 88% -140px, color-mix(
     <div class="grid"><div class="fg"><label>Номер замовлення</label><input id="fPr" placeholder="напр. WEB/26/0947426"></div><div class="fg"><label>Фабрика 1</label><select id="fFa" onchange="renderFacPay()"></select></div></div>
     <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan(); autoOnStatus(); oChip()"><option>Нова</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
     <div id="autoHint" style="font-size:12px;color:var(--p2);margin:-6px 0 10px"></div>
-    <div class="fg"><label>Відповідальний</label><select id="fAs"></select></div>
+    <div class="fg"><label>Відповідальний</label><select id="fAs"></select><small class="fc-hint" id="fAsHint"></small></div>
     <div id="canB" class="fg" style="display:none"><label style="color:var(--danger)">Причина скасування</label><textarea id="fCan" rows="2"></textarea></div>
 
 
@@ -1943,6 +1943,25 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&
 // Роль користувача: 'owner' (бачить усе) або 'manager' (не бачить собівартість і прибуток — лише в інтерфейсі)
 let ROLE = 'owner', USER_EMAIL = '';
 const isMgr = () => ROLE === 'manager';
+// Менеджер бачить лише свої замовлення й ще нерозподілені (так само діє правило в базі — див. roles.sql)
+const visibleOrder = o => !isMgr() || !o.assignee || o.assignee === ME();
+const statOrders = () => isMgr() ? orders.filter(o => o.assignee && o.assignee === ME()) : orders;
+// Відповідального вже призначено: змінити його може лише адмін
+const asLocked = o => isMgr() && !!(o && o.assignee);
+function applyAsRules(o) {
+  const el = document.getElementById('fAs'), hint = document.getElementById('fAsHint'); if (!el) return;
+  if (hint) hint.textContent = '';
+  if (!isMgr()) { el.disabled = false; return; }
+  const me = ME(), cur = o ? (o.assignee || '') : me;
+  if (cur) {
+    el.innerHTML = `<option value="${esc(cur)}">${esc(cur)}</option>`; el.value = cur; el.disabled = !!(o && o.assignee);
+    if (hint && o && o.assignee) hint.textContent = 'Відповідального вже призначено — змінити його може лише адмін.';
+  } else {
+    el.innerHTML = '<option value="">— не призначено —</option>' + (me ? `<option value="${esc(me)}">Взяти собі (${esc(me)})</option>` : '');
+    el.value = ''; el.disabled = false;
+    if (hint) hint.textContent = me ? 'Нерозподілене замовлення: можна взяти собі.' : 'Ваш логін не прив’язаний до співробітника — звернитесь до адміна.';
+  }
+}
 
 // Безпечний доступ до localStorage (може бути недоступний у приватному режимі)
 const LS = {
@@ -2492,7 +2511,7 @@ async function loadOrders() {
   const base = () => _sb.from('orders').select('*').eq('company', co);
   let r = await (TRASH_OK ? base().is('deleted_at', null) : base()).order('created_at', { ascending: false });
   if (r.error && TRASH_OK && /deleted_at/.test(r.error.message || '')) { TRASH_OK = false; r = await base().order('created_at', { ascending: false }); }
-  return r.data || [];
+  return (r.data || []).filter(visibleOrder);
 }
 
 let _synced = false;
@@ -2981,7 +3000,7 @@ function calItems(ignoreKind) {
     if (o.reminder_date) items.push({ d: o.reminder_date, t: 'rem', o });
     if (o.eta_date && SUPPLY_WAIT.includes(o.status)) items.push({ d: o.eta_date, t: 'eta', o });
   });
-  events.forEach(e => { if (e.event_date) items.push({ d: e.event_date, t: 'ev', e }); });
+  events.forEach(e => { if (e.event_date && !(isMgr() && e.assignee && e.assignee !== ME())) items.push({ d: e.event_date, t: 'ev', e }); });
   if (calWho === 'mine' && ME()) items = items.filter(i => (i.o ? i.o.assignee : i.e.assignee) === ME());
   if (calFocus && !ignoreKind) items = items.filter(i => (i.o ? i.o.id : i.e.order_id) === calFocus);
   if (!ignoreKind && calKind !== 'all') items = items.filter(i => (i.e ? (i.e.kind || 'task') : i.t) === calKind);
@@ -3710,7 +3729,7 @@ function renderTable(f) {
     const tags = (isRem(o) ? '<span class="tg">дзвінок</span>' : '') + (isLate(o) ? '<span class="tg">затримка</span>' : '') + ((o.deadline && o.deadline < today && isOpen(o)) ? '<span class="tg">дедлайн</span>' : '');
     const nxt = o.deadline ? 'монтаж ' + dateTxt(o.deadline) : (o.eta_date && SUPPLY_WAIT.includes(o.status)) ? 'ETA ' + dateTxt(o.eta_date) : '';
     const wa = waNum(orderPhone(o));
-    const asOpts = '<option value="">—</option>' + [...new Set([...TEAM, o.assignee].filter(Boolean))].map(t => `<option ${t === o.assignee ? 'selected' : ''}>${esc(t)}</option>`).join('');
+    const asOpts = '<option value="">—</option>' + [...new Set(isMgr() ? [o.assignee, o.assignee ? '' : ME()].filter(Boolean) : [...TEAM, o.assignee].filter(Boolean))].map(t => `<option ${t === o.assignee ? 'selected' : ''}>${esc(t)}</option>`).join('');
     return `<tr class="r ${selMode && selIds.has(o.id) ? 'sel' : ''}" data-id="${esc(o.id)}" onclick="tbRow(event,this)">
       <td class="selcol"><span class="cb"></span></td>
       <td><div class="ot-cl">${avatarHtml(o.client)}<div><div class="nm">${esc(o.client || 'Без імені')}${tags}</div><div class="sb">${sub || '—'}</div></div></div></td>
@@ -3718,7 +3737,7 @@ function renderTable(f) {
       <td class="num">${payOn ? fN(Math.round(paid)) + ' €' : '<span class="dim">—</span>'}</td>
       <td class="num ${payOn ? (debt > 1 ? 'bad' : 'ok') : ''}">${payOn ? (debt > 1 ? fN(Math.round(debt)) + ' €' : 'сплачено') : '<span class="dim">—</span>'}</td>
       <td><select class="stsel" style="--sc:${stColor(o.status)}" data-id="${esc(o.id)}" onchange="tbSetStatus(this.dataset.id, this.value)">${sts.map(k => `<option ${k === o.status ? 'selected' : ''}>${k}</option>`).join('')}</select></td>
-      <td><select class="assel" data-id="${esc(o.id)}" onchange="tbSetAs(this.dataset.id, this.value)">${asOpts}</select></td>
+      <td><select class="assel" ${asLocked(o) ? 'disabled title="Змінити відповідального може лише адмін"' : ''} data-id="${esc(o.id)}" onchange="tbSetAs(this.dataset.id, this.value)">${asOpts}</select></td>
       <td class="dim">${o.created_at ? fmtDate(orderTs(o)) : ''}${nxt ? '<div class="sb">' + nxt + '</div>' : ''}</td>
       <td style="white-space:nowrap">${wa ? `<a class="pl-act" style="display:inline-grid" href="https://wa.me/${wa}" target="_blank" rel="noopener" title="WhatsApp"><i class="fab fa-whatsapp"></i></a> ` : ''}${wa ? `<button type="button" class="pl-act" data-id="${esc(o.id)}" onclick="openWa(this.dataset.id)" title="Шаблон повідомлення"><i class="fa fa-comment-dots"></i></button>` : ''}</td>
     </tr>`;
@@ -3730,6 +3749,7 @@ function tbRow(e, tr) { if (e.target.closest('select,button,a,input')) return; c
 function tbSetStatus(id, st) { const o = orders.find(x => x.id === id); if (o && o.status !== st) moveOrder(o, st); else render(); }
 async function tbSetAs(id, as) {
   const o = orders.find(x => x.id === id); if (!o || (o.assignee || '') === as) return;
+  if (isMgr() && (o.assignee || (as && as !== ME()))) { alert('Змінити відповідального може лише адмін. Менеджер може лише взяти нерозподілене замовлення собі.'); return render(); }
   const prev = o.assignee || '', { error } = await _sb.from('orders').update({ assignee: as || null }).eq('id', id);
   if (error) { alert(/assignee/.test(error.message || '') ? 'У базі немає колонки assignee. Виконайте SQL з інструкції.' : 'Помилка: ' + error.message); return render(); }
   o.assignee = as || null; logHistory(id, o.company, 'updated', { assignee: [prev, as] }); render();
@@ -4146,7 +4166,7 @@ function setPeriod(p) { statPeriod = p; renderStats(); }
 
 function renderStats() {
   const container = document.getElementById('statsDisplay');
-  const src = orders.filter(inPeriod);
+  const src = statOrders().filter(inPeriod);
 
   const ACTIVE = ['Підтверджено','Перевірка','В роботі','На складі'];
   const done   = src.filter(o => o.status === 'Виконано');
@@ -4229,9 +4249,9 @@ function funnelStats(src) {
   const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
   const row = (l, v, w) => `<div class="hb"><div class="hb-top"><span>${l}</span><span>${v} · ${w}%</span></div><div class="hb-track"><div class="hb-fill" style="width:${Math.max(w, v ? 2 : 0)}%"></div></div></div>`;
   const touch = o => Math.max(orderTs(o), o.last_contact ? Date.parse(o.last_contact) : 0), now = Date.now();
-  const stale = orders.filter(o => o.status === 'Кошторис' && now - touch(o) > 7 * 864e5);
-  const waiting = orders.filter(o => o.status === 'Нова' && now - orderTs(o) > 2 * 864e5);
-  const late = orders.filter(isLate);
+  const stale = statOrders().filter(o => o.status === 'Кошторис' && now - touch(o) > 7 * 864e5);
+  const waiting = statOrders().filter(o => o.status === 'Нова' && now - orderTs(o) > 2 * 864e5);
+  const late = statOrders().filter(isLate);
   const tile = (n_, l, sub) => `<div class="st-box" style="cursor:default"><b style="${n_ ? 'color:var(--warning)' : ''}">${n_}</b><small>${l}</small><span>${sub}</span></div>`;
   return `<h4 class="st-h">Воронка продажів</h4>
     <div class="chart-box">${row('Заявки', total, 100)}${row('Складено кошторис', est.length, pct(est.length, total))}${row('Підтверджено', conf.length, pct(conf.length, total))}${row('Виконано', dn.length, pct(dn.length, total))}
@@ -4248,7 +4268,7 @@ function funnelStats(src) {
 function monthCompare(mgr) {
   const now = new Date(), ms = [];
   for (let i = 5; i >= 0; i--) { const d = new Date(now.getFullYear(), now.getMonth() - i, 1); ms.push({ y: d.getFullYear(), m: d.getMonth(), label: d.toLocaleDateString('uk-UA', { month: 'long', year: '2-digit' }), cr: 0, dn: 0, rev: 0, pr: 0 }); }
-  orders.forEach(o => {
+  statOrders().forEach(o => {
     const ts = orderTs(o); if (!ts) return;
     const d = new Date(ts), b = ms.find(x => x.y === d.getFullYear() && x.m === d.getMonth()); if (!b) return;
     b.cr++;
@@ -4271,7 +4291,7 @@ async function loadDurations() {
     if (s[1] === 'Підтверджено' && !e.conf) e.conf = t;
     if (s[1] === 'Виконано' && !e.done) e.done = t;
   });
-  const byId = Object.fromEntries(orders.map(o => [o.id, o]));
+  const byId = Object.fromEntries(statOrders().map(o => [o.id, o]));
   const toConf = [], toDone = [];
   Object.entries(enter).forEach(([id, e]) => { const o = byId[id]; if (!o) return; const c = orderTs(o); if (e.conf && c) toConf.push((e.conf - c) / 864e5); if (e.done && e.conf) toDone.push((e.done - e.conf) / 864e5); });
   const avg = a => a.length ? a.reduce((s, x) => s + x, 0) / a.length : null;
@@ -4308,7 +4328,7 @@ function monthlyChart() {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     months.push({ y: d.getFullYear(), m: d.getMonth(), label: d.toLocaleDateString('uk-UA', { month: 'short' }), profit: 0 });
   }
-  orders.filter(o => o.status === 'Виконано').forEach(o => {
+  statOrders().filter(o => o.status === 'Виконано').forEach(o => {
     const ts = orderTs(o); if (!ts) return;
     const d = new Date(ts), b = months.find(x => x.y === d.getFullYear() && x.m === d.getMonth());
     if (b) b.profit += n(o.sale_price_ht) - orderCost(o) + n(o.install_cost) + n(o.delivery);
@@ -4347,7 +4367,7 @@ function areaChart(vals, labels, fmt) {
 function statSeries(mgr) {
   const now = new Date(), ms = [];
   for (let i = 5; i >= 0; i--) { const d = new Date(now.getFullYear(), now.getMonth() - i, 1); ms.push({ y: d.getFullYear(), m: d.getMonth(), label: d.toLocaleDateString('uk-UA', { month: 'short' }), v: 0 }); }
-  orders.filter(o => o.status === 'Виконано').forEach(o => {
+  statOrders().filter(o => o.status === 'Виконано').forEach(o => {
     const ts = orderTs(o); if (!ts) return; const d = new Date(ts), b = ms.find(x => x.y === d.getFullYear() && x.m === d.getMonth()); if (!b) return;
     b.v += mgr ? 1 : (n(o.sale_price_ht) - orderCost(o) + n(o.install_cost) + n(o.delivery));
   });
@@ -4516,6 +4536,7 @@ const openO = id => {
   document.getElementById('logWrap').style.display = id ? 'block' : 'none';
   document.getElementById('logList').innerHTML = ''; if (id) loadLog(id);
   setAs('fAs', id ? o.assignee : ME());     // нове замовлення за замовчуванням призначається на мене
+  applyAsRules(id ? o : null);
   // Історія змін — лише для наявного замовлення; вантажиться, коли розгорнути
   const hb = document.getElementById('histBox');
   hb.open = false; hb.style.display = id ? 'block' : 'none';
@@ -4973,7 +4994,7 @@ function renderSettings() {
   const z = parseFloat(LS.get('crm_zoom', ''));
   document.getElementById('scaleLbl').textContent = z ? Math.round(z * 100) + '%' : 'авто';
   document.getElementById('setMk').value = LOW_MK();
-  document.getElementById('accInfo').textContent = `${USER_EMAIL || '—'} · ${isMgr() ? 'менеджер' : 'власник'} · ${CO_NAME[co] || ''}`;
+  document.getElementById('accInfo').textContent = `${USER_EMAIL || '—'} · ${isMgr() ? 'менеджер' + (MEMBER ? ' (' + MEMBER + ')' : ' · ⚠ логін не прив’язаний до співробітника') : 'адмін'} · ${CO_NAME[co] || ''}`;
 }
 applyTheme(); applyScale();
 if (window.matchMedia) { const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', applyTheme); }
