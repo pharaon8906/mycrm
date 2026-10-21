@@ -2082,6 +2082,17 @@ async function writeOrder(o, mode) {
   return r;
 }
 
+// Нова заявка йде через SQL-функцію create_request: вона записує заявку, навіть якщо її призначено іншому менеджеру
+// (звичайний запис у цьому випадку блокується правилом видимості). Якщо функції ще немає — звичайний запис.
+async function createRequest(o) {
+  try {
+    const r = await _sb.rpc('create_request', { p: o });
+    if (!r.error) return r;
+    if (!/create_request|schema cache|PGRST202|does not exist/i.test((r.error.message || '') + ' ' + (r.error.code || ''))) return r;
+  } catch (e) {}
+  return writeOrder(o, 'insert');
+}
+
 /* ================= КОМАНДА (відповідальні) ================= */
 const DEFAULT_TEAM = ['Олексій', 'Денис', 'Марія', 'Надя'];
 const DEFAULT_POOL = { heimek: ['Олексій', 'Денис'], luxwin: ['Надя', 'Марія'] };   // хто за замовчуванням у черзі на нові заявки
@@ -4138,7 +4149,7 @@ async function newRequest() {
               notes: noteVal, file_url: JSON.stringify(qnFiles) };
   // insert (не upsert!): це завжди новий унікальний запис; upsert додатково перевіряє
   // USING-частину RLS-політики через ON CONFLICT DO UPDATE і блокує крос-компанійні заявки
-  const { error } = await writeOrder(o, 'insert');
+  const { error } = await createRequest(o);
   if (error) return alert('Помилка: ' + error.message);
   logHistory(o.id, o.company, 'created', { status: 'Нова' });
 
