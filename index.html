@@ -677,7 +677,7 @@ input.ro-grn { background: #e8f6f1; color: #0a5c42; font-weight: 700; }
 input.ro-blu { background: #eef1ff; color: #26389e; font-weight: 700; }
 
 /* Ролі: менеджер не бачить собівартість, прибуток і борг фабрикам (лише інтерфейс) */
-body.role-mgr .fin-only { display: none !important; }
+body.role-mgr .fin-only, body.role-mgr .profit-only { display: none !important; }
 
 /* Історія змін */
 .hist summary { cursor: pointer; list-style: none; font-size: 11px; font-weight: 700; color: var(--muted2); text-transform: uppercase; letter-spacing: .08em; padding: 16px 0 10px; border-top: 1px solid var(--line-soft); margin-top: 18px; }
@@ -1527,14 +1527,14 @@ body.bg-tint { background: radial-gradient(900px 520px at 88% -140px, color-mix(
     <div class="grid"><div class="fg"><label>Ціна HT €</label><input id="fSa" type="number" step="any" oninput="onSale()"></div><div class="fg"><label>TVA %</label><select id="fTv" onchange="calc()"></select></div></div>
     <div class="grid"><div class="fg"><label>Монтаж €</label><input id="fIn" type="number" oninput="calc()"></div><div class="fg"><label>Доставка €</label><input id="fDe" type="number" oninput="calc()"></div></div>
     <div class="fg"><label>Сума TTC €</label><input id="fTt" class="ro-yel" readonly></div>
-    <div class="grid fin-only"><div class="fg"><label>Ціна Фабрики 1 €</label><input id="fCo" type="number" step="any" oninput="onCost()"></div><div class="fg"><label>Залишок фабриці 1 €</label><input id="facLeft1" class="ro-blu" readonly><input id="fFaPa" type="hidden"></div></div>
-    <div id="fac2Toggle" class="fin-only" onclick="toggleFac2()" style="color:var(--p2);cursor:pointer;font-size:13px;font-weight:600;margin:2px 0 14px">+ Додати другу фабрику</div>
-    <div id="fac2Block" class="fin-only" style="display:none">
+    <div class="grid"><div class="fg"><label>Ціна Фабрики 1 €</label><input id="fCo" type="number" step="any" oninput="onCost()"></div><div class="fg"><label>Залишок фабриці 1 €</label><input id="facLeft1" class="ro-blu" readonly><input id="fFaPa" type="hidden"></div></div>
+    <div id="fac2Toggle" onclick="toggleFac2()" style="color:var(--p2);cursor:pointer;font-size:13px;font-weight:600;margin:2px 0 14px">+ Додати другу фабрику</div>
+    <div id="fac2Block" style="display:none">
       <div class="fg"><label>Фабрика 2</label><select id="fFa2" onchange="renderFacPay()"></select></div>
       <div class="grid"><div class="fg"><label>Ціна Фабрики 2 €</label><input id="fCo2" type="number" step="any" oninput="onCost()"></div><div class="fg"><label>Залишок фабриці 2 €</label><input id="facLeft2" class="ro-blu" readonly><input id="fFaPa2" type="hidden"></div></div>
     </div>
-    <div class="grid fin-only"><div class="fg"><label>Чистий прибуток</label><input id="fMr" class="ro-grn" readonly></div><div class="fg"><label>Націнка % (ціна продажу рахується сама)</label><input id="fMk" class="ro-blu" type="number" step="any" inputmode="decimal" placeholder="напр. 30" oninput="onMk()"></div></div>
-    <div class="fg fin-only"><label>Оплати фабрикам (кілька платежів)</label>
+    <div class="grid"><div class="fg profit-only"><label>Чистий прибуток</label><input id="fMr" class="ro-grn" readonly></div><div class="fg"><label>Націнка % (ціна продажу рахується сама)</label><input id="fMk" class="ro-blu" type="number" step="any" inputmode="decimal" placeholder="напр. 30" oninput="onMk()"></div></div>
+    <div class="fg"><label>Оплати фабрикам (кілька платежів)</label>
       <div id="facPayList" class="file-list"></div>
       <div class="pay-add" style="grid-template-columns:1fr 1fr">
         <input type="date" id="facPayDate" title="Дата платежу">
@@ -1594,9 +1594,9 @@ body.bg-tint { background: radial-gradient(900px 520px at 88% -140px, color-mix(
           <div class="o-bar"><i id="smBar"></i></div>
           <div class="o-mr"><span>Оплачено клієнтом</span><b id="smPaid">0 €</b></div>
           <div class="o-mr"><span>Залишок клієнта</span><b id="smLeft">0 €</b></div>
-          <div class="o-mr o-div fin-only"><span>Борг фабрикам</span><b id="smFac">0 €</b></div>
-          <div class="o-mr fin-only"><span>Чистий прибуток</span><b id="smProfit">0 €</b></div>
-          <div class="o-mr fin-only"><span>Націнка</span><b id="smMk">—</b></div>
+          <div class="o-mr o-div"><span>Борг фабрикам</span><b id="smFac">0 €</b></div>
+          <div class="o-mr profit-only"><span>Чистий прибуток</span><b id="smProfit">0 €</b></div>
+          <div class="o-mr"><span>Націнка</span><b id="smMk">—</b></div>
         </div>
       </aside>
     </div>
