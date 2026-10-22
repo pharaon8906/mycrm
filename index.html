@@ -1307,6 +1307,12 @@ html.dark .urg-seg button.on[data-u] { color: #0b101c; }
 .ot tr.r.is-open td { background: var(--p2-soft); }
 .ot tr.r.is-open td:first-child { box-shadow: inset 3px 0 0 var(--p2); }
 .ot tr.r.was-open td:first-child { box-shadow: inset 3px 0 0 color-mix(in srgb, var(--p2) 38%, transparent); }
+/* --- звірка номерів --- */
+.dup-note { font-size: 12.5px; line-height: 1.5; border-radius: var(--r-sm); padding: 10px 12px; margin: 0 0 var(--s3); background: color-mix(in srgb, var(--p2) 8%, var(--surface)); color: var(--txt); }
+.dup-note:empty { display: none; }
+.dup-note.warn { background: color-mix(in srgb, var(--warning) 15%, var(--surface)); }
+.dup-note.stop { background: color-mix(in srgb, var(--danger) 13%, var(--surface)); }
+.dup-note .sub { display: block; margin-top: 4px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -1444,11 +1450,12 @@ html.dark .urg-seg button.on[data-u] { color: #0b101c; }
           <button type="button" data-co="luxwin" onclick="qnSetCo('luxwin')">Lux Win</button>
         </div>
       </div>
-      <div class="fg"><label>Клієнт</label><input id="qnClient" list="dlC" placeholder="Ім'я або компанія"></div>
+      <div class="fg"><label>Клієнт</label><input id="qnClient" list="dlC" placeholder="Ім'я, компанія або номер телефону" oninput="qnPhoneHint()"></div>
       <div class="grid">
-        <div class="fg"><label>Телефон</label><input id="qnPhone" type="tel"></div>
+        <div class="fg"><label>Телефон</label><input id="qnPhone" type="tel" oninput="qnPhoneHint()"></div>
         <div class="fg"><label>Номер замовлення</label><input id="qnNum" placeholder="напр. WEB/26/..."></div>
       </div>
+      <div class="dup-note" id="qnDup"></div>
       <div class="fg"><label>Відповідальний (хто робить прорахунок)</label><select id="qnAs"></select></div>
       <div class="fg"><label>Терміновість</label>
         <div class="seg urg-seg" id="qnUrg" style="margin-bottom:0">
@@ -1537,7 +1544,8 @@ html.dark .urg-seg button.on[data-u] { color: #0b101c; }
     <div class="cl-box" id="clBox" style="display:none">
       <div class="cl-box-h"><b id="clBoxTitle"></b><span style="flex:1"></span>
         <button type="button" id="clBoxOpen" onclick="clBoxOpenCard()"><i class="fa fa-id-card"></i> Картка клієнта</button></div>
-      <div class="grid"><div class="fg"><label>Телефон клієнта</label><input id="fClPh" type="tel" autocomplete="off"></div><div class="fg"><label>Адреса</label><input id="fClAd" autocomplete="off"></div></div>
+      <div class="dup-note" id="clDup"></div>
+      <div class="grid"><div class="fg"><label>Телефон клієнта</label><input id="fClPh" type="tel" autocomplete="off" oninput="clPhoneHint()"></div><div class="fg"><label>Адреса</label><input id="fClAd" autocomplete="off"></div></div>
       <div class="fg"><label>Статус клієнта</label><div class="cl-sts" id="fClSt"></div></div>
       <div class="fg" style="margin-bottom:8px"><label>Нотатки про клієнта</label><textarea id="fClNo" rows="2" oninput="autoGrow(this)"></textarea></div>
       <button type="button" class="btn-alt" id="clBoxSave" style="margin:0" onclick="clBoxSave()"><i class="fa fa-floppy-disk"></i> Зберегти дані клієнта</button>
@@ -2305,6 +2313,7 @@ let qnTargetCo = 'heimek';                               // для якої ко
 function qnSetCo(k) {
   qnTargetCo = k;
   document.querySelectorAll('#qnCoSeg button').forEach(b => b.classList.toggle('on', b.dataset.co === k));
+  if (typeof qnPhoneHint === 'function') qnPhoneHint();
 }
 
 /* ================= ФАЙЛИ ================= */
@@ -3692,7 +3701,7 @@ function clBoxSync(force) {
   document.getElementById('clBoxTitle').textContent = c ? 'Клієнт: ' + (c.name || '') : 'Новий клієнт — створиться при збереженні';
   document.getElementById('clBoxOpen').style.display = c ? '' : 'none';
   document.getElementById('clBoxSave').style.display = c ? '' : 'none';
-  renderClBoxSt();
+  renderClBoxSt(); clPhoneHint();
 }
 function clBoxOpenCard() { const c = clByName(document.getElementById('fCl').value); if (c) openClient(c.id); }
 // Записує в базу зміни з блоку (телефон, адреса, нотатки, статус); повертає true, якщо все гаразд
@@ -4247,18 +4256,25 @@ function renderNew() {
 }
 
 async function newRequest() {
-  const name  = document.getElementById('qnClient').value.trim();
-  const phone = document.getElementById('qnPhone').value.trim();
+  let name  = document.getElementById('qnClient').value.trim();
+  let phone = document.getElementById('qnPhone').value.trim();
+  if (!phone && phoneLike(name)) phone = name;       // у поле «Клієнт» вставили номер телефону
   const num   = document.getElementById('qnNum').value.trim();
   if (!name) return alert('Вкажіть клієнта');
 
   const target = qnTargetCo;
   const cross = target !== co;   // заявка для іншої компанії
 
+  // Звірка номера: дубль заборонено (адміну — з підтвердженням); заявка йде тому самому менеджеру; клієнт не дублюється
+  const guard = await phoneGuard(phone, target);
+  if (!guard.ok) return;
+  if (guard.v.clientId && guard.v.clientName && !nameIsPhone(guard.v.clientName)) name = guard.v.clientName;   // імʼя з бази замість введеного номера
+
   // клієнта авто-додаємо ЛИШЕ у своїй компанії (в чужу RLS не пустить)
   let clientId = null;
+  if (cross) clientId = guard.v.clientId || null;     // заявка в іншу компанію: прив'язуємо до наявного клієнта тієї компанії
   if (!cross) {
-    const existing = clients.find(c => (c.name||'').trim().toLowerCase() === name.toLowerCase());
+    const existing = (guard.v.clientId && clients.find(c => c.id === guard.v.clientId)) || clients.find(c => (c.name||'').trim().toLowerCase() === name.toLowerCase());
     if (!existing) {
       clientId = 'CNEW'+Date.now();
       await _sb.from('clients').upsert({ id:clientId, company:co, name, phone, address:'', notes:'' });
@@ -4271,7 +4287,8 @@ async function newRequest() {
   // телефон зберігаємо прямо в заявці (щоб приймаюча компанія бачила його)
   const noteVal = (cross ? `↪ Заявка від ${CO_NAME[co]}\n` : '') + document.getElementById('qnNotes').value;
   let asg = document.getElementById('qnAs').value;
-  if (asg === AS_AUTO) asg = await pickAssignee(target);
+  if (guard.v.valid) asg = guard.v.valid;            // номер уже веде цей менеджер
+  else if (asg === AS_AUTO) asg = await pickAssignee(target);
   const o = { id:'NEW'+Date.now(), created_at:new Date().toISOString(), company:target, client:name, client_id:clientId, product:num, phone, factory:FACTORIES[0], status:'Нова', assignee: asg || null, urgency: qnUrgV || null,
               notes: noteVal, file_url: JSON.stringify(qnFiles) };
   // insert (не upsert!): це завжди новий унікальний запис; upsert додатково перевіряє
@@ -4281,12 +4298,13 @@ async function newRequest() {
   logHistory(o.id, o.company, 'created', { status: 'Нова' });
 
   ['qnClient','qnPhone','qnNum','qnNotes'].forEach(i => document.getElementById(i).value = '');
+  qnPhoneHint();
   LS.del('crm_draft_qn_' + co);
   setAs('qnAs', qnAsDefault()); qnSetUrg('');
   autoGrow(document.getElementById('qnNotes'));
   qnFiles = []; renderQnFiles();
   await sync(); renderNew();
-  if (cross) alert(`Заявку надіслано в ${CO_NAME[target]}${asg ? ' · відповідальний: ' + asg : ''}. У вашій компанії вона не зберігається.`);
+  if (cross) alert(`Заявку надіслано в ${CO_NAME[target]}${guard.v.clientId ? ' · клієнт уже в базі: ' + (guard.v.clientName || '') : ''}${asg ? ' · відповідальний: ' + asg : ''}. У вашій компанії вона не зберігається.`);
 }
 
 /* ================= ЗВІТ ================= */
@@ -4569,6 +4587,16 @@ function clHint() {
   } else { el.className = 'fc-hint'; el.textContent = 'Нового клієнта буде додано в розділ «Клієнти».'; }
 }
 async function saveO() {
+  // Нове замовлення: звіряємо номер клієнта з базою компанії
+  if (!editId) {
+    const cn0 = document.getElementById('fCl').value.trim(), ph0 = (document.getElementById('fClPh') ? document.getElementById('fClPh').value.trim() : '') || (phoneLike(cn0) ? cn0 : '');
+    if (phoneKey(ph0)) {
+      const g = await phoneGuard(ph0, co);
+      if (!g.ok) return;
+      if (isMgr() && g.v.owner && g.v.owner !== ME()) { alert(`Цього клієнта вже веде ${g.v.owner} (${phoneDesc(g.v, co)}). Дублікат не створюється.`); return; }
+      if (g.v.valid && !isMgr()) setAs('fAs', g.v.valid);       // той самий менеджер, що вів цей номер
+    }
+  }
   const o = { id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value, factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value, assignee: document.getElementById('fAs').value || null, urgency: document.getElementById('fUrg').value || null, factory_ordered: document.getElementById('fOr').value || null, eta_date: document.getElementById('fEta').value || null, sale_price_ht: n(document.getElementById('fSa').value), tva_rate: n(document.getElementById('fTv').value), total_ttc: n(document.getElementById('fTt').value), cost_price: n(document.getElementById('fCo').value), install_cost: n(document.getElementById('fIn').value), delivery: n(document.getElementById('fDe').value), paid_amount: payTotal(), payments: curPay, factory_payments: curFacPay, factory_prepay: n(document.getElementById('fFaPa').value), factory2: document.getElementById('fFa2').value || null, cost_price2: n(document.getElementById('fCo2').value), factory_prepay2: n(document.getElementById('fFaPa2').value), deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value, cancel_reason: document.getElementById('fCan').value, file_url: JSON.stringify(curFiles), check_measured: document.getElementById('fChM').checked, check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked };
   // Дата створення виставляється автоматично: нове замовлення — зараз; наявне — зберігаємо стару
   // (якщо в старого запису її немає — відновлюємо з часу в id, інакше ставимо зараз)
@@ -4582,7 +4610,7 @@ async function saveO() {
   else { const cl = clients.find(c => (c.name || '').trim().toLowerCase() === cname.toLowerCase()); o.client_id = cl ? cl.id : null; }
   // Клієнта ще немає: якщо в полі номер телефону — шукаємо за номером, інакше створюємо клієнта (і телефон, якщо це номер)
   if (!o.client_id && cname) {
-    const isPh = phoneLike(cname), byPh = isPh ? clients.find(c => samePhone(c.phone, cname)) : null;
+    const isPh = phoneLike(cname), phSrc = (document.getElementById('fClPh') ? document.getElementById('fClPh').value.trim() : '') || (isPh ? cname : ''), byPh = phSrc ? clients.find(c => samePhone(c.phone, phSrc)) : null;
     if (byPh) { o.client_id = byPh.id; if (byPh.name) o.client = byPh.name; }
     else {
       const gv = id => (document.getElementById(id) ? document.getElementById(id).value.trim() : '');
@@ -4811,6 +4839,83 @@ async function delO() {
 const phoneKey = s => { const d = String(s || '').replace(/\D/g, ''); return d.length >= 9 ? d.slice(-9) : ''; };   // останні 9 цифр: 0612… = +33612…
 const nameIsPhone = s => !/\p{L}/u.test(String(s || '')) && String(s || '').replace(/\D/g, '').length >= 7;
 const clientOrders = c => orders.filter(o => o.client_id ? o.client_id === c.id : o.client === c.name);
+/* ================= ЗВІРКА НОМЕРІВ ПРИ СТВОРЕННІ ЗАЯВКИ / ЗАМОВЛЕННЯ ================= */
+const teamOf = c => c === co ? TEAM : (DEFAULT_POOL[c] || []);
+const otherCo = c => c === 'heimek' ? 'luxwin' : 'heimek';
+// Шукає номер у компанії по ВСІХ замовленнях і клієнтах (функція бази phone_lookup бачить і чуже — менеджеру це потрібно, щоб не робити дубль).
+// Якщо функції ще немає — шукаємо серед того, що бачить користувач.
+async function phoneLookup(phone, company) {
+  const key = phoneKey(phone); if (!key) return [];
+  try {
+    const r = await _sb.rpc('phone_lookup', { p_phone: phone, p_company: company });
+    if (!r.error && Array.isArray(r.data)) return r.data.map(x => ({ order_id: x.r_order_id, client_id: x.r_client_id, client: x.r_client, assignee: x.r_assignee, status: x.r_status, product: x.r_product, created_at: x.r_created, company: x.r_company }));
+  } catch (e) {}
+  if (company !== co) return [];
+  const rows = orders.filter(o => phoneKey(orderPhone(o)) === key || (nameIsPhone(o.client) && phoneKey(o.client) === key))
+    .map(o => ({ order_id: o.id, client_id: o.client_id || null, client: o.client, assignee: o.assignee, status: o.status, product: o.product, created_at: o.created_at, company }));
+  clients.filter(c => (phoneKey(c.phone) === key || (nameIsPhone(c.name) && phoneKey(c.name) === key)) && !rows.some(r => r.client_id === c.id))
+    .forEach(c => rows.push({ order_id: null, client_id: c.id, client: c.name, assignee: null, status: null, product: null, created_at: null, company }));
+  return rows;
+}
+function phoneVerdict(rows, company) {
+  const ords = rows.filter(r => r.order_id).sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+  const open = ords.filter(r => r.status !== 'Виконано' && r.status !== 'Скасовано');
+  const pick = l => (l.find(r => r.assignee) || {}).assignee || '';
+  const owner = pick(open) || pick(ords);
+  const named = rows.find(r => r.client && !nameIsPhone(r.client)) || rows.find(r => r.client) || {};
+  return { rows, ords, open, owner, valid: owner && (company !== co || teamOf(company).includes(owner)) ? owner : '',
+    clientId: (rows.find(r => r.client_id) || {}).client_id || null, clientName: named.client || '' };
+}
+function phoneDesc(v, company, noWhere) {
+  const where = (company === co || noWhere) ? '' : ` у ${CO_NAME[company]}`;
+  const opens = v.open.map(r => `${r.product ? '№' + r.product : 'замовлення'} (${r.status})`).join(', ');
+  return `${v.clientName || 'клієнт'}${where} · веде ${v.owner || 'ніхто'}` + (v.open.length ? ` · відкрито: ${opens}` : v.ords.length ? ' · усі замовлення закриті' : '');
+}
+// Перед створенням: менеджер не може зробити дубль; адмін — лише після підтвердження
+async function phoneGuard(phone, company) {
+  const v = phoneVerdict(await phoneLookup(phone, company), company);
+  if (!v.rows.length || !v.open.length || company !== co) return { ok: true, v };   // заявка в іншу компанію не блокується: вона прив'язується до наявного клієнта й менеджера
+  const desc = phoneDesc(v, company);
+  if (isMgr()) { alert(`Цей номер уже в роботі: ${desc}.\n\nДублікат не створюється. Відкрийте наявне замовлення або зверніться до адміна${v.owner ? ' чи колеги (' + v.owner + ')' : ''}.`); return { ok: false, v }; }
+  if (!confirm(`Цей номер уже в роботі: ${desc}.\n\nВсе одно створити ще одне${v.valid ? ' (заявку буде призначено: ' + v.valid + ')' : ''}?`)) return { ok: false, v };
+  return { ok: true, v };
+}
+// Підказка під полем одразу під час введення номера
+const _pt = {};
+function phoneHint(elId, phone, company, onVerdict) {
+  clearTimeout(_pt[elId]);
+  const el = document.getElementById(elId); if (!el) return;
+  if (!phoneKey(phone)) { el.innerHTML = ''; el.className = 'dup-note'; return; }
+  _pt[elId] = setTimeout(async () => {
+    const seq = _pt[elId + 'q'] = (_pt[elId + 'q'] || 0) + 1;
+    const [rows, rows2] = await Promise.all([phoneLookup(phone, company), phoneLookup(phone, otherCo(company))]);
+    if (seq !== _pt[elId + 'q']) return;
+    const v = phoneVerdict(rows, company), v2 = phoneVerdict(rows2, otherCo(company));
+    let h = '', cls = 'dup-note';
+    const xc = company !== co;
+    if (rows.length) {
+      cls += (!xc && v.open.length) ? (isMgr() ? ' stop' : ' warn') : ' info';
+      h += `<b>${xc ? 'Клієнт уже є в ' + CO_NAME[company] + ':' : 'Номер уже є в базі:'}</b> ${esc(phoneDesc(v, company, xc))}`;
+      if (xc) h += `<span class="sub">Дублікат не створюється: заявку буде прив'язано до цього клієнта${v.valid ? ' і передано: <b>' + esc(v.valid) + '</b>' : ''}.</span>`;
+      else {
+        if (v.open.length) h += `<span class="sub">${isMgr() ? 'Дублікат створити не вдасться.' : 'Створення ще одного потребуватиме підтвердження.'}</span>`;
+        if (v.valid) h += `<span class="sub">Автоматично призначу: <b>${esc(v.valid)}</b></span>`;
+      }
+    }
+    if (rows2.length) { if (!rows.length) cls += ' info'; h += `<span class="${rows.length ? 'sub' : ''}">Також є в ${CO_NAME[otherCo(company)]}: ${esc(phoneDesc(v2, otherCo(company), true))}</span>`; }
+    el.innerHTML = h; el.className = cls.trim();
+    if (onVerdict) onVerdict(v);
+  }, 450);
+}
+function qnPhoneHint() {
+  const nm = document.getElementById('qnClient').value.trim(), ph = document.getElementById('qnPhone').value.trim() || (phoneLike(nm) ? nm : '');
+  phoneHint('qnDup', ph, qnTargetCo, v => { if (v.valid) setAs('qnAs', v.valid); });
+}
+function clPhoneHint() {
+  if (editId) { const el = document.getElementById('clDup'); if (el) { el.innerHTML = ''; el.className = 'dup-note'; } return; }   // перевірка лише для нового замовлення
+  const nm = document.getElementById('fCl').value.trim(), ph = document.getElementById('fClPh').value.trim() || (phoneLike(nm) ? nm : '');
+  phoneHint('clDup', ph, co, v => { if (v.valid && !isMgr()) setAs('fAs', v.valid); });
+}
 let dupGroups = [];
 function findDupGroups() {
   const par = clients.map((_, i) => i);
