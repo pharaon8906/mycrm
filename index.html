@@ -1299,6 +1299,14 @@ html.dark .urg-seg button.on[data-u] { color: #0b101c; }
 .cl-box-h { display: flex; align-items: center; gap: var(--s2); margin-bottom: var(--s3); font-size: 13px; }
 .cl-box-h button { border: 0; background: var(--surface); color: var(--p2); font: inherit; font-size: 12.5px; font-weight: 600; padding: 6px 12px; border-radius: 999px; cursor: pointer; box-shadow: var(--sh-1); }
 .cl-box input, .cl-box textarea { background: var(--surface); }
+/* --- підсвічування відкритого в списку --- */
+.card.is-open { background: color-mix(in srgb, var(--p2) 7%, var(--surface)); box-shadow: 0 0 0 2px var(--p2), var(--sh-card-h); }
+.card.was-open { box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--p2) 38%, transparent), var(--sh-card); }
+.kc.is-open { box-shadow: 0 0 0 2px var(--p2), var(--sh-card-h); }
+.kc.was-open { box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--p2) 38%, transparent), var(--sh-card); }
+.ot tr.r.is-open td { background: var(--p2-soft); }
+.ot tr.r.is-open td:first-child { box-shadow: inset 3px 0 0 var(--p2); }
+.ot tr.r.was-open td:first-child { box-shadow: inset 3px 0 0 color-mix(in srgb, var(--p2) 38%, transparent); }
 </style>
 </head>
 <body>
@@ -3624,6 +3632,29 @@ document.addEventListener('keydown', e => {
   }
 });
 
+/* ================= ПІДСВІЧУВАННЯ ВІДКРИТОГО ЗАМОВЛЕННЯ / КЛІЄНТА В СПИСКУ ================= */
+let openedOrderId = null, openedClientId = null;
+// Відкрите зараз — яскраво (is-open); те, що щойно закрили, — ледь помітно (was-open), щоб легко знайти місце в списку
+function markOpened(scroll) {
+  document.querySelectorAll('.is-open, .was-open').forEach(e => e.classList.remove('is-open', 'was-open'));
+  const isOn = id => { const m = document.getElementById(id); return !!m && m.style.display === 'flex' && !m.classList.contains('closing'); };
+  const mark = (id, open, sel) => {
+    if (!id) return;
+    document.querySelectorAll(sel).forEach(e => {
+      if (e.dataset.id !== String(id)) return;
+      e.classList.add(open ? 'is-open' : 'was-open');
+      if (open && scroll) { const r = e.getBoundingClientRect(); if (r.top < 120 || r.bottom > innerHeight - 20) e.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+    });
+  };
+  mark(openedOrderId, isOn('mO'), '#list .card, #listNew .card, #otable tr.r, #kanban .kc');
+  mark(openedClientId, isOn('mCc'), '#listC .card');
+}
+(function () {   // списки перемальовуються (пошук, синхронізація) — підсвічування відновлюється саме
+  let tm = 0;
+  const mo = new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(() => markOpened(), 30); });
+  ['list', 'listNew', 'otable', 'kanban', 'listC'].forEach(id => { const el = document.getElementById(id); if (el) mo.observe(el, { childList: true }); });
+})();
+
 /* ================= ТЕРМІНОВІСТЬ ЗАМОВЛЕНЬ ================= */
 const URG_ST = ['', 'Терміново', 'Дуже терміново'];
 const urgRank = o => Math.max(0, URG_ST.indexOf((o && o.urgency) || ''));
@@ -3722,7 +3753,7 @@ function setClSt(k) { clSt = (k === clSt) ? '' : k; renderC(); }
 const CONF_ST = ['Підтверджено', 'Перевірка', 'В роботі', 'На складі', 'Виконано'];
 let ccId = null;
 function openClient(id) {
-  const c = clients.find(x => x.id == id); if (!c) return; ccId = c.id;
+  const c = clients.find(x => x.id == id); if (!c) return; ccId = c.id; openedClientId = c.id;
   const ords = clientOrders(c).slice().sort((a, b) => orderTs(b) - orderTs(a));
   const conf = ords.filter(o => CONF_ST.includes(o.status)), est = ords.filter(o => o.status === 'Кошторис' || o.status === 'Нова');
   const sum = conf.reduce((s, o) => s + n(o.total_ttc), 0), paid = conf.reduce((s, o) => s + n(o.paid_amount), 0), left = conf.reduce((s, o) => s + Math.max(0, n(o.total_ttc) - n(o.paid_amount)), 0);
@@ -4612,7 +4643,7 @@ async function renameClientInOrders(id, oldName, newName) {
 }
 
 const openO = id => {
-  editId = id; const o = id ? orders.find(x=>x.id==id) : {};
+  editId = id; openedOrderId = id || null; const o = id ? orders.find(x=>x.id==id) : {};
   ['fCl','fPr','fSa','fCo','fIn','fDe','fDl','fRe','fNo','fCan','fFaPa','fCo2','fFaPa2','fOr','fEta'].forEach(i=>document.getElementById(i).value='');
   ['fChM','fChO','fChS','fChI'].forEach(i=>document.getElementById(i).checked=false);
   document.getElementById('fFa').value = id ? (o.factory || FACTORIES[0]) : FACTORIES[0];
@@ -4693,6 +4724,7 @@ function showModal(id) {
   el.style.display = 'flex';
   if (!was) history.pushState({ m: id }, '');        // якщо вікно вже відкрите (бічна панель), нового запису в історії не робимо
   growAll();   // підігнати висоту полів коментарів під наявний текст
+  markOpened(true);
 }
 // Закриття з короткою анімацією; логічно вікно закрите одразу (клас closing)
 function hideModal(el) {
@@ -4701,7 +4733,7 @@ function hideModal(el) {
   el._closeT = setTimeout(() => { if (el.classList.contains('closing')) { el.style.display = 'none'; el.classList.remove('closing'); } }, 200);
 }
 const closeM = (id, fromPop) => {
-  hideModal(document.getElementById(id));
+  hideModal(document.getElementById(id)); markOpened();
   if (id === 'mO' || id === 'mC') editId = null;     // допоміжні вікна (шаблони, кошик тощо) не скидають відкрите замовлення
   if(id==='mO') { document.querySelector('#mO h3').textContent='Замовлення'; finishFiles(); }
   // якщо закрили вручну — прибрати запис з історії
