@@ -1336,6 +1336,22 @@ input[readonly]:not(.ro-yel):not(.ro-grn):not(.ro-blu) { background: var(--line-
 .sa-chk:active { transform: scale(.9); }
 .bp-top span { display: flex; align-items: center; gap: var(--s3); }
 .bp-top button i { margin-right: 4px; }
+/* --- швидке меню статусу --- */
+.status-badge.st-click { cursor: pointer; transition: filter .15s, transform .15s; }
+.status-badge.st-click:hover { filter: brightness(.94); transform: translateY(-1px); }
+.status-badge.st-click::after { content: "▾"; font-size: 10px; margin-left: 2px; opacity: .7; }
+.st-menu { position: fixed; z-index: 9500; min-width: 190px; padding: 6px; border-radius: 16px; background: var(--surface-2); box-shadow: var(--sh-3); display: grid; gap: 2px; animation: panelIn .14s ease both; }
+.st-menu button { display: flex; align-items: center; gap: 10px; border: 0; background: none; padding: 9px 12px; border-radius: 10px; font: inherit; font-size: 13.5px; font-weight: 600; color: var(--txt); cursor: pointer; text-align: left; }
+.st-menu button i { width: 9px; height: 9px; border-radius: 50%; background: var(--sc); flex: none; }
+.st-menu button:hover { background: var(--line-soft); }
+.st-menu button.on { background: color-mix(in srgb, var(--sc) 14%, var(--surface-2)); color: var(--sc); }
+.cc-logadd { margin: 0 0 var(--s3); }
+/* --- на телефоні швидкі форми — нижнім вікном, а не на весь екран --- */
+@media (max-width: 640px) {
+  #mDt, #mE, #mC, #mWhat, #mTour, #mW, #mSh { align-items: flex-end; }
+  #mDt .mbox, #mE .mbox, #mC .mbox, #mWhat .mbox, #mTour .mbox, #mW .mbox { height: auto; max-height: 88vh; border-radius: 24px 24px 0 0; padding-top: 22px; padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); position: relative; }
+  #mDt .mbox::before, #mE .mbox::before, #mC .mbox::before, #mWhat .mbox::before, #mTour .mbox::before, #mW .mbox::before { content: ""; position: absolute; left: 50%; top: 8px; width: 40px; height: 4px; margin-left: -20px; border-radius: 4px; background: var(--line-in); }
+}
 </style>
 </head>
 <body>
@@ -1804,6 +1820,7 @@ input[readonly]:not(.ro-yel):not(.ro-grn):not(.ro-blu) { background: var(--line-
     <div class="fg fin-only" style="gap:8px">
       <button type="button" class="btn-alt" style="display:block;margin:0" onclick="openTrash()"><i class="fa fa-trash-can"></i> Кошик видалених замовлень</button>
       <button type="button" class="btn-alt" style="display:block;margin:0" onclick="openDups()"><i class="fa fa-user-group"></i> Дублікати клієнтів</button>
+      <button type="button" class="btn-alt" style="display:block;margin:0" onclick="exportBackup()"><i class="fa fa-download"></i> Резервна копія всіх даних (JSON)</button>
     </div>
 
     <div class="sec">Акаунт</div>
@@ -2747,7 +2764,7 @@ const render = () => {
             <div class="c-name"><span class="nm">${esc(o.client||'Без імені')}</span>${urgBadge(o)}${clBadge(o)}${rem ? '<span title="Передзвонити">⏰</span>' : ''}</div>
             <div class="c-sub">${esc(o.product||'—')} · ${esc(o.factory||'—')}${o.factory2 ? ' + '+esc(o.factory2) : ''}</div>
           </div>
-          <div class="status-badge">${esc(o.status)}</div>
+          <div class="status-badge ${selMode ? '' : 'st-click'}" ${selMode ? '' : `onclick="stMenu(event,'${esc(o.id)}')" title="Змінити статус"`}>${esc(o.status)}</div>
         </div>
         ${showProg(o) ? progHtml(o) : ''}
         <div class="c-main">
@@ -3832,6 +3849,11 @@ function openClient(id) {
     <div class="fg"><textarea id="ccNotes" rows="3" oninput="autoGrow(this)" placeholder="уподобання, умови, важливі домовленості…">${esc(c.notes || '')}</textarea></div>
     <button type="button" class="btn-alt" style="display:block" onclick="ccSaveNotes()"><i class="fa fa-floppy-disk"></i> Зберегти нотатки</button>
     <div class="sec">Історія спілкування</div>
+    <div class="pay-add cc-logadd" style="grid-template-columns:auto 1fr auto">
+      <select id="ccLogKind"><option value="call">📞 Дзвінок</option><option value="noans">📵 Не відповів</option><option value="msg">💬 Повідомлення</option><option value="note">📝 Нотатка</option></select>
+      <input id="ccLogText" placeholder="Що відбулося…" onkeydown="if(event.key==='Enter'){event.preventDefault();ccAddLog()}">
+      <button type="button" onclick="ccAddLog()" title="Додати запис"><i class="fa fa-plus"></i></button>
+    </div>
     <div id="ccLog"><small style="color:var(--muted2)">Завантаження…</small></div>`;
   showModal('mCc');
   ccLoadLog(ids);
@@ -3846,6 +3868,15 @@ async function ccLoadLog(ids) {
   if (!data.length) { box.innerHTML = '<small style="color:var(--muted2)">Записів ще немає. Їх додають у замовленні в розділі «Журнал спілкування», а також при відправці повідомлень з шаблонів.</small>'; return; }
   box.innerHTML = '<div class="cc-log">' + data.map(l => { const o = orders.find(x => x.id === l.order_id);
     return `<div class="cc-le"><div class="lm">${fmtDateTime(Date.parse(l.created_at))} · ${esc(l.author || '—')}${o && o.product ? ' · №' + esc(o.product) : ''}</div>${esc(l.text || '')}</div>`; }).join('') + '</div>';
+}
+// Запис спілкування з картки клієнта: іде в журнал його найновішого відкритого замовлення (інакше — найновішого)
+async function ccAddLog() {
+  const c = clients.find(x => x.id == ccId); if (!c) return;
+  const inp = document.getElementById('ccLogText'), text = inp.value.trim(); if (!text) return;
+  const ords = clientOrders(c).slice().sort((a, b) => orderTs(b) - orderTs(a));
+  const o = ords.find(isOpen) || ords[0];
+  if (!o) return alert('У клієнта ще немає замовлення, до якого можна додати запис.');
+  if (await addLogEntry(o, document.getElementById('ccLogKind').value, text)) { inp.value = ''; ccLoadLog(ords.map(x => x.id)); render(); refreshBell(); }
 }
 async function ccSaveNotes() {
   const c = clients.find(x => x.id == ccId); if (!c) return;
@@ -3927,6 +3958,20 @@ function renderTable(f) {
   }).join('');
   box.innerHTML = `<div class="ot-wrap"><table class="ot"><thead><tr><th class="selcol"></th><th>Клієнт</th><th class="num">Сума TTC</th><th class="num">Оплачено</th><th class="num">Борг</th><th>Статус</th><th>Хто веде</th><th>Створено / далі</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
     + (f.length > tbLimit ? `<button type="button" class="btn-alt ot-more" onclick="tbLimit += 150; render()">Показати ще (${f.length - tbLimit})</button>` : '');
+}
+// Швидка зміна статусу: клік по мітці статусу на картці відкриває меню
+function closeStMenu() { const m = document.getElementById('stMenu'); if (m) m.remove(); }
+function stMenu(e, id) {
+  e.stopPropagation(); closeStMenu();
+  const o = orders.find(x => x.id === id); if (!o) return;
+  const m = document.createElement('div'); m.id = 'stMenu'; m.className = 'st-menu';
+  m.innerHTML = BOARD_ST.map(x => `<button type="button" class="${x.k === o.status ? 'on' : ''}" style="--sc:${stColor(x.k)}" data-s="${esc(x.k)}"><i></i>${x.k}</button>`).join('');
+  document.body.appendChild(m);
+  const r = e.currentTarget.getBoundingClientRect(), mw = m.offsetWidth, mh = m.offsetHeight;
+  m.style.left = Math.max(8, Math.min(innerWidth - mw - 8, r.right - mw)) + 'px';
+  m.style.top = (r.bottom + mh + 12 > innerHeight ? Math.max(8, r.top - mh - 6) : r.bottom + 6) + 'px';
+  m.addEventListener('click', ev => { ev.stopPropagation(); const b = ev.target.closest('button'); if (!b) return; closeStMenu(); if (b.dataset.s !== o.status) tbSetStatus(id, b.dataset.s); });
+  setTimeout(() => { document.addEventListener('click', closeStMenu, { once: true }); window.addEventListener('scroll', closeStMenu, { once: true, capture: true }); }, 0);
 }
 function tbRow(e, tr) { if (e.target.closest('select,button,a,input')) return; cardClick(tr); }
 function tbSetStatus(id, st) { const o = orders.find(x => x.id === id); if (o && o.status !== st) moveOrder(o, st); else render(); }
@@ -4060,9 +4105,13 @@ document.addEventListener('drop', e => {
 /* ================= ЦЕНТР СПОВІЩЕНЬ (дзвіночок) ================= */
 function bellData() {
   const a = alertItems(), X = bellX();
-  return { ev: a.ev, rem: a.rem, late: orders.filter(o => isLate(o) && !X['late:' + o.id + ':' + o.eta_date]), news: orders.filter(o => o.status === 'Нова' && !X['new:' + o.id]).sort((x, y) => orderTs(y) - orderTs(x)),
+  return { stale: orders.filter(o => staleOf(o) && !X[staleKey(o)]).sort((x, y) => staleOf(y) - staleOf(x)), ev: a.ev, rem: a.rem, late: orders.filter(o => isLate(o) && !X['late:' + o.id + ':' + o.eta_date]), news: orders.filter(o => o.status === 'Нова' && !X['new:' + o.id]).sort((x, y) => orderTs(y) - orderTs(x)),
            debt: orders.filter(o => isDebtor(o) && !X['debt:' + o.id]).sort((x, y) => (n(y.total_ttc) - n(y.paid_amount)) - (n(x.total_ttc) - n(x.paid_amount))) };
 }
+// «Клієнт мовчить»: нова заявка без руху 2+ дні або кошторис 3+ дні (рух = запис у журналі спілкування)
+const touchTs = o => Math.max(orderTs(o), o.last_contact ? Date.parse(o.last_contact) : 0);
+const staleOf = o => { if (o.status !== 'Нова' && o.status !== 'Кошторис') return 0; const d = (Date.now() - touchTs(o)) / 864e5; return d >= (o.status === 'Нова' ? 2 : 3) ? Math.floor(d) : 0; };
+const staleKey = o => 'stale:' + o.id + ':' + ymd(touchTs(o));
 // Прибрані зі сповіщень (на цьому пристрої): ключ містить дату, тому при новій даті сповіщення зʼявиться знову
 const BELL_KEY = 'crm_bell_x';
 function bellX() { try { return JSON.parse(LS.get(BELL_KEY, '{}')) || {}; } catch (e) { return {}; } }
@@ -4075,7 +4124,7 @@ function bellDismiss(k) {
 function bellClearAll() {
   const d = bellData(), prev = bellX(), m = Object.assign({}, prev), add = k => { m[k] = Date.now(); };
   d.ev.forEach(e => add('ev:' + e.id)); d.rem.forEach(o => add('rem:' + o.id + ':' + o.reminder_date)); d.late.forEach(o => add('late:' + o.id + ':' + o.eta_date));
-  d.news.forEach(o => add('new:' + o.id)); d.debt.forEach(o => add('debt:' + o.id));
+  d.news.forEach(o => add('new:' + o.id)); d.debt.forEach(o => add('debt:' + o.id)); d.stale.forEach(o => add(staleKey(o)));
   bellSave(m); bellRefreshAll();
   toast('Сповіщення очищено', () => { bellSave(prev); bellRefreshAll(); });
 }
@@ -4083,7 +4132,7 @@ async function bellDoneEv(id) { await toggleEv(id); bellRefreshAll(); }
 const chkBtn = (click, title, ico) => `<button type="button" class="sa-chk" onclick="event.stopPropagation();${click}" title="${title}"><i class="fa ${ico || 'fa-circle-check'}"></i></button>`;
 function refreshBell() {
   const b = document.getElementById('bellN'); if (!b) return;
-  const d = bellData(), cnt = d.ev.length + d.rem.length + d.late.length + d.news.length;
+  const d = bellData(), cnt = d.ev.length + d.rem.length + d.late.length + d.news.length + d.stale.length;
   b.textContent = cnt > 99 ? '99+' : cnt; b.style.display = cnt ? '' : 'none';
 }
 function toggleBell(e) { e.stopPropagation(); const p = document.getElementById('bellPanel'); if (p.classList.toggle('on')) renderBell(); }
@@ -4092,7 +4141,8 @@ function renderBell() {
   const orow = (o, ico, c, sub, key) => `<div class="sa-row" onclick="bellGo('openO','${esc(o.id)}')"><div class="si" style="background:${c}"><i class="fa ${ico}"></i></div><div class="st">${esc(o.client || 'Без імені')}<small>${esc(sub)}</small></div>${chkBtn(`bellDismiss('${esc(key)}')`, 'Прибрати зі сповіщень')}</div>`;
   const sec = (title, cnt, rows) => rows ? `<div class="bp-h">${title}<span>${cnt}</span></div>${rows}` : '';
   const now = [...d.ev.map(e => ({ d: e.event_date, t: 'ev', e })), ...d.rem.map(o => ({ d: o.reminder_date, t: 'rem', o }))].sort((a, b) => a.d.localeCompare(b.d));
-  const html = sec('Потребує уваги зараз', now.length, now.slice(0, 6).map(agendaRow).join(''))
+  const html = sec('Клієнт мовчить', d.stale.length, d.stale.slice(0, 4).map(o => orow(o, 'fa-hourglass-half', 'var(--warning)', o.status + ' · ' + staleOf(o) + ' дн. без руху' + (o.assignee ? ' · ' + o.assignee : ''), staleKey(o))).join(''))
+    + sec('Потребує уваги зараз', now.length, now.slice(0, 6).map(agendaRow).join(''))
     + sec('Затримка поставок', d.late.length, d.late.slice(0, 4).map(o => orow(o, 'fa-truck', 'var(--danger)', 'очікувалось ' + dateTxt(o.eta_date) + (o.product ? ' · №' + o.product : ''), 'late:' + o.id + ':' + o.eta_date)).join(''))
     + sec('Нові заявки', d.news.length, d.news.slice(0, 4).map(o => orow(o, 'fa-inbox', 'var(--p2)', (o.product ? '№' + o.product + ' · ' : '') + (o.assignee || 'без відповідального'), 'new:' + o.id)).join(''))
     + sec('Борги клієнтів', d.debt.length, d.debt.slice(0, 3).map(o => orow(o, 'fa-money-bill-wave', 'var(--g-ok)', 'залишок ' + fN(Math.round(n(o.total_ttc) - n(o.paid_amount))) + ' €', 'debt:' + o.id)).join(''));
@@ -4216,26 +4266,32 @@ function maybeTour() { if (_tourAsked || LS.get('crm_tour', '') === '1') return;
 
 /* ================= ЩО НОВОГО ================= */
 // При кожному оновленні піднімайте APP_VERSION і додавайте новий запис угору списку CHANGELOG: користувачі побачать його один раз.
-const APP_VERSION = '2026.10.24';
+const APP_VERSION = '2026.10.25';
 const CHANGELOG = [
+  { v: '2026.10.25', date: '25.10.2026',
+    news: [
+      'Сповіщення «Клієнт мовчить»: заявка чи кошторис без руху кілька днів.',
+      'Статус змінюється одним кліком по мітці на картці.',
+      'Запис спілкування можна додати прямо з картки клієнта.',
+      'Звіт по менеджерах: заявки, конверсія, середній чек.',
+      'Резервна копія всіх даних (Налаштування → Дані).',
+      'На телефоні швидкі форми відкриваються знизу.'
+    ],
+    fixes: [] },
   { v: '2026.10.24', date: '24.10.2026',
     news: [
-      'Звірка номерів телефону: дубль не створюється, заявка йде менеджеру, який уже веде цього клієнта (також для заявок Lux Win → Heimek).',
-      'Ролі: адмін бачить усе; менеджер бачить свої та нерозподілені замовлення, вже призначеного відповідального змінити не може, статистика лише по своїх.',
-      'Статуси клієнтів (Потенційний, Активний, Постійний, VIP, Неактивний, Не турбувати) — у картці клієнта, у списку з фільтром і в картці замовлення.',
-      'Дані клієнта (телефон, адреса, нотатки, статус) можна змінювати прямо в картці замовлення.',
-      'Терміновість заявок: Звичайна / Терміново / Дуже терміново — мітка на картці, фільтр і сортування.',
-      'Відкрите замовлення чи клієнт підсвічується в списку.',
-      'Сповіщення і справи: кнопка ✓ позначає виконаним (для подій) або прибирає зі списку; «Очистити все» у дзвіночку з можливістю скасувати.',
-      'Новий дизайн: «Сьогодні» як дашборд, список замовлень з підсумком, історія змін як часова лінія, вибір вигляду шапки в налаштуваннях.'
+      'Номер телефону звіряється: дубль не створюється, заявка йде менеджеру клієнта.',
+      'Ролі: менеджер бачить свої й нерозподілені замовлення, відповідального не змінює.',
+      'Статуси клієнтів і терміновість заявок.',
+      'Дані клієнта можна змінити в картці замовлення.',
+      'Сповіщення й справи: кнопка ✓ і «Очистити все».',
+      'Відкрите замовлення підсвічується в списку.'
     ],
     fixes: [
-      'Додаючи нового клієнта, тепер можна поставити йому статус.',
-      'Поля вводу стали виразнішими — одразу видно, куди можна писати.',
-      'Кнопка налаштувань знову видна у світлій темі.',
-      'Прибрано кнопку «Вибрати» з панелі замовлень (вона заважала). Вибір кількох замовлень лишився в Ctrl+F → «Вибрати кілька замовлень».',
-      'Нову заявку можна призначити колезі без помилки доступу.',
-      'Кнопка «Зберегти» в картці замовлення більше не ховається за краєм екрана при іншому масштабі.'
+      'Статус при додаванні нового клієнта.',
+      'Виразніші поля вводу.',
+      'Кнопка налаштувань у світлій темі.',
+      'Прибрано кнопку «Вибрати» (є в Ctrl+F).'
     ] }
 ];
 function whatHtml(list) {
@@ -4243,16 +4299,20 @@ function whatHtml(list) {
     + (c.news && c.news.length ? `<div class="wn-h new"><i class="fa fa-wand-magic-sparkles"></i> Нове</div><ul class="wn-list">${c.news.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '')
     + (c.fixes && c.fixes.length ? `<div class="wn-h fix"><i class="fa fa-wrench"></i> Виправлено</div><ul class="wn-list">${c.fixes.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '')).join('');
 }
-function openWhat(all) {
-  document.getElementById('whatBody').innerHTML = whatHtml(all ? CHANGELOG : CHANGELOG.slice(0, 1));
+function openWhat(all, since) {
+  // після оновлення — усе, що новіше за побачене раніше (але не більше трьох записів); з налаштувань — увесь список
+  let list = all ? CHANGELOG : (since ? CHANGELOG.filter(c => c.v > since) : CHANGELOG).slice(0, 3);
+  if (!list.length) list = CHANGELOG.slice(0, 1);
+  document.getElementById('whatBody').innerHTML = whatHtml(list);
   LS.set('crm_seen_ver', APP_VERSION);
   showModal('mWhat');
 }
 // Показуємо один раз після оновлення; новим користувачам (ще не бачили підказок) — ні
 function maybeWhat() {
-  if (LS.get('crm_seen_ver', '') === APP_VERSION) return;
+  const seen = LS.get('crm_seen_ver', '');
+  if (seen === APP_VERSION) return;
   if (LS.get('crm_tour', '') !== '1') { LS.set('crm_seen_ver', APP_VERSION); return; }
-  setTimeout(() => { if (!document.querySelector('.modal-w[style*="flex"]')) openWhat(); }, 1600);
+  setTimeout(() => { if (!document.querySelector('.modal-w[style*="flex"]')) openWhat(false, seen); }, 1600);
 }
 
 /* ================= АНІМАЦІЇ ================= */
@@ -4478,6 +4538,7 @@ function renderStats() {
     </div>
     <h4 class="st-h"><span>Замовлення за статусами</span>${mgr ? '' : '<button class="btn-ghost" onclick="exportCSV()"><i class="fa fa-file-export"></i> Експорт CSV</button>'}</h4>
     <div class="cnt-grid">${cHtml}</div>
+    ${mgr ? '' : mgrTable(src)}
     ${teamStats(src, mgr)}
     ${funnelStats(src)}
     ${monthCompare(mgr)}
@@ -4555,6 +4616,17 @@ async function loadDurations() {
 }
 
 // Підсумок по співробітниках: скільки чекає, у роботі, виконано. Прибуток бачить лише власник
+// Таблиця менеджерів для адміна: заявок, у роботі, виконано, конверсія, середній чек, скільки «мовчать»
+function mgrTable(src) {
+  const by = {}; src.forEach(o => { if (o.assignee) (by[o.assignee] = by[o.assignee] || []).push(o); });
+  const ACT = ['Підтверджено', 'Перевірка', 'В роботі', 'На складі'];
+  const rows = Object.keys(by).map(nm => {
+    const g = by[nm], act = g.filter(o => ACT.includes(o.status)), dn = g.filter(o => o.status === 'Виконано'), conf = act.length + dn.length;
+    const rev = [...act, ...dn].reduce((a, o) => a + n(o.total_ttc), 0), stale = g.filter(o => staleOf(o)).length;
+    return `<tr class="r" data-n="${esc(nm)}" onclick="goAs(this.dataset.n)"><td><div class="ot-cl">${avatarHtml(nm)}<div class="nm">${esc(nm)}</div></div></td><td class="num">${g.length}</td><td class="num">${act.length}</td><td class="num">${dn.length}</td><td class="num">${g.length ? Math.round(conf / g.length * 100) : 0}%</td><td class="num">${conf ? fN(Math.round(rev / conf)) + ' €' : '—'}</td><td class="num ${stale ? 'bad' : 'dim'}">${stale || '—'}</td></tr>`;
+  }).join('');
+  return rows ? `<h4 class="st-h"><span>Менеджери</span></h4><div class="ot-wrap"><table class="ot" style="min-width:560px"><thead><tr><th>Менеджер</th><th class="num">Заявок</th><th class="num">В роботі</th><th class="num">Виконано</th><th class="num" title="Частка заявок, що дійшли до підтвердження">Конверсія</th><th class="num">Сер. чек</th><th class="num" title="Нові й кошториси без руху">Мовчать</th></tr></thead><tbody>${rows}</tbody></table></div>` : '';
+}
 function teamStats(src, mgr) {
   const by = {}; src.forEach(o => { (by[o.assignee || ''] = by[o.assignee || ''] || []).push(o); });
   const names = [...TEAM, ...Object.keys(by).filter(k => k && !TEAM.includes(k))];
@@ -4647,6 +4719,30 @@ function factoryBars(list) {
   return rows.map(([name, v]) =>
     `<div class="hb"><div class="hb-top"><span>${esc(name)}</span><span>${fN(Math.round(v))} €</span></div><div class="hb-track"><div class="hb-fill" style="width:${Math.max(2, Math.round(v / max * 100))}%"></div></div></div>`
   ).join('');
+}
+
+/* ================= РЕЗЕРВНА КОПІЯ ================= */
+async function fetchAllRows(table) {
+  let all = [], from = 0;
+  for (;;) {
+    const r = await _sb.from(table).select('*').range(from, from + 999);
+    if (r.error) return { rows: all, err: r.error.message };
+    all = all.concat(r.data || []);
+    if (!r.data || r.data.length < 1000) break;
+    from += 1000;
+  }
+  return { rows: all };
+}
+async function exportBackup() {
+  if (isMgr()) return;
+  toast('Готую резервну копію…');
+  const out = { app: 'Axis', exported_at: new Date().toISOString(), by: USER_EMAIL, tables: {}, skipped: {} };
+  for (const t of ['orders', 'clients', 'events', 'partner_leads', 'team_members', 'order_log', 'order_history']) {
+    const r = await fetchAllRows(t); out.tables[t] = r.rows; if (r.err) out.skipped[t] = r.err;
+  }
+  const blob = new Blob([JSON.stringify(out)], { type: 'application/json' }), a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `axis_backup_${new Date().toISOString().slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(a.href);
+  toast(`Копію збережено: замовлень ${out.tables.orders.length}, клієнтів ${out.tables.clients.length}`);
 }
 
 /* ================= ЕКСПОРТ CSV ================= */
