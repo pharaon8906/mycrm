@@ -1313,6 +1313,29 @@ html.dark .urg-seg button.on[data-u] { color: #0b101c; }
 .dup-note.warn { background: color-mix(in srgb, var(--warning) 15%, var(--surface)); }
 .dup-note.stop { background: color-mix(in srgb, var(--danger) 13%, var(--surface)); }
 .dup-note .sub { display: block; margin-top: 4px; color: var(--muted); }
+/* --- поля вводу: одразу видно, що сюди можна писати --- */
+:root { --field-bg: #f6f8fc; --field-bd: #c9d2e1; }
+html.dark { --field-bg: #0e1524; --field-bd: #38456a; }
+input:not([type=checkbox]):not([type=radio]):not([type=hidden]), select, textarea { background: var(--field-bg); border: 1.5px solid var(--field-bd); box-shadow: inset 0 1px 2px rgba(16,24,40,.05); }
+input:not([type=checkbox]):not([type=radio]):not([type=hidden]):hover, select:hover, textarea:hover { border-color: color-mix(in srgb, var(--p2) 45%, var(--field-bd)); }
+input:not([type=checkbox]):not([type=radio]):not([type=hidden]):focus, select:focus, textarea:focus { background: var(--surface); border-color: var(--p2); box-shadow: 0 0 0 4px color-mix(in srgb, var(--p2) 16%, transparent); }
+input::placeholder, textarea::placeholder { color: var(--muted2); opacity: .85; }
+input[readonly]:not(.ro-yel):not(.ro-grn):not(.ro-blu) { background: var(--line-soft); border-color: transparent; box-shadow: none; color: var(--muted); }
+.fld-hint { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--muted2); }
+/* --- «Що нового» --- */
+.wn-ver { font-size: 12px; color: var(--muted2); margin: 4px 0 var(--s3); }
+.wn-h { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin: var(--s4) 0 var(--s2); }
+.wn-h.new { color: var(--p2); } .wn-h.fix { color: var(--success); }
+.wn-list { list-style: none; display: grid; gap: 8px; margin: 0; padding: 0; }
+.wn-list li { position: relative; padding: 10px 12px 10px 34px; background: var(--line-soft); border-radius: var(--r-sm); font-size: 13.5px; line-height: 1.45; }
+.wn-list li::before { content: ""; position: absolute; left: 14px; top: 17px; width: 8px; height: 8px; border-radius: 50%; background: var(--p2); }
+.wn-h.fix + .wn-list li::before { background: var(--success); }
+/* --- кнопка «виконано» у списках справ і сповіщень --- */
+.sa-chk { flex: none; width: 30px; height: 30px; border: 0; border-radius: 50%; background: transparent; color: var(--muted2); cursor: pointer; display: grid; place-items: center; font-size: 17px; margin-left: 2px; transition: color .15s, background-color .15s, transform .15s; }
+.sa-chk:hover { color: var(--success); background: color-mix(in srgb, var(--success) 14%, transparent); transform: scale(1.1); }
+.sa-chk:active { transform: scale(.9); }
+.bp-top span { display: flex; align-items: center; gap: var(--s3); }
+.bp-top button i { margin-right: 4px; }
 </style>
 </head>
 <body>
@@ -1414,7 +1437,6 @@ html.dark .urg-seg button.on[data-u] { color: #0b101c; }
             <button type="button" data-v="board" onclick="setView('board')" title="Канбан"><i class="fa fa-table-columns"></i><span>Канбан</span></button>
           </div>
           <button class="tbtn" id="fltBtn" onclick="toggleFlt()" title="Фільтри: фабрика, дати"><i class="fa fa-sliders"></i> <span>Фільтри</span></button>
-          <button class="tbtn" id="selBtn" onclick="toggleSel()" title="Вибрати кілька замовлень"><i class="fa fa-check-double"></i> <span>Вибрати</span></button>
           <button class="tbtn fin-only" id="trashBtn" onclick="tab('trash')" title="Кошик видалених замовлень"><i class="fa fa-trash-can"></i></button>
         </div>
       </div>
@@ -1718,7 +1740,7 @@ html.dark .urg-seg button.on[data-u] { color: #0b101c; }
         <button type="button" data-v="1" onclick="setBg('1')">З відтінком компанії</button>
       </div>
     </div>
-    <div class="fg"><button type="button" class="btn-alt" style="display:block;margin:0" onclick="closeM('mS'); setTimeout(openTour, 120)"><i class="fa fa-circle-question"></i> Показати підказки по програмі</button></div>
+    <div class="fg"><button type="button" class="btn-alt" style="display:block;margin:0 0 8px" onclick="closeM('mS'); setTimeout(openWhat, 120)"><i class="fa fa-wand-magic-sparkles"></i> Що нового в програмі</button><button type="button" class="btn-alt" style="display:block;margin:0" onclick="closeM('mS'); setTimeout(openTour, 120)"><i class="fa fa-circle-question"></i> Показати підказки по програмі</button></div>
 
     <div class="sec">Команда</div>
     <div class="fg"><label>Я працюю як (для фільтра «Мої»)</label><div class="seg" id="meSeg" style="margin-bottom:0"></div><small id="meLock" style="color:var(--muted)"></small></div>
@@ -1835,6 +1857,15 @@ html.dark .urg-seg button.on[data-u] { color: #0b101c; }
 </div>
 
 <!-- ПІДКАЗКИ ДЛЯ НОВОГО КОРИСТУВАЧА -->
+<!-- ЩО НОВОГО (після оновлення) -->
+<div id="mWhat" class="modal-w">
+  <div class="mbox" style="max-width:560px">
+    <div style="display:flex;justify-content:space-between;"><h3>Що нового</h3><i class="fa fa-times" onclick="closeM('mWhat')"></i></div>
+    <div id="whatBody"></div>
+    <button class="btn-s" style="margin-top:8px" onclick="closeM('mWhat')">Зрозуміло</button>
+  </div>
+</div>
+
 <div id="mTour" class="modal-w">
   <div class="mbox" style="max-width:480px;text-align:center">
     <div id="tourBody"></div>
@@ -2589,7 +2620,7 @@ async function sync() {
   if (curT==='stats') renderStats();
   if (curT==='calendar') renderCal();
   if (curT==='partners') renderPartners();
-  if (!_synced) { playEnter(document.getElementById('p-' + curT)); maybeTour(); }
+  if (!_synced) { playEnter(document.getElementById('p-' + curT)); maybeTour(); maybeWhat(); }
   _synced = true; topbar(false);
   document.getElementById('loader').style.display = 'none';
 }
@@ -3152,7 +3183,7 @@ function agendaRow(i) {
   const o = i.o || (i.e && i.e.order_id ? orders.find(x => x.id === i.e.order_id) : null);
   const title = i.e ? i.e.title : (i.o.client || 'Без імені'), sub = i.e ? [EV_T[i.e.kind || 'task'].lbl, i.e.client || (o && o.client)].filter(Boolean).join(' · ') : OT[i.t].lbl + ' · ' + (i.o.product || '---');
   const click = i.e ? `openEv('${esc(i.e.id)}')` : `openO('${esc(i.o.id)}')`;
-  return `<div class="sa-row" onclick="${click}"><div class="si" style="background:${itemColor(i)}"><i class="fa ${itemIco(i)}"></i></div><div class="st">${esc(title)}<small>${esc(sub)}</small></div>${mavHtml(i.o ? i.o.assignee : i.e.assignee)}${i.e && evTime(i.e) ? `<span class="tm">${evTime(i.e)}</span>` : ''}</div>`;
+  return `<div class="sa-row" onclick="${click}"><div class="si" style="background:${itemColor(i)}"><i class="fa ${itemIco(i)}"></i></div><div class="st">${esc(title)}<small>${esc(sub)}</small></div>${mavHtml(i.o ? i.o.assignee : i.e.assignee)}${i.e && evTime(i.e) ? `<span class="tm">${evTime(i.e)}</span>` : ''}${i.e ? chkBtn(`bellDoneEv('${esc(i.e.id)}')`, 'Позначити виконаним') : (i.t === 'rem' ? chkBtn(`bellDismiss('rem:${esc(i.o.id)}:${i.d}')`, 'Дзвінок зроблено — прибрати') : '')}</div>`;
 }
 function agendaGroups(items, lateFirst) {
   const t = todayStr(), groups = {}; items.forEach(i => { const k = (lateFirst && i.d < t) ? 'late' : i.d; (groups[k] = groups[k] || []).push(i); });
@@ -3162,13 +3193,14 @@ function agendaGroups(items, lateFirst) {
     return `<div class="sa-day"><span class="${cls}">${k === 'late' ? 'Прострочено' : (rel ? rel + ' · ' : '') + dayLabel(k)}</span></div>${groups[k].map(agendaRow).join('')}`;
   }).join('');
 }
-function renderSide() { refreshAlerts(); if (curT === 'today') renderToday(); }
+function renderSide() { refreshAlerts(); refreshBell(); if (curT === 'today') renderToday(); }
 
 // Сторінка «Сьогодні»: що робити зараз, найближчі 7 днів, нові заявки, борги
 function renderToday() {
   const box = document.getElementById('todayDisplay'); if (!box) return;
   const t = todayStr(), end = ymd(Date.now() + 7 * 864e5), me = ME(), mine = a => !me || !a || a === me;
-  const all = calItems(true).filter(i => i.e ? !i.e.done : true);
+  const X0 = bellX();
+  const all = calItems(true).filter(i => i.e ? !i.e.done : !(i.t === 'rem' && X0['rem:' + i.o.id + ':' + i.d]));
   const mineI = all.filter(i => mine(i.o ? i.o.assignee : i.e.assignee));
   const now = mineI.filter(i => i.d <= t), soon = mineI.filter(i => i.d > t && i.d <= end);
   const newReq = orders.filter(o => o.status === 'Нова').sort((a, b) => urgRank(b) - urgRank(a) || orderTs(b) - orderTs(a));
@@ -3490,7 +3522,8 @@ const NOTIF_ON = () => LS.get('crm_notif', '0') === '1' && NOTIF_SUP() && Notifi
 // Що потребує уваги саме зараз: невиконані події на сьогодні й раніше та нагадування «передзвонити» (мої або без відповідального)
 function alertItems() {
   const t = todayStr(), me = ME(), mine = a => !me || !a || a === me;
-  return { ev: events.filter(e => !e.done && e.event_date && e.event_date <= t && mine(e.assignee)), rem: orders.filter(o => isRem(o) && mine(o.assignee)) };
+  const X = bellX();
+  return { ev: events.filter(e => !e.done && e.event_date && e.event_date <= t && mine(e.assignee) && !X['ev:' + e.id]), rem: orders.filter(o => isRem(o) && mine(o.assignee) && !X['rem:' + o.id + ':' + o.reminder_date]) };
 }
 // Лічильник на вкладці «Календар» і в заголовку вкладки браузера
 function refreshAlerts() {
@@ -3607,7 +3640,9 @@ function kRender() {
     ...TAB_CMDS.filter(c => !(c[0] === 'partners' && isMgr())).map(c => ({ ico: c[2], label: 'Перейти: ' + c[1], kw: c[1] + ' вкладка', run: () => tab(c[0]) })),
     { ico: 'fa-gear', label: 'Налаштування', kw: 'settings', run: () => openSettings() },
     { ico: 'fa-trash-can', label: 'Кошик видалених замовлень', kw: 'видалені', run: () => openTrash() },
-    { ico: 'fa-user-group', label: 'Дублікати клієнтів', kw: 'обʼєднати', run: () => openDups() }
+    { ico: 'fa-user-group', label: 'Дублікати клієнтів', kw: 'обʼєднати', run: () => openDups() },
+    { ico: 'fa-wand-magic-sparkles', label: 'Що нового в програмі', kw: 'оновлення зміни список', run: () => openWhat(true) },
+    { ico: 'fa-check-double', label: 'Вибрати кілька замовлень', kw: 'виділити масові дії статус призначити', run: () => { tab('orders'); toggleSel(true); } }
   ];
   const cm = cmds.filter(c => !has || match([c.label, c.kw], []));
   if (cm.length) secs.push(['Команди', cm.slice(0, has ? 5 : 6).map(c => ({ ico: c.ico, t: c.label, sub: '', run: c.run }))]);
@@ -3757,6 +3792,7 @@ async function ccSetStatus(k) {
   });
 }
 function setClSt(k) { clSt = (k === clSt) ? '' : k; renderC(); }
+(function () { const e = document.getElementById('cSt'); if (e) e.innerHTML = clStOptions(); })();   // список статусів у формі клієнта
 
 /* ================= КАРТКА КЛІЄНТА ================= */
 const CONF_ST = ['Підтверджено', 'Перевірка', 'В роботі', 'На складі', 'Виконано'];
@@ -3792,7 +3828,7 @@ function openClient(id) {
     <div class="sec">Замовлення</div>
     ${ords.map(ordRow).join('') || '<small style="color:var(--muted2)">Замовлень ще немає</small>'}
     ${upcoming.length ? `<div class="sec">Заплановано</div>${upcoming.map(e => `<div class="sa-row" onclick="ccEvent('${esc(e.id)}')"><div class="si" style="background:${EV_T[e.kind || 'task'].c}"><i class="fa ${EV_T[e.kind || 'task'].ico}"></i></div><div class="st">${esc(e.title)}<small>${dayLabel(e.event_date)}${evTime(e) ? ' · ' + evTime(e) : ''}</small></div></div>`).join('')}` : ''}
-    <div class="sec">Нотатки про клієнта</div>
+    <div class="sec">Нотатки про клієнта <span class="fld-hint">· поле можна редагувати</span></div>
     <div class="fg"><textarea id="ccNotes" rows="3" oninput="autoGrow(this)" placeholder="уподобання, умови, важливі домовленості…">${esc(c.notes || '')}</textarea></div>
     <button type="button" class="btn-alt" style="display:block" onclick="ccSaveNotes()"><i class="fa fa-floppy-disk"></i> Зберегти нотатки</button>
     <div class="sec">Історія спілкування</div>
@@ -4023,10 +4059,28 @@ document.addEventListener('drop', e => {
 
 /* ================= ЦЕНТР СПОВІЩЕНЬ (дзвіночок) ================= */
 function bellData() {
-  const a = alertItems();
-  return { ev: a.ev, rem: a.rem, late: orders.filter(isLate), news: orders.filter(o => o.status === 'Нова').sort((x, y) => orderTs(y) - orderTs(x)),
-           debt: orders.filter(isDebtor).sort((x, y) => (n(y.total_ttc) - n(y.paid_amount)) - (n(x.total_ttc) - n(x.paid_amount))) };
+  const a = alertItems(), X = bellX();
+  return { ev: a.ev, rem: a.rem, late: orders.filter(o => isLate(o) && !X['late:' + o.id + ':' + o.eta_date]), news: orders.filter(o => o.status === 'Нова' && !X['new:' + o.id]).sort((x, y) => orderTs(y) - orderTs(x)),
+           debt: orders.filter(o => isDebtor(o) && !X['debt:' + o.id]).sort((x, y) => (n(y.total_ttc) - n(y.paid_amount)) - (n(x.total_ttc) - n(x.paid_amount))) };
 }
+// Прибрані зі сповіщень (на цьому пристрої): ключ містить дату, тому при новій даті сповіщення зʼявиться знову
+const BELL_KEY = 'crm_bell_x';
+function bellX() { try { return JSON.parse(LS.get(BELL_KEY, '{}')) || {}; } catch (e) { return {}; } }
+function bellSave(m) { const now = Date.now(); Object.keys(m).forEach(k => { if (now - m[k] > 60 * 864e5) delete m[k]; }); LS.set(BELL_KEY, JSON.stringify(m)); }
+function bellRefreshAll() { refreshBell(); refreshAlerts(); if (document.getElementById('bellPanel').classList.contains('on')) renderBell(); if (curT === 'today') renderToday(); }
+function bellDismiss(k) {
+  const prev = bellX(), m = Object.assign({}, prev); m[k] = Date.now(); bellSave(m); bellRefreshAll();
+  toast('Прибрано зі сповіщень', () => { bellSave(prev); bellRefreshAll(); });
+}
+function bellClearAll() {
+  const d = bellData(), prev = bellX(), m = Object.assign({}, prev), add = k => { m[k] = Date.now(); };
+  d.ev.forEach(e => add('ev:' + e.id)); d.rem.forEach(o => add('rem:' + o.id + ':' + o.reminder_date)); d.late.forEach(o => add('late:' + o.id + ':' + o.eta_date));
+  d.news.forEach(o => add('new:' + o.id)); d.debt.forEach(o => add('debt:' + o.id));
+  bellSave(m); bellRefreshAll();
+  toast('Сповіщення очищено', () => { bellSave(prev); bellRefreshAll(); });
+}
+async function bellDoneEv(id) { await toggleEv(id); bellRefreshAll(); }
+const chkBtn = (click, title, ico) => `<button type="button" class="sa-chk" onclick="event.stopPropagation();${click}" title="${title}"><i class="fa ${ico || 'fa-circle-check'}"></i></button>`;
 function refreshBell() {
   const b = document.getElementById('bellN'); if (!b) return;
   const d = bellData(), cnt = d.ev.length + d.rem.length + d.late.length + d.news.length;
@@ -4035,14 +4089,14 @@ function refreshBell() {
 function toggleBell(e) { e.stopPropagation(); const p = document.getElementById('bellPanel'); if (p.classList.toggle('on')) renderBell(); }
 function renderBell() {
   const d = bellData(), p = document.getElementById('bellPanel');
-  const orow = (o, ico, c, sub) => `<div class="sa-row" onclick="bellGo('openO','${esc(o.id)}')"><div class="si" style="background:${c}"><i class="fa ${ico}"></i></div><div class="st">${esc(o.client || 'Без імені')}<small>${esc(sub)}</small></div></div>`;
+  const orow = (o, ico, c, sub, key) => `<div class="sa-row" onclick="bellGo('openO','${esc(o.id)}')"><div class="si" style="background:${c}"><i class="fa ${ico}"></i></div><div class="st">${esc(o.client || 'Без імені')}<small>${esc(sub)}</small></div>${chkBtn(`bellDismiss('${esc(key)}')`, 'Прибрати зі сповіщень')}</div>`;
   const sec = (title, cnt, rows) => rows ? `<div class="bp-h">${title}<span>${cnt}</span></div>${rows}` : '';
   const now = [...d.ev.map(e => ({ d: e.event_date, t: 'ev', e })), ...d.rem.map(o => ({ d: o.reminder_date, t: 'rem', o }))].sort((a, b) => a.d.localeCompare(b.d));
   const html = sec('Потребує уваги зараз', now.length, now.slice(0, 6).map(agendaRow).join(''))
-    + sec('Затримка поставок', d.late.length, d.late.slice(0, 4).map(o => orow(o, 'fa-truck', 'var(--danger)', 'очікувалось ' + dateTxt(o.eta_date) + (o.product ? ' · №' + o.product : ''))).join(''))
-    + sec('Нові заявки', d.news.length, d.news.slice(0, 4).map(o => orow(o, 'fa-inbox', 'var(--p2)', (o.product ? '№' + o.product + ' · ' : '') + (o.assignee || 'без відповідального'))).join(''))
-    + sec('Борги клієнтів', d.debt.length, d.debt.slice(0, 3).map(o => orow(o, 'fa-money-bill-wave', 'var(--g-ok)', 'залишок ' + fN(Math.round(n(o.total_ttc) - n(o.paid_amount))) + ' €')).join(''));
-  p.innerHTML = `<div class="bp-top"><b>Сповіщення</b><button type="button" onclick="bellGo('tab','today')">Усе на «Сьогодні»</button></div>`
+    + sec('Затримка поставок', d.late.length, d.late.slice(0, 4).map(o => orow(o, 'fa-truck', 'var(--danger)', 'очікувалось ' + dateTxt(o.eta_date) + (o.product ? ' · №' + o.product : ''), 'late:' + o.id + ':' + o.eta_date)).join(''))
+    + sec('Нові заявки', d.news.length, d.news.slice(0, 4).map(o => orow(o, 'fa-inbox', 'var(--p2)', (o.product ? '№' + o.product + ' · ' : '') + (o.assignee || 'без відповідального'), 'new:' + o.id)).join(''))
+    + sec('Борги клієнтів', d.debt.length, d.debt.slice(0, 3).map(o => orow(o, 'fa-money-bill-wave', 'var(--g-ok)', 'залишок ' + fN(Math.round(n(o.total_ttc) - n(o.paid_amount))) + ' €', 'debt:' + o.id)).join(''));
+  p.innerHTML = `<div class="bp-top"><b>Сповіщення</b><span>${html ? '<button type="button" onclick="bellClearAll()"><i class="fa fa-broom"></i> Очистити все</button>' : ''}<button type="button" onclick="bellGo('tab','today')">На «Сьогодні»</button></span></div>`
     + (html || '<div class="sa-empty" style="padding:28px 10px"><i class="fa fa-circle-check" style="font-size:26px;color:var(--success);display:block;margin-bottom:8px"></i>Усе гаразд: нічого не потребує уваги</div>');
 }
 function bellGo(fn, arg) { document.getElementById('bellPanel').classList.remove('on'); setTimeout(() => (fn === 'tab' ? tab(arg) : fn === 'openO' ? openO(arg) : 0), 40); }
@@ -4159,6 +4213,47 @@ function tourNext() { if (tourI < TOUR.length - 1) { tourI++; renderTour(); } el
 function tourSkip() { LS.set('crm_tour', '1'); closeM('mTour'); }
 let _tourAsked = false;
 function maybeTour() { if (_tourAsked || LS.get('crm_tour', '') === '1') return; _tourAsked = true; setTimeout(openTour, 1500); }
+
+/* ================= ЩО НОВОГО ================= */
+// При кожному оновленні піднімайте APP_VERSION і додавайте новий запис угору списку CHANGELOG: користувачі побачать його один раз.
+const APP_VERSION = '2026.10.24';
+const CHANGELOG = [
+  { v: '2026.10.24', date: '24.10.2026',
+    news: [
+      'Звірка номерів телефону: дубль не створюється, заявка йде менеджеру, який уже веде цього клієнта (також для заявок Lux Win → Heimek).',
+      'Ролі: адмін бачить усе; менеджер бачить свої та нерозподілені замовлення, вже призначеного відповідального змінити не може, статистика лише по своїх.',
+      'Статуси клієнтів (Потенційний, Активний, Постійний, VIP, Неактивний, Не турбувати) — у картці клієнта, у списку з фільтром і в картці замовлення.',
+      'Дані клієнта (телефон, адреса, нотатки, статус) можна змінювати прямо в картці замовлення.',
+      'Терміновість заявок: Звичайна / Терміново / Дуже терміново — мітка на картці, фільтр і сортування.',
+      'Відкрите замовлення чи клієнт підсвічується в списку.',
+      'Сповіщення і справи: кнопка ✓ позначає виконаним (для подій) або прибирає зі списку; «Очистити все» у дзвіночку з можливістю скасувати.',
+      'Новий дизайн: «Сьогодні» як дашборд, список замовлень з підсумком, історія змін як часова лінія, вибір вигляду шапки в налаштуваннях.'
+    ],
+    fixes: [
+      'Додаючи нового клієнта, тепер можна поставити йому статус.',
+      'Поля вводу стали виразнішими — одразу видно, куди можна писати.',
+      'Кнопка налаштувань знову видна у світлій темі.',
+      'Прибрано кнопку «Вибрати» з панелі замовлень (вона заважала). Вибір кількох замовлень лишився в Ctrl+F → «Вибрати кілька замовлень».',
+      'Нову заявку можна призначити колезі без помилки доступу.',
+      'Кнопка «Зберегти» в картці замовлення більше не ховається за краєм екрана при іншому масштабі.'
+    ] }
+];
+function whatHtml(list) {
+  return list.map(c => `<div class="wn-ver"><b>Оновлення від ${esc(c.date)}</b></div>`
+    + (c.news && c.news.length ? `<div class="wn-h new"><i class="fa fa-wand-magic-sparkles"></i> Нове</div><ul class="wn-list">${c.news.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '')
+    + (c.fixes && c.fixes.length ? `<div class="wn-h fix"><i class="fa fa-wrench"></i> Виправлено</div><ul class="wn-list">${c.fixes.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '')).join('');
+}
+function openWhat(all) {
+  document.getElementById('whatBody').innerHTML = whatHtml(all ? CHANGELOG : CHANGELOG.slice(0, 1));
+  LS.set('crm_seen_ver', APP_VERSION);
+  showModal('mWhat');
+}
+// Показуємо один раз після оновлення; новим користувачам (ще не бачили підказок) — ні
+function maybeWhat() {
+  if (LS.get('crm_seen_ver', '') === APP_VERSION) return;
+  if (LS.get('crm_tour', '') !== '1') { LS.set('crm_seen_ver', APP_VERSION); return; }
+  setTimeout(() => { if (!document.querySelector('.modal-w[style*="flex"]')) openWhat(); }, 1600);
+}
 
 /* ================= АНІМАЦІЇ ================= */
 const REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -4743,7 +4838,7 @@ function dupO() {
 }
 
 const fab = () => curT === 'partners' ? openLeads() : curT === 'calendar' ? openEv(null) : curT === 'clients'
-  ? (editId=null, ['cNa','cPh','cAd','cNo','cSt'].forEach(i=>document.getElementById(i).value=''), document.getElementById('hSec').style.display='none', document.getElementById('btnDC').style.display='none', showModal('mC'))
+  ? (editId=null, (document.getElementById('cSt').innerHTML = clStOptions()), ['cNa','cPh','cAd','cNo','cSt'].forEach(i=>document.getElementById(i).value=''), document.getElementById('hSec').style.display='none', document.getElementById('btnDC').style.display='none', showModal('mC'))
   : openO(null);
 // Показ модалки + запис в історію (щоб "Назад" її закривав)
 function showModal(id) {
@@ -5066,7 +5161,7 @@ function toggleSel(force) {
   selMode = typeof force === 'boolean' ? force : !selMode;
   if (!selMode) selIds.clear();
   document.body.classList.toggle('sel-mode', selMode);
-  document.getElementById('selBtn').classList.toggle('on', selMode);
+  const sb = document.getElementById('selBtn'); if (sb) sb.classList.toggle('on', selMode);
   document.getElementById('bulkBar').style.display = selMode ? 'flex' : 'none';
   updateBulk(); render();
 }
