@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Plate -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,24 A30,30 0 1 0 54.01,24 Z" />
+    <path
+        android:fillColor="#12805C"
+        android:pathData="M54,34 A20,20 0 1 0 54.01,34 Z" />
+    <!-- Camera lens ring representing "photo" recognition -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,40 A14,14 0 1 0 54.01,40 Z" />
+    <path
+        android:fillColor="#12805C"
+        android:pathData="M54,46 A8,8 0 1 0 54.01,46 Z" />
+    <!-- Fork -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M26,58 L30,58 L30,84 L26,84 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M22,58 L24,58 L24,70 L22,70 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,58 L34,58 L34,70 L32,70 Z" />
+    <!-- Spoon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M78,58 m-6,0 a6,6 0 1 0 12,0 a6,6 0 1 0 -12,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M76,64 L80,64 L80,84 L76,84 Z" />
+</vector>
