@@ -8,129 +8,236 @@
 <title>Taalfiets A1.2</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Nunito:wght@500;600;700;800&display=swap">
 <style>
-/* Layout: one narrow column of tools under a sticky tab rail; Delft-tile blue as the single accent */
+/* Layout: one playful column under an animated Dutch-landscape hero; candy palette of Delft blue, tulip pink, oranje and mint */
 :root{
-  --bg:#f2f4f9; --surface:#ffffff; --ink:#131a2f; --muted:#5b6481; --line:#d9dfec;
-  --delft:#2340a8; --delft-soft:#e3e8f8; --tulip:#c9432a; --tulip-soft:#fbe7e2; --good:#1b7f55; --good-soft:#dff3ea;
-  --het:#b4361f; --de:#2340a8;
-  --f-display:"Unbounded","Inter",system-ui,sans-serif; --f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --r:14px;
+  --bg:#f3f6ff; --surface:#ffffff; --ink:#1a1f3d; --muted:#5d6488; --line:#e1e6f5;
+  --blue:#2f5bff; --blue-soft:#e7edff; --orange:#ff7a1a; --orange-soft:#fff0e2; --pink:#f03a6c; --pink-soft:#ffe7ef;
+  --green:#10a86f; --green-soft:#dcf6ea; --sun:#ffbf1a; --sun-soft:#fff5d6; --purple:#7d55ff; --purple-soft:#efe9ff;
+  --sky1:#4f7dff; --sky2:#9cc0ff; --onhero:#ffffff;
+  --de:#2f5bff; --het:#f03a6c;
+  --shadow:0 10px 30px -14px rgba(47,91,255,.35);
+  --f-display:"Unbounded","Nunito",system-ui,sans-serif; --f-body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:22px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0c1120; --surface:#151c33; --ink:#e7ebf7; --muted:#9aa3c1; --line:#27315a;
-  --delft:#8aa2ff; --delft-soft:#1c2752; --tulip:#ff8466; --tulip-soft:#3a1d18; --good:#52c995; --good-soft:#123326;
-  --het:#ff8466; --de:#8aa2ff; color-scheme:dark}}
+  --bg:#0e1230; --surface:#191f47; --ink:#f1f3ff; --muted:#a8aed6; --line:#2c3468;
+  --blue:#7f9bff; --blue-soft:#232f6e; --orange:#ff9a4d; --orange-soft:#3c2615; --pink:#ff6f99; --pink-soft:#41192c;
+  --green:#3ddc9c; --green-soft:#11382a; --sun:#ffd257; --sun-soft:#3a3115; --purple:#a98bff; --purple-soft:#2c2160;
+  --sky1:#1d2c7a; --sky2:#4b3f9e; --onhero:#ffffff; --de:#7f9bff; --het:#ff6f99;
+  --shadow:0 10px 30px -14px rgba(0,0,0,.6); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0c1120; --surface:#151c33; --ink:#e7ebf7; --muted:#9aa3c1; --line:#27315a;
-  --delft:#8aa2ff; --delft-soft:#1c2752; --tulip:#ff8466; --tulip-soft:#3a1d18; --good:#52c995; --good-soft:#123326;
-  --het:#ff8466; --de:#8aa2ff; color-scheme:dark}
+  --bg:#0e1230; --surface:#191f47; --ink:#f1f3ff; --muted:#a8aed6; --line:#2c3468;
+  --blue:#7f9bff; --blue-soft:#232f6e; --orange:#ff9a4d; --orange-soft:#3c2615; --pink:#ff6f99; --pink-soft:#41192c;
+  --green:#3ddc9c; --green-soft:#11382a; --sun:#ffd257; --sun-soft:#3a3115; --purple:#a98bff; --purple-soft:#2c2160;
+  --sky1:#1d2c7a; --sky2:#4b3f9e; --onhero:#ffffff; --de:#7f9bff; --het:#ff6f99;
+  --shadow:0 10px 30px -14px rgba(0,0,0,.6); color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;margin:0}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
-.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
-header.top{padding-block:22px 14px;display:flex;align-items:center;gap:14px}
-.tile{width:46px;height:46px;flex:none;border-radius:8px;background:
-  radial-gradient(circle at 50% 50%,var(--surface) 0 5px,transparent 6px),
-  radial-gradient(circle at 50% 50%,var(--delft) 0 11px,transparent 12px),
-  conic-gradient(from 45deg,var(--delft) 0 25%,var(--delft-soft) 0 50%,var(--delft) 0 75%,var(--delft-soft) 0);border:2px solid var(--delft)}
-h1{font-family:var(--f-display);font-size:1.35rem;margin:0;letter-spacing:-.01em;line-height:1.15}
-.sub{color:var(--muted);font-size:.85rem;margin:2px 0 0}
-nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line);margin:0;}
-.tabs-in{display:flex;gap:4px;overflow-x:auto;padding:8px 0;scrollbar-width:none}
+body{margin:0;color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  background:radial-gradient(800px 420px at 0% -5%,var(--blue-soft),transparent 60%),radial-gradient(700px 420px at 100% 10%,var(--pink-soft),transparent 60%),radial-gradient(700px 500px at 50% 100%,var(--sun-soft),transparent 60%),var(--bg);background-attachment:fixed;background-color:var(--bg)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 56px}
+
+/* hero */
+.hero{position:relative;border-radius:26px;overflow:hidden;background:linear-gradient(160deg,var(--sky1),var(--sky2));color:var(--onhero);min-height:212px;box-shadow:var(--shadow)}
+.hero svg.scene{position:absolute;inset:auto 0 0 0;width:100%;height:96px;display:block}
+.btn svg{width:18px;height:18px;flex:none}
+.hero .ht{position:relative;padding:18px 20px 0;display:grid;gap:4px}
+.hero h1{font-family:var(--f-display);font-weight:800;font-size:1.55rem;margin:0;letter-spacing:-.01em;line-height:1.1;text-shadow:0 2px 10px rgba(0,0,0,.18)}
+.hero h1 span{background:var(--sun);color:#1a1f3d;border-radius:8px;padding:0 6px;font-size:.8em;vertical-align:middle;margin-left:4px}
+.hero p{margin:0;font-weight:700;opacity:.95;font-size:.9rem}
+.hstats{position:relative;display:flex;gap:6px;padding:10px 20px 0;flex-wrap:wrap}
+.hstats span{background:rgba(255,255,255,.22);backdrop-filter:blur(6px);border-radius:999px;padding:3px 10px;font-weight:800;font-size:.8rem}
+.blades{transform-origin:330px 52px;animation:spin 7s linear infinite}
+.sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway 3s ease-in-out infinite}
+.sway:nth-of-type(2n){animation-delay:-1.2s}.sway:nth-of-type(3n){animation-delay:-2s}
+.cloud{animation:drift 26s linear infinite}
+.cloud2{animation:drift 38s linear infinite;animation-delay:-14s}
+.bike{animation:ride 14s linear infinite}
+.wheel{transform-box:fill-box;transform-origin:center;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes sway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+@keyframes drift{from{transform:translateX(-120px)}to{transform:translateX(520px)}}
+@keyframes ride{from{transform:translateX(-60px)}to{transform:translateX(460px)}}
+
+/* tabs */
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;margin-top:12px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(10px);border-radius:18px}
+.tabs-in{display:flex;gap:6px;overflow-x:auto;padding:8px 2px;scrollbar-width:none}
 .tabs-in::-webkit-scrollbar{display:none}
-.tab{flex:none;border:0;background:transparent;color:var(--muted);font:600 .88rem var(--f-body);padding:8px 12px;border-radius:999px;cursor:pointer}
-.tab[aria-selected="true"]{background:var(--delft);color:var(--surface)}
-.tab:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--delft);outline-offset:2px}
-main{display:grid;gap:18px;padding-top:18px}
-h2{font-family:var(--f-display);font-size:1.05rem;margin:0;text-wrap:balance;font-weight:700}
-h3{font-size:1rem;margin:0}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:grid;gap:12px;min-width:0}
-.muted{color:var(--muted)}
-.small{font-size:.83rem}
-.label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tab{flex:none;border:0;background:var(--surface);color:var(--ink);font:800 .88rem var(--f-body);padding:8px 13px;border-radius:999px;cursor:pointer;box-shadow:0 2px 8px -4px rgba(30,40,100,.25);transition:transform .15s}
+.tab:hover{transform:translateY(-2px)}
+.tab[aria-selected="true"]{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff}
+.tab:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+
+main{display:grid;gap:16px;padding-top:12px}
+h2{font-family:var(--f-display);font-size:1.08rem;margin:0;text-wrap:balance;font-weight:700}
+h3{font-size:1.05rem;margin:0;font-weight:800}
+.card{background:var(--surface);border-radius:var(--r);padding:18px;display:grid;gap:12px;min-width:0;box-shadow:var(--shadow);animation:rise .4s cubic-bezier(.2,.8,.3,1.2) both}
+main>*:nth-child(2){animation-delay:.05s}main>*:nth-child(3){animation-delay:.1s}main>*:nth-child(4){animation-delay:.15s}main>*:nth-child(5){animation-delay:.2s}
+@keyframes rise{from{transform:translateY(14px) scale(.98);opacity:.35}to{transform:none;opacity:1}}
+.muted{color:var(--muted)} .small{font-size:.87rem}
+.label{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:800}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-button.btn{font:600 .9rem var(--f-body);border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-button.btn:hover{border-color:var(--delft)}
-button.primary{background:var(--delft);border-color:var(--delft);color:var(--surface)}
-button.good{background:var(--good);border-color:var(--good);color:var(--surface)}
-button.bad{background:var(--tulip);border-color:var(--tulip);color:var(--surface)}
-button.ghost{border-color:transparent;background:var(--delft-soft);color:var(--delft)}
-button.speak{border:0;background:var(--delft-soft);color:var(--delft);width:34px;height:34px;border-radius:50%;display:inline-grid;place-items:center;cursor:pointer;flex:none}
-button.speak svg{width:16px;height:16px}
-select,input[type=text],input[type=search]{font:500 .92rem var(--f-body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 12px;max-width:100%}
-input[type=text]{width:100%}
-.flash{border-radius:18px;border:1px solid var(--line);background:var(--surface);min-height:220px;display:grid;place-items:center;text-align:center;padding:24px;cursor:pointer;position:relative;user-select:none}
-.flash .word{font-family:var(--f-display);font-size:clamp(1.5rem,6vw,2.2rem);font-weight:500;line-height:1.2;overflow-wrap:anywhere}
-.flash .back{font-size:1.15rem;margin-top:10px}
-.flash .hint{margin-top:10px;font-size:.88rem;color:var(--muted);max-width:44ch;margin-inline:auto}
-.flash .corner{position:absolute;top:12px;left:14px}
-.flash .spk{position:absolute;top:10px;right:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+button.btn,a.btn{font:800 .95rem var(--f-body);border-radius:14px;border:0;background:var(--blue-soft);color:var(--blue);padding:10px 16px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none;transition:transform .12s, box-shadow .12s}
+button.btn:hover,a.btn:hover{transform:translateY(-2px)}
+button.btn:active{transform:scale(.96)}
+button.btn:disabled{opacity:.45;cursor:default;transform:none}
+.primary{background:linear-gradient(135deg,var(--blue),var(--purple))!important;color:#fff!important;box-shadow:0 8px 18px -8px var(--blue)}
+.good{background:linear-gradient(135deg,var(--green),#22c3a0)!important;color:#fff!important}
+.bad{background:linear-gradient(135deg,var(--orange),var(--pink))!important;color:#fff!important}
+.sunny{background:var(--sun-soft)!important;color:var(--ink)!important}
+button.speak{border:0;background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff;width:40px;height:40px;border-radius:50%;display:inline-grid;place-items:center;cursor:pointer;flex:none;box-shadow:0 6px 14px -6px var(--pink);transition:transform .12s}
+button.speak:hover{transform:scale(1.08)}
+button.speak.talking{animation:pulse .8s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.15);box-shadow:0 0 0 8px color-mix(in srgb,var(--pink) 25%,transparent)}}
+button.speak svg{width:18px;height:18px}
+select,input[type=text],input[type=search]{font:700 .95rem var(--f-body);color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:10px 12px;max-width:100%}
+input[type=text],input[type=search]{width:100%}
+
+/* flashcard */
+.flipwrap{perspective:1200px}
+.flipper{position:relative;min-height:290px;transition:transform .6s cubic-bezier(.3,1.4,.5,1);transform-style:preserve-3d;cursor:pointer}
+.flipper.flipped{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:26px;display:grid;place-items:center;text-align:center;padding:26px 20px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
+.face.front{background:linear-gradient(150deg,var(--blue-soft),var(--purple-soft))}
+.face.back{background:linear-gradient(150deg,var(--sun-soft),var(--pink-soft));transform:rotateY(180deg)}
+.face .pic{font-size:72px;line-height:1;animation:bob 2.6s ease-in-out infinite;filter:drop-shadow(0 8px 10px rgba(0,0,0,.15))}
+@keyframes bob{50%{transform:translateY(-8px) rotate(3deg)}}
+.face .word{font-family:var(--f-display);font-size:clamp(1.5rem,6.5vw,2.3rem);font-weight:700;line-height:1.2;overflow-wrap:anywhere;margin-top:10px}
+.face .tr{font-size:1.2rem;font-weight:800;margin-top:6px}
+.face .hint{margin-top:8px;font-size:.92rem;color:var(--muted);max-width:42ch;margin-inline:auto}
+.face .corner{position:absolute;top:14px;left:16px}
+.face .spk{position:absolute;top:12px;right:12px}
+.flipwrap.out-r{animation:outR .35s ease-in forwards}.flipwrap.out-l{animation:outL .35s ease-in forwards}.flipwrap.in{animation:cardIn .4s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes outR{to{transform:translateX(120%) rotate(14deg);opacity:0}}
+@keyframes outL{to{transform:translateX(-120%) rotate(-14deg);opacity:0}}
+@keyframes cardIn{from{transform:scale(.85) translateY(20px);opacity:0}}
 .art-de{color:var(--de)} .art-het{color:var(--het)}
-.pill{display:inline-block;font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--delft-soft);color:var(--delft)}
-.pill.ok{background:var(--good-soft);color:var(--good)}
-.pill.warn{background:var(--tulip-soft);color:var(--tulip)}
-.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
-.bar>i{display:block;height:100%;background:var(--delft);border-radius:99px;transition:width .3s}
-.list{display:grid;gap:0;max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+.pill{display:inline-block;font-size:.75rem;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--surface);color:var(--blue)}
+.pill.ok{background:var(--green-soft);color:var(--green)}
+.pill.fire{background:var(--orange-soft);color:var(--orange)}
+.bar{height:12px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--purple),var(--pink));background-size:200% 100%;animation:shine 3s linear infinite;transition:width .6s cubic-bezier(.2,.8,.3,1)}
+@keyframes shine{to{background-position:-200% 0}}
+.list{display:grid;max-height:440px;overflow:auto;border-radius:16px;background:var(--bg)}
 .li{display:flex;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
 .li:last-child{border-bottom:0}
-.li .nl{font-weight:600;min-width:0;flex:1}
-.li .uk{color:var(--muted);flex:1;min-width:0;font-size:.9rem}
-.opts{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-.opt{font:500 1rem var(--f-body);text-align:left;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
-.opt:hover{border-color:var(--delft)}
-.opt.right{background:var(--good-soft);border-color:var(--good);color:var(--good)}
-.opt.wrong{background:var(--tulip-soft);border-color:var(--tulip);color:var(--tulip)}
-.q-big{font-family:var(--f-display);font-size:1.5rem;text-align:center;padding:10px 0;overflow-wrap:anywhere}
-.line{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;padding:10px 0;border-bottom:1px dashed var(--line)}
-.line:last-child{border-bottom:0}
-.who{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.8rem;background:var(--delft-soft);color:var(--delft)}
-.who.B{background:var(--tulip-soft);color:var(--tulip)}
-.line .nl{font-weight:600}
+.li .em{font-size:1.4rem;width:30px;text-align:center;flex:none}
+.li .nl{font-weight:800;min-width:0;flex:1}
+.li .uk{color:var(--muted);flex:1;min-width:0;font-size:.92rem}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.tilebtn{border:0;border-radius:18px;padding:12px;text-align:left;cursor:pointer;font:800 .9rem var(--f-body);color:var(--ink);display:grid;gap:6px;transition:transform .15s}
+.tilebtn:hover{transform:translateY(-3px) rotate(-1deg)}
+.tilebtn .e{font-size:1.8rem}
+.tilebtn .bar{height:6px;background:color-mix(in srgb,var(--ink) 12%,transparent)}
+.c0{background:var(--blue-soft)}.c1{background:var(--pink-soft)}.c2{background:var(--sun-soft)}.c3{background:var(--green-soft)}.c4{background:var(--purple-soft)}.c5{background:var(--orange-soft)}
+
+/* quiz */
+.opts{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.opt{font:800 1.02rem var(--f-body);text-align:left;padding:14px 16px;border-radius:16px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;transition:transform .12s,border-color .12s}
+.opt:hover{border-color:var(--blue);transform:translateY(-2px)}
+.opt.right{background:var(--green-soft);border-color:var(--green);color:var(--green);animation:pop .4s}
+.opt.wrong{background:var(--pink-soft);border-color:var(--pink);color:var(--pink);animation:shake .4s}
+@keyframes pop{40%{transform:scale(1.07)}}
+@keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+.q-pic{font-size:78px;text-align:center;line-height:1;animation:bob 2.6s ease-in-out infinite}
+.q-big{font-family:var(--f-display);font-size:1.6rem;text-align:center;padding:6px 0;overflow-wrap:anywhere;font-weight:700}
+.feedback{font-weight:800;font-size:1.05rem}
+.feedback.ok{color:var(--green)} .feedback.no{color:var(--pink)}
+.mode{display:flex;gap:14px;align-items:center}
+.mode .mi{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-size:30px;flex:none}
+
+/* dialogs */
+.chat{display:grid;gap:10px}
+.line{display:flex;gap:8px;align-items:flex-end;max-width:92%}
+.line.B{margin-left:auto;flex-direction:row-reverse}
+.ava{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:22px;flex:none;background:var(--blue-soft)}
+.line.B .ava{background:var(--pink-soft)}
+.bubble{background:var(--blue-soft);border-radius:18px 18px 18px 6px;padding:10px 12px;min-width:0;display:flex;gap:8px;align-items:flex-start;transition:transform .2s}
+.line.B .bubble{background:var(--pink-soft);border-radius:18px 18px 6px 18px}
+.bubble .speak{width:32px;height:32px}
+.bubble .speak svg{width:15px;height:15px}
+.line .nl{font-weight:800}
 .line .uk{color:var(--muted);font-size:.9rem}
-.line.playing .nl{color:var(--delft)}
-.hidden-text{filter:blur(6px);cursor:pointer}
-details.g{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:0 18px}
-details.g summary{cursor:pointer;padding:14px 0;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:10px}
-details.g summary::after{content:"+";color:var(--delft);font-weight:700}
-details.g[open] summary::after{content:"–"}
-details.g .gb{padding-bottom:16px;display:grid;gap:10px}
+.line.playing .bubble{transform:scale(1.04);box-shadow:0 0 0 3px var(--sun)}
+.hidden-text{filter:blur(7px);cursor:pointer}
+.dlg-card{border:0;text-align:left;cursor:pointer;font:inherit;color:inherit}
+.dlg-card .e{font-size:2.2rem}
+
+details.g{background:var(--surface);border-radius:var(--r);padding:0 18px;box-shadow:var(--shadow)}
+details.g summary{cursor:pointer;padding:15px 0;font-weight:800;list-style:none;display:flex;align-items:center;gap:10px}
+details.g summary .e{font-size:1.5rem}
+details.g summary::after{content:"+";margin-left:auto;color:var(--blue);font-weight:800;font-size:1.3rem;transition:transform .2s}
+details.g[open] summary::after{transform:rotate(45deg)}
+details.g .gb{padding-bottom:16px;display:grid;gap:10px;animation:rise .3s both}
 details.g ul{margin:0;padding-left:20px}
-.tipbox{background:var(--delft-soft);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:.9rem}
-.tipbox b{color:var(--delft)}
+.tipbox{background:var(--sun-soft);border-radius:14px;padding:10px 12px;font-size:.93rem}
+.tipbox b{color:var(--orange)}
 .ex{display:flex;gap:10px;align-items:center}
-.ex .nl{font-weight:600}
-.stat{display:grid;gap:2px}
-.stat .n{font-family:var(--f-display);font-size:1.6rem;font-variant-numeric:tabular-nums}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:.9rem;z-index:20;max-width:calc(100% - 32px)}
-.feedback{font-weight:600}
-.feedback.ok{color:var(--good)} .feedback.no{color:var(--tulip)}
-.sound{display:grid;gap:8px}
-.sound .s{font-family:var(--f-display);font-size:1.3rem;color:var(--delft)}
-.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;font:600 .9rem var(--f-body);cursor:pointer;display:inline-flex;gap:6px;align-items:center}
-.chip:hover{border-color:var(--delft);color:var(--delft)}
-table.ff{width:100%;border-collapse:collapse;font-size:.92rem}
-table.ff td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
-table.ff td:first-child{font-weight:600;white-space:nowrap}
+.ex .nl{font-weight:800}
+.stat{display:grid;gap:2px;padding:12px;border-radius:16px}
+.stat .n{font-family:var(--f-display);font-size:1.7rem;font-variant-numeric:tabular-nums}
+.ring{--p:0;width:96px;height:96px;border-radius:50%;flex:none;display:grid;place-items:center;background:conic-gradient(var(--green) calc(var(--p)*1%),var(--line) 0);transition:--p .6s}
+.ring>div{width:74px;height:74px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:14px;font-weight:700;font-size:.92rem;z-index:20;max-width:calc(100% - 32px)}
+.sound .s{font-family:var(--f-display);font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;width:max-content}
+.chip{border:0;background:var(--bg);color:var(--ink);border-radius:999px;padding:7px 13px;font:800 .92rem var(--f-body);cursor:pointer;transition:transform .12s}
+.chip:hover{transform:translateY(-2px);background:var(--blue-soft);color:var(--blue)}
+table.ff{width:100%;border-collapse:collapse;font-size:.94rem}
+table.ff td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.ff td:first-child{font-weight:800;white-space:nowrap}
 .scroll{overflow-x:auto}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.cf{position:fixed;width:9px;height:13px;border-radius:2px;pointer-events:none;z-index:30}
+.xpf{position:fixed;pointer-events:none;z-index:31;font:800 1.1rem var(--f-display);color:var(--green)}
+.sheet{position:fixed;inset:0;z-index:40;background:rgba(10,14,40,.5);display:grid;place-items:end center;padding:16px max(16px,env(safe-area-inset-left,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-right,0px))}
+.sheet .card{max-width:560px;width:100%;max-height:85vh;overflow:auto}
+.diag li{margin:4px 0}
+@media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
 </style>
 
 <div class="wrap">
-  <header class="top">
-    <div class="tile" aria-hidden="true"></div>
-    <div>
-      <h1>Taalfiets <span style="color:var(--delft)">A1.2</span></h1>
-      <p class="sub">Нідерландська для українців · 500 слів · діалоги · вимова</p>
-    </div>
+  <header class="hero">
+    <div class="ht"><h1>Taalfiets <span>A1.2</span></h1><p>Нідерландська для українців · 500 слів · діалоги · вимова</p></div>
+    <div class="hstats" id="hstats"></div>
+    <svg class="scene" viewBox="0 0 400 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <g class="cloud"><ellipse cx="40" cy="22" rx="22" ry="9" fill="#fff" opacity=".8"/><ellipse cx="56" cy="17" rx="14" ry="9" fill="#fff" opacity=".8"/></g>
+      <g class="cloud2"><ellipse cx="0" cy="38" rx="18" ry="7" fill="#fff" opacity=".6"/><ellipse cx="12" cy="34" rx="11" ry="7" fill="#fff" opacity=".6"/></g>
+      <!-- canal houses -->
+      <path d="M150 120V62l10-14 10 14v58z" fill="#ff7a1a"/><rect x="155" y="70" width="6" height="8" fill="#fff8"/><rect x="155" y="86" width="6" height="8" fill="#fff8"/>
+      <path d="M170 120V54l12-16 12 16v66z" fill="#f03a6c"/><rect x="176" y="62" width="6" height="9" fill="#fff8"/><rect x="176" y="80" width="6" height="9" fill="#fff8"/>
+      <path d="M194 120V66h4v-6h4v-6h8v6h4v6h4v54z" fill="#ffbf1a"/><rect x="200" y="74" width="5" height="8" fill="#fff8"/><rect x="208" y="74" width="5" height="8" fill="#fff8"/>
+      <path d="M218 120V58l11-14 11 14v62z" fill="#10a86f"/><rect x="224" y="66" width="6" height="9" fill="#fff8"/><rect x="224" y="84" width="6" height="9" fill="#fff8"/>
+      <path d="M240 120V68l9-12 9 12v52z" fill="#7d55ff"/><rect x="245" y="76" width="5" height="8" fill="#fff8"/>
+      <!-- windmill -->
+      <path d="M318 120l6-62h12l6 62z" fill="#3b2a6e"/><rect x="326" y="100" width="8" height="20" rx="3" fill="#ffbf1a"/>
+      <g class="blades"><rect x="327" y="10" width="6" height="42" rx="2" fill="#fff"/><rect x="327" y="52" width="6" height="42" rx="2" fill="#fff"/><rect x="288" y="49" width="42" height="6" rx="2" fill="#fff"/><rect x="330" y="49" width="42" height="6" rx="2" fill="#fff"/><circle cx="330" cy="52" r="5" fill="#ffbf1a"/></g>
+      <!-- ground + tulips -->
+      <path d="M0 108q100-10 200 0t200 0v12H0z" fill="#10a86f"/>
+      <path d="M0 113q100-6 200 0t200 0v7H0z" fill="#2f5bff" opacity=".55"/>
+      <g fill="#f03a6c">
+        <g class="sway"><path d="M20 108v-12" stroke="#0b7a50" stroke-width="2"/><path d="M15 92q5-8 10 0q-1 6-5 6t-5-6z"/></g>
+        <g class="sway"><path d="M36 108v-14" stroke="#0b7a50" stroke-width="2"/><path d="M31 90q5-8 10 0q-1 6-5 6t-5-6z" fill="#ffbf1a"/></g>
+        <g class="sway"><path d="M52 108v-11" stroke="#0b7a50" stroke-width="2"/><path d="M47 93q5-8 10 0q-1 6-5 6t-5-6z" fill="#ff7a1a"/></g>
+        <g class="sway"><path d="M68 108v-13" stroke="#0b7a50" stroke-width="2"/><path d="M63 91q5-8 10 0q-1 6-5 6t-5-6z"/></g>
+        <g class="sway"><path d="M84 108v-12" stroke="#0b7a50" stroke-width="2"/><path d="M79 92q5-8 10 0q-1 6-5 6t-5-6z" fill="#7d55ff"/></g>
+        <g class="sway"><path d="M372 108v-12" stroke="#0b7a50" stroke-width="2"/><path d="M367 92q5-8 10 0q-1 6-5 6t-5-6z" fill="#ffbf1a"/></g>
+        <g class="sway"><path d="M388 108v-10" stroke="#0b7a50" stroke-width="2"/><path d="M383 94q5-8 10 0q-1 6-5 6t-5-6z"/></g>
+      </g>
+      <!-- bike -->
+      <g class="bike"><g transform="translate(0 92)" stroke="#1a1f3d" stroke-width="2" fill="none">
+        <g class="wheel"><circle cx="8" cy="10" r="7"/><path d="M8 3v14M1 10h14"/></g>
+        <g class="wheel"><circle cx="30" cy="10" r="7"/><path d="M30 3v14M23 10h14"/></g>
+        <path d="M8 10l8-10h12l2 10M16 0l-2-4M26 0l2-5h3"/><circle cx="17" cy="-12" r="3" fill="#ff7a1a" stroke="none"/><path d="M17 -9l2 9" stroke="#ff7a1a" stroke-width="3"/>
+      </g></g>
+    </svg>
   </header>
   <nav class="tabs" aria-label="Розділи"><div class="tabs-in" id="tabs" role="tablist"></div></nav>
   <main id="view"></main>
 </div>
 <div class="toast" id="toast" hidden></div>
+<div id="sheetHost"></div>
 
 <script>
 const RAW = {
@@ -825,63 +932,126 @@ const FALSE_FRIENDS = [
 ["doen","робити","не «done»"]
 ];
 
+const CATEMO={"Привітання і фрази":"👋","Числа":"🔢","Час і дні":"⏰","Сім'я та люди":"👨‍👩‍👧","Їжа":"🧀","Напої":"☕","Кафе і магазин":"🛒","Дім":"🏠","Місто і транспорт":"🚲","Тіло і здоров'я":"🩺","Одяг і кольори":"👕","Погода":"🌦️","Робота і навчання":"💼","Хобі і дозвілля":"🎨","Дієслова":"🏃","Прикметники":"✨","Питання і зв'язки":"❓","Прийменники":"📦","Займенники":"🙋","Подорожі":"🧳"};
+const EMO={"hallo":"👋","goedemorgen":"🌅","goedemiddag":"🌞","goedenavond":"🌆","tot ziens":"👋","alsjeblieft":"🙏","alstublieft":"🙏","dank je wel":"🙏","dank u wel":"🙏","graag gedaan":"😊","sorry":"😔","ja":"✅","nee":"❌","prima":"👌","hoe gaat het?":"🙂","het gaat goed":"😄","ik begrijp het niet":"🤷","eet smakelijk":"🍽️","gezondheid":"🤧","proost":"🥂","succes!":"🍀",
+"nul":"0️⃣","een":"1️⃣","twee":"2️⃣","drie":"3️⃣","vier":"4️⃣","vijf":"5️⃣","zes":"6️⃣","zeven":"7️⃣","acht":"8️⃣","negen":"9️⃣","tien":"🔟","honderd":"💯","eerste":"🥇","tweede":"🥈",
+"de dag":"☀️","de week":"📅","de maand":"🗓️","het jaar":"📆","het uur":"🕐","vandaag":"📍","morgen":"➡️","gisteren":"⬅️","nu":"⚡","vroeg":"🐓","laat":"🌙","altijd":"♾️","nooit":"🚫","de avond":"🌆","de nacht":"🌙","de lente":"🌷","de zomer":"🏖️","de herfst":"🍂","de winter":"❄️","hoe laat is het?":"⌚","half drie":"🕝","zondag":"☀️","maandag":"🌙","donderdag":"⚡",
+"de familie":"👨‍👩‍👧‍👦","het gezin":"👨‍👩‍👧","de vader":"👨","de moeder":"👩","de ouders":"👫","het kind":"🧒","de kinderen":"👧👦","de zoon":"👦","de dochter":"👧","de broer":"👦","de zus":"👧","de opa":"👴","de oma":"👵","de man":"👨","de vrouw":"👩","de jongen":"👦","het meisje":"👧","de vriend":"🤝","de vriendin":"💁‍♀️","de buurman":"🏘️","de collega":"🧑‍💼","de mensen":"👥","de naam":"🏷️",
+"het eten":"🍽️","het ontbijt":"🥐","de lunch":"🥪","het avondeten":"🍲","het brood":"🍞","de boter":"🧈","de kaas":"🧀","het ei":"🥚","de melk":"🥛","het vlees":"🥩","de kip":"🍗","de vis":"🐟","de groente":"🥦","de aardappel":"🥔","de ui":"🧅","de wortel":"🥕","de appel":"🍎","de peer":"🍐","de sinaasappel":"🍊","de aardbei":"🍓","de rijst":"🍚","de suiker":"🍬","het zout":"🧂","het broodje":"🥯","de hagelslag":"🍫","de stroopwafel":"🧇","de patat":"🍟","de pindakaas":"🥜",
+"het water":"💧","de koffie":"☕","de thee":"🍵","het sap":"🧃","het bier":"🍺","de wijn":"🍷","de frisdrank":"🥤","ik heb honger":"😋","ik heb dorst":"🥵",
+"het restaurant":"🍴","het café":"☕","de kaart":"📜","de rekening":"🧾","de ober":"🤵","bestellen":"📝","betalen":"💶","pinnen":"💳","contant":"💵","de winkel":"🏪","de supermarkt":"🛒","de bakker":"🥖","de apotheek":"💊","de prijs":"🏷️","duur":"💎","goedkoop":"🪙","de korting":"🔖","het geld":"💰","kopen":"🛍️","hoeveel kost het?":"💶","de kassa":"🧾","open":"🟢","dicht":"🔴",
+"het huis":"🏠","het appartement":"🏢","de kamer":"🚪","de keuken":"🍳","de badkamer":"🛁","de slaapkamer":"🛏️","de woonkamer":"🛋️","het toilet":"🚽","de tuin":"🌳","de deur":"🚪","het raam":"🪟","de tafel":"🍽️","de stoel":"🪑","de bank":"🛋️","het bed":"🛏️","de kast":"🗄️","de douche":"🚿","de koelkast":"🧊","het mes":"🔪","de vork":"🍴","de lepel":"🥄","de sleutel":"🔑","de verwarming":"🔥",
+"de stad":"🏙️","het dorp":"🏡","de straat":"🛣️","de weg":"🛤️","de gracht":"🛶","het centrum":"📍","het station":"🚉","de trein":"🚆","de bus":"🚌","de tram":"🚋","de fiets":"🚲","de auto":"🚗","het vliegtuig":"✈️","het vliegveld":"🛫","de halte":"🚏","het kaartje":"🎫","de ingang":"➡️","de uitgang":"🚪","links":"⬅️","rechts":"➡️","rechtdoor":"⬆️","dichtbij":"📍","ver":"🗺️","het ziekenhuis":"🏥","de school":"🏫","het gemeentehuis":"🏛️",
+"het lichaam":"🧍","het hoofd":"🙂","het haar":"💇","het oog":"👁️","het oor":"👂","de neus":"👃","de mond":"👄","de tand":"🦷","de arm":"💪","de hand":"✋","de buik":"🫃","het been":"🦵","de voet":"🦶","de huisarts":"👩‍⚕️","de dokter":"🧑‍⚕️","het medicijn":"💊","de pijn":"🤕","ziek":"🤒","gezond":"💪","moe":"😴","de koorts":"🌡️","verkouden":"🤧","ik heb hoofdpijn":"🤕","de afspraak":"📅",
+"de kleren":"👚","de broek":"👖","het shirt":"👕","de trui":"🧶","de jas":"🧥","de jurk":"👗","de rok":"👗","de schoen":"👟","de bril":"👓","de paraplu":"☂️","passen":"🪞","de kleur":"🎨","rood":"🟥","oranje":"🟧","geel":"🟨","groen":"🟩","blauw":"🟦","bruin":"🟫","zwart":"⬛","wit":"⬜",
+"het weer":"🌤️","de zon":"☀️","de regen":"🌧️","de wind":"💨","de sneeuw":"❄️","de wolk":"☁️","het regent":"🌧️","het waait":"🌬️","warm":"🥵","koud":"🥶","lekker weer":"😎","nat":"💦","droog":"🏜️","de graad":"🌡️","de lucht":"🌌",
+"het werk":"💼","werken":"👩‍💻","het kantoor":"🏢","de baas":"🧑‍💼","het salaris":"💶","de vergadering":"👥","de leraar":"👨‍🏫","de les":"📚","de taal":"🗣️","het woord":"🔤","de zin":"💬","het boek":"📖","de computer":"💻","de telefoon":"📱","leren":"🧠","studeren":"🎓","lezen":"📖","schrijven":"✍️","het huiswerk":"📝","het formulier":"📋","de vakantie":"🏝️","vrij":"🕊️","druk":"🏃",
+"de hobby":"🎨","sporten":"🏋️","zwemmen":"🏊","fietsen":"🚴","wandelen":"🚶","koken":"👨‍🍳","dansen":"💃","zingen":"🎤","de muziek":"🎵","de film":"🎬","het spel":"🎲","de vrije tijd":"⛱️","het feest":"🎉","de verjaardag":"🎂","het cadeau":"🎁","uitgaan":"🪩","reizen":"🌍",
+"zijn":"🟰","hebben":"🤲","gaan":"🚶","komen":"👋","doen":"🛠️","maken":"🔨","zeggen":"💬","spreken":"🗣️","praten":"💬","vragen":"❓","antwoorden":"💡","weten":"🧠","kennen":"🤝","denken":"🤔","zien":"👀","kijken":"👁️","horen":"👂","luisteren":"🎧","eten":"🍴","drinken":"🥤","slapen":"😴","wonen":"🏠","wachten":"⏳","zoeken":"🔍","vinden":"🎯","geven":"🎁","nemen":"✊","brengen":"📦","beginnen":"▶️","stoppen":"⏹️","helpen":"🆘","bellen":"📞","staan":"🧍","zitten":"🪑","liggen":"🛌","lopen":"🚶","rijden":"🚗","blijven":"📌","worden":"🌱","kunnen":"💪","willen":"🙏","moeten":"❗","mogen":"👍","houden van":"❤️","wassen":"🧼","opstaan":"⏰","meenemen":"🎒","afspreken":"🤝","proberen":"🎯","gebruiken":"🔧","begrijpen":"💡","vergeten":"🫥","betekenen":"📖","krijgen":"📥","openen":"🔓","sluiten":"🔒",
+"groot":"🐘","klein":"🐭","lang":"🦒","kort":"📏","nieuw":"🆕","oud":"🏚️","jong":"👶","mooi":"🌸","goed":"👍","slecht":"👎","leuk":"😃","saai":"🥱","makkelijk":"🙂","moeilijk":"🧗","snel":"🐆","langzaam":"🐢","blij":"😊","verdrietig":"😢","boos":"😠","bang":"😨","aardig":"🥰","vriendelijk":"😊","gezellig":"🕯️","lekker":"😋","vol":"🈵","leeg":"🫙","schoon":"🧽","vies":"🤢","hoog":"🗼","zwaar":"🏋️","licht":"🪶","sterk":"💪","belangrijk":"⭐","klaar":"✅","rustig":"🧘","stil":"🤫","fijn":"😌","raar":"🤪","slim":"🧠",
+"wie":"🧑","wat":"❓","waar":"📍","wanneer":"⏰","waarom":"🤔","hoe":"🛠️","hoeveel":"🔢","veel":"📚","weinig":"🤏","samen":"👫","alleen":"🧍","misschien":"🤷","niet":"🚫","geen":"🙅",
+"in":"📥","op":"⬆️","onder":"⬇️","naast":"↔️","achter":"🔙","voor":"🔜","tussen":"↕️","met":"➕","zonder":"➖","naar":"➡️","uit":"📤",
+"ik":"🙋","hij":"👨","zij / ze":"👩","wij / we":"👥","jullie":"👥",
+"de reis":"🧭","het hotel":"🏨","de koffer":"🧳","het paspoort":"🛂","het land":"🗺️","Nederland":"🇳🇱","België":"🇧🇪","Oekraïne":"🇺🇦","het Nederlands":"🗣️","de zee":"🌊","het strand":"🏖️","het bos":"🌲","het meer":"🏞️","de molen":"🌬️","de tulp":"🌷","boeken":"📲"};
+
+const OPEN_URL='';
 
 /* ---------- data prep ---------- */
 const WORDS=[];
 for(const [cat,txt] of Object.entries(RAW)){
-  txt.trim().split('\n').forEach(l=>{const [nl,uk,hint]=l.split('|');WORDS.push({id:nl.trim(),nl:nl.trim(),uk:(uk||'').trim(),hint:(hint||'').trim(),cat})});
+  txt.trim().split('\n').forEach(l=>{const [nl,uk,hint]=l.split('|');const id=nl.trim();WORDS.push({id,nl:id,uk:(uk||'').trim(),hint:(hint||'').trim(),cat,em:EMO[id]||CATEMO[cat]||'🇳🇱'})});
 }
 const CATS=Object.keys(RAW);
 const NOUNS=WORDS.filter(w=>/^(de|het) [a-zà-ÿ]/i.test(w.nl)&&!w.nl.includes('?'));
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- storage ---------- */
-const KEY='taalfiets-v1';
-const DAY=86400000;
-const INTERVALS=[0,1,2,4,7,14,30];
-function today(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+const KEY='taalfiets-v1',DAY=86400000,INTERVALS=[0,1,2,4,7,14,30];
+function dstr(d){return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+function today(){return dstr(new Date())}
 let S={box:{},due:{},xp:0,streak:0,last:'',done:{date:'',n:0},goal:20,rate:0.9,voice:''};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)S=Object.assign(S,s)}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-function touchDay(){
-  const t=today();
-  if(S.done.date!==t){
-    const y=new Date(Date.now()-DAY);const ys=y.getFullYear()+'-'+(y.getMonth()+1)+'-'+y.getDate();
-    if(S.last!==t){S.streak=(S.last===ys)?S.streak:0}
-    S.done={date:t,n:0};
-  }
-}
-function credit(xp){touchDay();const t=today();if(S.last!==t){S.streak=(S.streak||0)+1;S.last=t}S.done.n++;S.xp+=xp;save()}
-function grade(w,ok){
-  let b=S.box[w.id]||0;b=ok?Math.min(b+1,6):Math.max(0,b-2);S.box[w.id]=b;
-  S.due[w.id]=Date.now()+INTERVALS[b]*DAY-3600000;credit(ok?10:2);
-}
+function touchDay(){const t=today();if(S.done.date!==t){const ys=dstr(new Date(Date.now()-DAY));if(S.last!==t&&S.last!==ys)S.streak=0;S.done={date:t,n:0}}}
+function credit(xp){touchDay();const t=today();if(S.last!==t){S.streak=(S.streak||0)+1;S.last=t}S.done.n++;S.xp+=xp;save();drawHero();if(S.done.n===S.goal){toast('Денну ціль виконано! Goed zo!');confetti(90)}}
+function setBox(w,b){S.box[w.id]=b;S.due[w.id]=Date.now()+INTERVALS[b]*DAY-3600000}
+function grade(w,ok){const b=S.box[w.id]||0;setBox(w,ok?Math.min(b+1,6):Math.max(0,b-2));credit(ok?10:2)}
 function isDue(w){return S.box[w.id]!==undefined&&(S.due[w.id]||0)<=Date.now()}
 function learned(w){return (S.box[w.id]||0)>=3}
 
-/* ---------- speech ---------- */
-let NLV=[];
-function loadVoices(){try{NLV=speechSynthesis.getVoices().filter(v=>/^nl/i.test(v.lang))}catch(e){NLV=[]}}
-if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=()=>{loadVoices();if(cur==='progress')render()}}
-function pickVoice(alt){
-  if(!NLV.length)return null;
-  let list=NLV.slice().sort((a,b)=>(b.lang==='nl-NL')-(a.lang==='nl-NL'));
-  let v=list.find(v=>v.name===S.voice)||list[0];
-  if(alt&&list.length>1)v=list.find(x=>x!==v)||v;
-  return v;
+/* ---------- speech: browser voice -> online audio -> help ---------- */
+const SYN=('speechSynthesis' in window)?window.speechSynthesis:null;
+let NLV=[],ALLV=0,audioState='unknown',helpShown=false,keep=[];
+function loadVoices(){try{const all=SYN?SYN.getVoices():[];ALLV=all.length;NLV=all.filter(v=>/^nl/i.test(v.lang)).sort((a,b)=>(b.lang==='nl-NL')-(a.lang==='nl-NL'))}catch(e){NLV=[]}}
+if(SYN){loadVoices();try{SYN.addEventListener('voiceschanged',loadVoices)}catch(e){SYN.onvoiceschanged=loadVoices}}
+document.addEventListener('pointerdown',()=>{if(SYN){try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;SYN.speak(u)}catch(e){}}},{once:true});
+function pickVoice(alt){if(!NLV.length)return null;let v=NLV.find(v=>v.name===S.voice)||NLV[0];if(alt&&NLV.length>1)v=NLV.find(x=>x!==v)||v;return v}
+function cleanText(t){return t.replace(/\s\/\s/g,', ').replace(/\(.*?\)/g,'').replace(/\.\.\.|…|___/g,'').trim()}
+let curAudio=null;
+function stopSpeech(){try{SYN&&SYN.cancel()}catch(e){}if(curAudio){try{curAudio.pause()}catch(e){}curAudio=null}document.querySelectorAll('.speak.talking').forEach(b=>b.classList.remove('talking'))}
+function playAudio(text,rate,done,fail){
+  try{const a=new Audio('https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=nl&q='+encodeURIComponent(text.slice(0,190)));
+    curAudio=a;a.playbackRate=rate<0.75?0.7:1;let ok=false;
+    a.onplaying=()=>{ok=true;audioState='ok'};a.onended=()=>done&&done();
+    a.onerror=()=>{if(!ok){audioState='fail';fail&&fail()}};
+    const p=a.play();if(p&&p.catch)p.catch(()=>{if(!ok){audioState='fail';fail&&fail()}});
+  }catch(e){audioState='fail';fail&&fail()}
 }
-let warned=false;
+function speakTTS(text,o){
+  const u=new SpeechSynthesisUtterance(text);u.lang='nl-NL';const v=pickVoice(o.alt);if(v)u.voice=v;
+  u.rate=o.rate||S.rate;u.pitch=o.pitch||1;keep.push(u);if(keep.length>20)keep.shift();
+  let started=false;u.onstart=()=>{started=true};
+  u.onend=()=>{o.btn&&o.btn.classList.remove('talking');o.onend&&o.onend()};
+  u.onerror=e=>{o.btn&&o.btn.classList.remove('talking');if(e.error==='interrupted'||e.error==='canceled')return;o.onfail?o.onfail():o.onend&&o.onend()};
+  try{SYN.resume()}catch(e){}SYN.speak(u);
+  if(o.onfail)setTimeout(()=>{if(!started&&!SYN.speaking)o.onfail()},2500);
+}
 function say(text,o={}){
-  if(!('speechSynthesis' in window)){toast('Цей браузер не вміє озвучувати текст');return}
-  if(!o.queue)speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text.replace(/\s\/\s/g,', ').replace(/\(.*?\)/g,'').replace(/\.\.\./g,''));
-  u.lang='nl-NL';const v=pickVoice(o.alt);if(v)u.voice=v;
-  u.rate=o.rate||S.rate;u.pitch=o.pitch||1;
-  if(o.onend)u.onend=o.onend;if(o.onerror)u.onerror=o.onerror;
-  if(!NLV.length&&!warned){warned=true;toast('Нідерландський голос не знайдено — встанови його в налаштуваннях телефону (Мова → Синтез мовлення)')}
-  speechSynthesis.speak(u);
+  text=cleanText(text);if(!text)return;
+  if(!o.queue)stopSpeech();
+  if(o.btn)o.btn.classList.add('talking');
+  loadVoices();
+  const fallback=()=>{if(audioState==='fail'){o.btn&&o.btn.classList.remove('talking');if(!o.auto)speechHelp();o.onend&&o.onend();return}
+    playAudio(text,o.rate||S.rate,()=>{o.btn&&o.btn.classList.remove('talking');o.onend&&o.onend()},()=>{o.btn&&o.btn.classList.remove('talking');if(!o.auto)speechHelp();o.onend&&o.onend()})};
+  if(SYN&&(NLV.length||ALLV===0)){speakTTS(text,Object.assign({},o,{onfail:NLV.length?null:fallback}))}
+  else fallback();
 }
-const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>';
+function speechHelp(force){
+  if(helpShown&&!force)return;helpShown=true;loadVoices();
+  const host=document.getElementById('sheetHost');
+  const reason=!SYN?'Вікно, у якому відкрито курс, не підтримує синтез мовлення. Так буває у вбудованому переглядачі застосунку Claude на Android.'
+    :!NLV.length?'Браузер уміє говорити, але на пристрої не встановлено нідерландський голос.':'Голос є, але відтворення заблоковано. Натисніть ще раз або перевірте, чи не вимкнено звук.';
+  host.innerHTML=`<div class="sheet" id="sheet"><div class="card" role="dialog" aria-modal="true" aria-labelledby="shT">
+    <div class="row" style="justify-content:space-between"><h2 id="shT">🔇 Озвучка не працює</h2><button class="btn" id="shX" aria-label="Закрити">✕</button></div>
+    <div>${reason}</div>
+    <ul class="diag small">
+      <li>Синтез мовлення в браузері: <b>${SYN?'є ✅':'немає ❌'}</b></li>
+      <li>Нідерландських голосів: <b>${NLV.length}${NLV.length?' ✅':' ❌'}</b>${SYN?` (усього голосів: ${ALLV})`:''}</li>
+      <li>Запасна онлайн-озвучка: <b>${audioState==='ok'?'працює ✅':audioState==='fail'?'заблокована ❌':'ще не перевірено'}</b></li>
+    </ul>
+    <div class="tipbox"><b>Як виправити:</b><br>
+      1. Відкрийте курс у звичайному браузері Chrome або Safari${OPEN_URL?' (кнопка нижче)':''}.<br>
+      2. <b>Android:</b> Налаштування → Система → Мова та введення → Синтез мовлення → Google → Встановити голосові дані → <b>Nederlands</b>.<br>
+      3. <b>iPhone:</b> Параметри → Універсальний доступ → Усний контент → Голоси → <b>Nederlands</b> → завантажити.<br>
+      4. Перевірте, що на телефоні не вимкнено звук (на iPhone — перемикач збоку).</div>
+    <div class="row">${OPEN_URL?`<a class="btn primary" href="${OPEN_URL}" target="_blank" rel="noopener">Відкрити в браузері</a>`:''}<button class="btn" id="shTry">${SPK} Спробувати ще раз</button></div>
+  </div></div>`;
+  const close=()=>host.innerHTML='';
+  document.getElementById('shX').onclick=close;
+  document.getElementById('sheet').onclick=e=>{if(e.target.id==='sheet')close()};
+  document.getElementById('shTry').onclick=()=>{audioState='unknown';close();helpShown=false;say('Hallo! Ik spreek Nederlands.')};
+}
+const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>';
 function spkBtn(text,label){return `<button class="speak" data-say="${esc(text)}" aria-label="Слухати: ${esc(label||text)}" title="Слухати">${SPK}</button>`}
+
+/* ---------- fx ---------- */
+const CF=['#2f5bff','#ff7a1a','#f03a6c','#10a86f','#ffbf1a','#7d55ff'];
+function confetti(n=40,x,y){if(reduced)return;x=x??innerWidth/2;y=y??innerHeight/3;
+  for(let i=0;i<n;i++){const s=document.createElement('i');s.className='cf';s.style.background=CF[i%6];s.style.left=x+'px';s.style.top=y+'px';document.body.appendChild(s);
+    const a=Math.random()*Math.PI*2,v=60+Math.random()*180,dx=Math.cos(a)*v,dy=Math.sin(a)*v-140;
+    const an=s.animate([{transform:'translate(0,0) rotate(0)',opacity:1},{transform:`translate(${dx}px,${dy+300}px) rotate(${Math.random()*900}deg)`,opacity:0}],{duration:1100+Math.random()*700,easing:'cubic-bezier(.2,.6,.4,1)'});an.onfinish=()=>s.remove()}}
+function xpFloat(el,txt){if(reduced||!el)return;const r=el.getBoundingClientRect();const s=document.createElement('div');s.className='xpf';s.textContent=txt;s.style.left=(r.left+r.width/2-16)+'px';s.style.top=(r.top-6)+'px';document.body.appendChild(s);
+  s.animate([{transform:'translateY(0) scale(.8)',opacity:0},{transform:'translateY(-14px) scale(1.15)',opacity:1,offset:.25},{transform:'translateY(-50px) scale(1)',opacity:0}],{duration:1000,easing:'ease-out'}).onfinish=()=>s.remove()}
 
 /* ---------- helpers ---------- */
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -891,64 +1061,67 @@ function norm(s){return s.toLowerCase().replace(/^(de|het|een) /,'').replace(/[?
 let tt;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3200)}
 function hashStr(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)}
 const $=s=>document.querySelector(s);
+const catIdx=c=>CATS.indexOf(c)%6;
 
 /* ---------- tabs ---------- */
-const TABS=[['today','Сьогодні'],['words','Слова'],['quiz','Тренажер'],['dialogs','Діалоги'],['grammar','Граматика'],['sounds','Вимова'],['hacks','Лайфхаки'],['progress','Прогрес']];
+const TABS=[['today','🏠 Сьогодні'],['words','🃏 Слова'],['quiz','🎯 Тренажер'],['dialogs','💬 Діалоги'],['grammar','📘 Граматика'],['sounds','🎙️ Вимова'],['hacks','💡 Лайфхаки'],['progress','🏆 Прогрес']];
 let cur=(location.hash||'').slice(1);if(!TABS.some(t=>t[0]===cur))cur='today';
 function drawTabs(){$('#tabs').innerHTML=TABS.map(([id,n])=>`<button class="tab" role="tab" data-tab="${id}" aria-selected="${id===cur}">${n}</button>`).join('')}
-function go(id){cur=id;try{history.replaceState(null,'','#'+id)}catch(e){location.hash=id}drawTabs();render();window.scrollTo({top:0})}
+function drawHero(){touchDay();$('#hstats').innerHTML=`<span>🔥 ${S.streak||0} дн.</span><span>⭐ ${S.xp} XP</span><span>📚 ${WORDS.filter(learned).length}/${WORDS.length}</span>`}
+function go(id){cur=id;try{history.replaceState(null,'','#'+id)}catch(e){}drawTabs();render();const n=document.querySelector('nav.tabs');if(n&&window.scrollY>n.offsetTop)window.scrollTo({top:n.offsetTop-4})}
 window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h!==cur&&TABS.some(t=>t[0]===h)){cur=h;drawTabs();render()}});
-
 document.addEventListener('click',e=>{
-  const s=e.target.closest('[data-say]');if(s){e.stopPropagation();say(s.dataset.say,{rate:s.dataset.rate?+s.dataset.rate:undefined});return}
+  const s=e.target.closest('[data-say]');if(s){e.stopPropagation();say(s.dataset.say,{rate:s.dataset.rate?+s.dataset.rate:undefined,btn:s.classList.contains('speak')?s:null});return}
   const t=e.target.closest('[data-tab]');if(t){go(t.dataset.tab);return}
   const g=e.target.closest('[data-go]');if(g){go(g.dataset.go);return}
 });
 
 /* ---------- views ---------- */
-function render(){try{window.speechSynthesis&&speechSynthesis.cancel()}catch(e){}({today:vToday,words:vWords,quiz:vQuiz,dialogs:vDialogs,grammar:vGrammar,sounds:vSounds,hacks:vHacks,progress:vProgress})[cur]()}
+function render(){stopSpeech();({today:vToday,words:vWords,quiz:vQuiz,dialogs:vDialogs,grammar:vGrammar,sounds:vSounds,hacks:vHacks,progress:vProgress})[cur]()}
 
 function vToday(){
   touchDay();
   const wod=WORDS[hashStr(today())%WORDS.length];
-  const due=WORDS.filter(isDue).length;
-  const nw=WORDS.filter(w=>S.box[w.id]===undefined).length;
+  const due=WORDS.filter(isDue).length, nw=WORDS.filter(w=>S.box[w.id]===undefined).length;
   const pct=Math.min(100,Math.round(S.done.n/S.goal*100));
   const hack=HACKS[hashStr(today()+'h')%HACKS.length];
   $('#view').innerHTML=`
-  <section class="card">
+  <section class="card" style="background:linear-gradient(135deg,var(--sun-soft),var(--pink-soft))">
     <div class="label">Слово дня</div>
-    <div class="row" style="justify-content:space-between;flex-wrap:nowrap">
-      <div style="min-width:0"><div class="q-big" style="text-align:left;padding:0">${artHTML(wod.nl)}</div>
-      <div>${esc(wod.uk)}</div>${wod.hint?`<div class="small muted">${esc(wod.hint)}</div>`:''}</div>
+    <div class="row" style="flex-wrap:nowrap;gap:14px">
+      <div class="q-pic" style="font-size:64px">${wod.em}</div>
+      <div style="min-width:0;flex:1"><div class="q-big" style="text-align:left;padding:0">${artHTML(wod.nl)}</div>
+      <div style="font-weight:800">${esc(wod.uk)}</div>${wod.hint?`<div class="small muted">${esc(wod.hint)}</div>`:''}</div>
       ${spkBtn(wod.nl)}
     </div>
   </section>
   <section class="card">
-    <div class="row" style="justify-content:space-between"><h2>Ціль на сьогодні</h2><span class="pill ${S.streak?'ok':''}">Серія: ${S.streak||0} дн.</span></div>
-    <div class="bar" role="progressbar" aria-valuenow="${S.done.n}" aria-valuemax="${S.goal}"><i style="width:${pct}%"></i></div>
-    <div class="small muted">${S.done.n} з ${S.goal} вправ · ${S.xp} XP</div>
-    <div class="row">
-      <button class="btn primary" id="startDue">${due?`Повторити (${due})`:'Нові слова'}</button>
-      <button class="btn" data-go="quiz">Тренажер</button>
-      <button class="btn" data-go="dialogs">Діалог дня</button>
+    <div class="row" style="flex-wrap:nowrap;gap:16px">
+      <div class="ring" style="--p:${pct}"><div>${pct}%</div></div>
+      <div style="min-width:0;display:grid;gap:6px">
+        <h2>Ціль на сьогодні</h2>
+        <div class="small muted">${S.done.n} з ${S.goal} вправ · ${S.xp} XP</div>
+        <div class="row"><span class="pill fire">🔥 Серія: ${S.streak||0} дн.</span>${due?`<span class="pill">🔁 На повторення: ${due}</span>`:''}</div>
+      </div>
     </div>
-    <div class="small muted">${due?`Слів на повторення: ${due}. Інтервальне повторення — не дасть їм забутися.`:`Ще ${nw} нових слів чекають на тебе.`}</div>
+    <div class="row">
+      <button class="btn primary" id="startDue">${due?`🔁 Повторити (${due})`:'✨ Нові слова'}</button>
+      <button class="btn sunny" data-go="quiz">🎯 Тренажер</button>
+      <button class="btn" data-go="dialogs">💬 Діалог</button>
+    </div>
+    <div class="small muted">${due?'Інтервальне повторення не дасть словам забутися.':`Ще ${nw} нових слів чекають на тебе.`}</div>
   </section>
-  <section class="card">
-    <div class="label">Лайфхак дня</div>
+  <section class="card" style="background:linear-gradient(135deg,var(--blue-soft),var(--purple-soft))">
+    <div class="label">💡 Лайфхак дня</div>
     <h3>${esc(hack[0])}</h3><div>${esc(hack[1])}</div>
   </section>
   <section class="card">
     <h2>Як проходити курс</h2>
-    <div class="grid2 small">
-      <div><b>1. Слова</b><br>Картки з озвучкою. Натисни «Знаю» чи «Ще раз» — програма сама вирішить, коли повторити.</div>
-      <div><b>2. Тренажер</b><br>Переклад, аудіювання, написання й гра de/het. Кнопка «Підказка», коли застряг.</div>
-      <div><b>3. Діалоги</b><br>9 життєвих ситуацій. Слухай, а потім грай роль одного зі співрозмовників.</div>
-      <div><b>4. Граматика й вимова</b><br>Коротко про головне A1.2 з прикладами, які можна почути.</div>
+    <div class="grid2">
+      ${[['🃏','Слова','Картки з картинками й озвучкою. «Знаю» чи «Ще раз» — програма сама вирішить, коли повторити.','c0'],['🎯','Тренажер','Переклад, аудіювання, написання і гра de/het. Застряг — тисни «Підказка».','c2'],['💬','Діалоги','9 життєвих ситуацій. Слухай, а потім грай роль одного зі співрозмовників.','c1'],['🎙️','Вимова','Складні звуки з поясненням українською і повільною озвучкою.','c3']].map(([e,h,t,c])=>`<div class="stat ${c}"><div style="font-size:1.8rem">${e}</div><b>${h}</b><span class="small">${t}</span></div>`).join('')}
     </div>
   </section>`;
-  $('#startDue').onclick=()=>{wordsState.cat=due?'__due':'__new';go('words')};
+  $('#startDue').onclick=()=>{wordsState.cat=due?'__due':'__new';buildDeck();go('words')};
 }
 
 /* words / flashcards */
@@ -963,70 +1136,81 @@ function buildDeck(){
 }
 function vWords(){
   if(!wordsState.q.length||wordsState.i>=wordsState.q.length)buildDeck();
-  const opts=[['__new','Нові (15)'],['__due','На повторення ('+WORDS.filter(isDue).length+')'],['__all','Мікс із усіх']].concat(CATS.map(c=>[c,c+' ('+WORDS.filter(w=>w.cat===c).length+')']));
+  const opts=[['__new','✨ Нові (15)'],['__due','🔁 На повторення ('+WORDS.filter(isDue).length+')'],['__all','🎲 Мікс із усіх']].concat(CATS.map(c=>[c,CATEMO[c]+' '+c+' ('+WORDS.filter(w=>w.cat===c).length+')']));
   $('#view').innerHTML=`
   <section class="card">
     <div class="row">
-      <select id="cat" aria-label="Набір слів">${opts.map(([v,n])=>`<option value="${esc(v)}" ${v===wordsState.cat?'selected':''}>${esc(n)}</option>`).join('')}</select>
-      <button class="btn ghost" id="dir">${wordsState.dir==='nl'?'NL → UA':'UA → NL'}</button>
+      <select id="cat" aria-label="Набір слів" style="flex:1;min-width:0">${opts.map(([v,n])=>`<option value="${esc(v)}" ${v===wordsState.cat?'selected':''}>${esc(n)}</option>`).join('')}</select>
+      <button class="btn" id="dir">${wordsState.dir==='nl'?'🇳🇱 → 🇺🇦':'🇺🇦 → 🇳🇱'}</button>
     </div>
     <div id="cardArea"></div>
   </section>
   <section class="card">
-    <div class="row" style="justify-content:space-between"><h2>Словник</h2><span class="small muted">${WORDS.length} слів · <span class="art-de">de</span> / <span class="art-het">het</span></span></div>
+    <h2>Теми</h2>
+    <div class="tiles">${CATS.map(c=>{const ws=WORDS.filter(w=>w.cat===c);const l=ws.filter(learned).length;return `<button class="tilebtn c${catIdx(c)}" data-cat="${esc(c)}"><span class="e">${CATEMO[c]}</span><span>${esc(c)}</span><span class="small muted">${l}/${ws.length}</span><span class="bar"><i style="width:${l/ws.length*100}%"></i></span></button>`}).join('')}</div>
+  </section>
+  <section class="card">
+    <div class="row" style="justify-content:space-between"><h2>📖 Словник</h2><span class="small muted">${WORDS.length} слів · <span class="art-de">de</span> / <span class="art-het">het</span></span></div>
     <input type="search" id="search" placeholder="Пошук нідерландською чи українською" value="${esc(wordsState.search)}" aria-label="Пошук слова">
     <div class="list" id="dict"></div>
   </section>`;
   $('#cat').onchange=e=>{wordsState.cat=e.target.value;buildDeck();drawCard()};
   $('#dir').onclick=()=>{wordsState.dir=wordsState.dir==='nl'?'uk':'nl';wordsState.flipped=false;vWords()};
   $('#search').oninput=e=>{wordsState.search=e.target.value;drawDict()};
+  document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{wordsState.cat=b.dataset.cat;$('#cat').value=b.dataset.cat;buildDeck();drawCard();$('#cardArea').scrollIntoView({behavior:reduced?'auto':'smooth',block:'center'})});
   drawCard();drawDict();
 }
-function drawCard(){
+function drawCard(anim){
   const a=$('#cardArea');const st=wordsState;
-  if(!st.q.length){a.innerHTML=`<div class="flash" style="cursor:default"><div><div class="word">Klaar!</div><div class="back muted">${st.cat==='__due'?'Немає слів на повторення. Приходь завтра або вчи нові.':'У цьому наборі вже немає нових слів.'}</div></div></div>`;return}
-  if(st.i>=st.q.length){a.innerHTML=`<div class="flash" style="cursor:default"><div><div class="word">Goed gedaan!</div><div class="back">Набір пройдено: ${st.q.length} карток</div><div class="row" style="justify-content:center;margin-top:14px"><button class="btn primary" id="again">Ще набір</button><button class="btn" data-go="quiz">Перевірити в тренажері</button></div></div></div>`;$('#again').onclick=()=>{buildDeck();drawCard()};return}
-  const w=st.q[st.i];const front=st.dir==='nl'?artHTML(w.nl):esc(w.uk);const back=st.dir==='nl'?esc(w.uk):artHTML(w.nl);
+  if(!st.q.length){a.innerHTML=`<div class="flipwrap in"><div class="flipper" style="cursor:default"><div class="face front"><div><div class="pic">🎉</div><div class="word">Klaar!</div><div class="hint">${st.cat==='__due'?'Немає слів на повторення. Приходь завтра або вчи нові.':'У цьому наборі вже немає нових слів.'}</div></div></div></div></div>`;return}
+  if(st.i>=st.q.length){confetti(70);a.innerHTML=`<div class="flipwrap in"><div class="flipper" style="cursor:default"><div class="face front"><div><div class="pic">🏆</div><div class="word">Goed gedaan!</div><div class="tr">Набір пройдено: ${st.q.length} карток</div><div class="row" style="justify-content:center;margin-top:14px"><button class="btn primary" id="again">Ще набір</button><button class="btn sunny" data-go="quiz">🎯 Перевірити</button></div></div></div></div></div>`;$('#again').onclick=()=>{buildDeck();drawCard()};return}
+  const w=st.q[st.i];const nlF=st.dir==='nl';
   const b=S.box[w.id];
   a.innerHTML=`
-  <div class="small muted">${st.i+1} / ${st.q.length} · ${esc(w.cat)}</div>
-  <div class="flash" id="flash" tabindex="0" role="button" aria-label="Перевернути картку">
-    <span class="corner pill ${b>=3?'ok':''}">${b===undefined?'нове':'рівень '+b}</span>
-    <span class="spk">${spkBtn(w.nl)}</span>
-    <div>
-      <div class="word">${front}</div>
-      ${st.flipped?`<div class="back">${back}</div>${w.hint?`<div class="hint">${esc(w.hint)}</div>`:''}`:`<div class="hint">Натисни, щоб перевернути</div>`}
+  <div class="row" style="justify-content:space-between"><span class="small muted">${st.i+1} / ${st.q.length} · ${CATEMO[w.cat]} ${esc(w.cat)}</span><span class="pill ${b>=3?'ok':''}">${b===undefined?'✨ нове':'рівень '+b}</span></div>
+  <div class="bar" style="height:8px"><i style="width:${st.i/st.q.length*100}%"></i></div>
+  <div class="flipwrap ${anim===false?'':'in'}" id="fw">
+    <div class="flipper ${st.flipped?'flipped':''}" id="flip" tabindex="0" role="button" aria-label="Перевернути картку">
+      <div class="face front"><span class="spk">${spkBtn(w.nl)}</span><div>
+        <div class="pic">${w.em}</div>
+        <div class="word">${nlF?artHTML(w.nl):esc(w.uk)}</div>
+        <div class="hint">👆 Торкнись, щоб перевернути</div></div></div>
+      <div class="face back"><span class="spk">${spkBtn(w.nl)}</span><div>
+        <div class="pic">${w.em}</div>
+        <div class="word">${nlF?esc(w.uk):artHTML(w.nl)}</div>
+        <div class="tr muted">${nlF?artHTML(w.nl):esc(w.uk)}</div>
+        ${w.hint?`<div class="hint">💡 ${esc(w.hint)}</div>`:''}</div></div>
     </div>
   </div>
-  <div class="row" style="justify-content:center">
-    ${st.flipped?`<button class="btn bad" id="no">Ще раз</button><button class="btn good" id="yes">Знаю</button>`:`<button class="btn primary" id="flip">Показати переклад</button>`}
-  </div>`;
-  const flip=()=>{if(!st.flipped){st.flipped=true;if(st.dir==='uk')say(w.nl);drawCard()}};
-  $('#flash').onclick=flip;$('#flash').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}};
-  if($('#flip'))$('#flip').onclick=flip;
-  if($('#yes'))$('#yes').onclick=()=>{grade(w,true);st.i++;st.flipped=false;drawCard()};
-  if($('#no'))$('#no').onclick=()=>{grade(w,false);st.q.push(w);st.i++;st.flipped=false;drawCard()};
-  if(st.dir==='nl'&&!st.flipped&&cur==='words'&&a.dataset.last!==w.id+st.i){a.dataset.last=w.id+st.i;}
+  <div class="row" style="justify-content:center" id="cbtns"></div>`;
+  const btns=()=>{$('#cbtns').innerHTML=st.flipped?`<button class="btn bad" id="no">🔁 Ще раз</button><button class="btn good" id="yes">✅ Знаю</button>`:`<button class="btn primary" id="show">Показати переклад</button>`;
+    if($('#show'))$('#show').onclick=flip;
+    if($('#yes'))$('#yes').onclick=e=>{grade(w,true);xpFloat(e.currentTarget,'+10');next('out-r')};
+    if($('#no'))$('#no').onclick=()=>{grade(w,false);st.q.push(w);next('out-l')}};
+  const flip=()=>{st.flipped=!st.flipped;$('#flip').classList.toggle('flipped',st.flipped);if(st.flipped)say(w.nl,{auto:true});btns()};
+  const next=cls=>{const fw=$('#fw');if(reduced){st.i++;st.flipped=false;drawCard();return}fw.classList.remove('in');void fw.offsetWidth;fw.classList.add(cls);setTimeout(()=>{st.i++;st.flipped=false;drawCard()},300)};
+  $('#flip').onclick=flip;$('#flip').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}};
+  btns();
 }
 function drawDict(){
   const q=norm(wordsState.search||'');
-  const list=WORDS.filter(w=>!q||norm(w.nl).includes(q)||w.uk.toLowerCase().includes(q)).slice(0,500);
-  $('#dict').innerHTML=list.length?list.map(w=>`<div class="li">${spkBtn(w.nl)}<div class="nl">${artHTML(w.nl)}</div><div class="uk">${esc(w.uk)}</div>${learned(w)?'<span class="pill ok">вивчено</span>':''}</div>`).join(''):'<div class="li muted">Нічого не знайдено</div>';
+  const list=WORDS.filter(w=>!q||norm(w.nl).includes(q)||w.uk.toLowerCase().includes(q));
+  $('#dict').innerHTML=list.length?list.map(w=>`<div class="li"><span class="em">${w.em}</span><div class="nl">${artHTML(w.nl)}</div><div class="uk">${esc(w.uk)}</div>${learned(w)?'<span class="pill ok">✓</span>':''}${spkBtn(w.nl)}</div>`).join(''):'<div class="li muted">Нічого не знайдено</div>';
 }
 
 /* quiz */
-const QZ={mode:null,qs:[],i:0,score:0,answered:false,hint:0};
+const QZ={mode:null,qs:[],i:0,score:0,answered:false,hint:0,cat:''};
 const MODES=[
- ['choice','Вибери переклад','Бачиш нідерландське слово — обираєш український переклад.'],
- ['listen','На слух','Чуєш слово — обираєш, яке саме прозвучало. Тренує розуміння мови.'],
- ['type','Напиши слово','Бачиш український переклад — пишеш нідерландською. Артикль можна не писати.'],
- ['article','De чи het?','Гра на артиклі. Найкорисніші 2 хвилини для граматики.']
+ ['choice','🖼️','Вибери переклад','Бачиш слово з картинкою — обираєш переклад.','c0'],
+ ['listen','🎧','На слух','Чуєш слово — обираєш, яке прозвучало.','c1'],
+ ['type','⌨️','Напиши слово','Пишеш нідерландською. Артикль можна не писати.','c2'],
+ ['article','🎲','De чи het?','Гра на артиклі — найкорисніші 2 хвилини.','c3']
 ];
 function vQuiz(){
   if(!QZ.mode){
-    $('#view').innerHTML=`<section class="card"><h2>Тренажер</h2><div class="muted small">Раунд — 10 питань. Слова, з якими ти помиляєшся, частіше повертатимуться в картках.</div></section>
-    ${MODES.map(([id,n,d])=>`<section class="card"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;gap:14px"><div style="min-width:0"><h3>${n}</h3><div class="small muted">${d}</div></div><button class="btn primary" data-mode="${id}">Почати</button></div></section>`).join('')}
-    <section class="card"><label class="label" for="qcat">Тема для тренажера</label><select id="qcat"><option value="">Усі теми</option>${CATS.map(c=>`<option ${QZ.cat===c?'selected':''}>${esc(c)}</option>`).join('')}</select></section>`;
+    $('#view').innerHTML=`<section class="card"><h2>🎯 Тренажер</h2><div class="muted small">Раунд — 10 питань. Слова, з якими помиляєшся, повертаються частіше.</div>
+    <label class="label" for="qcat">Тема</label><select id="qcat"><option value="">🌈 Усі теми</option>${CATS.map(c=>`<option value="${esc(c)}" ${QZ.cat===c?'selected':''}>${CATEMO[c]} ${esc(c)}</option>`).join('')}</select></section>
+    ${MODES.map(([id,e,n,d,c])=>`<section class="card"><div class="mode"><div class="mi ${c}">${e}</div><div style="min-width:0;flex:1"><h3>${n}</h3><div class="small muted">${d}</div></div><button class="btn primary" data-mode="${id}">Грати</button></div></section>`).join('')}`;
     $('#qcat').onchange=e=>QZ.cat=e.target.value;
     document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>startQuiz(b.dataset.mode));
     return;
@@ -1042,89 +1226,89 @@ function startQuiz(mode){
   Object.assign(QZ,{mode,qs:shuffle(qs),i:0,score:0,answered:false,hint:0,pool});
   vQuiz();
 }
-function distractors(w,key){
-  const same=QZ.pool.filter(x=>x!==w&&x[key]!==w[key]);
-  return shuffle(same).slice(0,3);
-}
+function distractors(w,key){return shuffle(QZ.pool.filter(x=>x!==w&&x[key]!==w[key])).slice(0,3)}
 function drawQ(){
   const v=$('#view');
   if(QZ.i>=QZ.qs.length){
-    const p=QZ.score/QZ.qs.length;
-    v.innerHTML=`<section class="card" style="text-align:center"><div class="label">Результат</div><div class="q-big">${QZ.score} / ${QZ.qs.length}</div>
-    <div>${p>=.9?'Uitstekend! Відмінно!':p>=.6?'Goed zo! Добре, ще трохи практики.':'Niet erg! Повтори картки й спробуй ще.'}</div>
+    const p=QZ.score/QZ.qs.length;if(p>=.6)confetti(p>=.9?120:60);
+    v.innerHTML=`<section class="card" style="text-align:center;background:linear-gradient(135deg,var(--sun-soft),var(--green-soft))"><div class="q-pic">${p>=.9?'🏆':p>=.6?'🌷':'💪'}</div><div class="q-big">${QZ.score} / ${QZ.qs.length}</div>
+    <div style="font-weight:800">${p>=.9?'Uitstekend! Відмінно!':p>=.6?'Goed zo! Добре, ще трохи практики.':'Niet erg! Повтори картки й спробуй ще.'}</div>
     <div class="row" style="justify-content:center"><button class="btn primary" id="rq">Ще раунд</button><button class="btn" id="bq">Інший режим</button></div></section>`;
     $('#rq').onclick=()=>startQuiz(QZ.mode);$('#bq').onclick=()=>{QZ.mode=null;vQuiz()};return;
   }
   const w=QZ.qs[QZ.i];QZ.answered=false;QZ.hint=0;
-  const head=`<div class="row" style="justify-content:space-between"><span class="small muted">Питання ${QZ.i+1} / ${QZ.qs.length} · ${QZ.score} правильних</span><button class="btn ghost" id="quit">Вийти</button></div><div class="bar"><i style="width:${QZ.i/QZ.qs.length*100}%"></i></div>`;
+  const head=`<div class="row" style="justify-content:space-between"><span class="small muted">Питання ${QZ.i+1} / ${QZ.qs.length} · ✅ ${QZ.score}</span><button class="btn" id="quit">✕ Вийти</button></div><div class="bar"><i style="width:${QZ.i/QZ.qs.length*100}%"></i></div>`;
   let body='';
   if(QZ.mode==='choice'){
     const o=shuffle([w,...distractors(w,'uk')]);
-    body=`<div class="row" style="justify-content:center">${spkBtn(w.nl)}</div><div class="q-big">${artHTML(w.nl)}</div><div class="opts">${o.map(x=>`<button class="opt" data-a="${x===w}">${esc(x.uk)}</button>`).join('')}</div>`;
+    body=`<div class="q-pic">${w.em}</div><div class="row" style="justify-content:center;gap:12px"><div class="q-big">${artHTML(w.nl)}</div>${spkBtn(w.nl)}</div><div class="opts">${o.map(x=>`<button class="opt" data-a="${x===w}">${esc(x.uk)}</button>`).join('')}</div>`;
   }else if(QZ.mode==='listen'){
     const o=shuffle([w,...distractors(w,'nl')]);
-    body=`<div class="q-big"><button class="btn primary" id="play">${SPK} Слухати</button> <button class="btn ghost" data-say="${esc(w.nl)}" data-rate="0.55">Повільно</button></div><div class="opts">${o.map(x=>`<button class="opt" data-a="${x===w}">${artHTML(x.nl)}</button>`).join('')}</div>`;
+    body=`<div class="q-pic">🎧</div><div class="row" style="justify-content:center"><button class="btn primary" id="play">${SPK} Слухати</button><button class="btn" data-say="${esc(w.nl)}" data-rate="0.55">🐢 Повільно</button></div><div class="opts">${o.map(x=>`<button class="opt" data-a="${x===w}">${artHTML(x.nl)}</button>`).join('')}</div>`;
   }else if(QZ.mode==='type'){
-    body=`<div class="q-big">${esc(w.uk)}</div><form id="tf" class="row" style="flex-wrap:nowrap"><input type="text" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="нідерландською…" aria-label="Відповідь"><button class="btn primary">Перевірити</button></form>`;
+    body=`<div class="q-pic">${w.em}</div><div class="q-big">${esc(w.uk)}</div><form id="tf" class="row" style="flex-wrap:nowrap"><input type="text" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="нідерландською…" aria-label="Відповідь"><button class="btn primary">OK</button></form>`;
   }else{
     const m=w.nl.match(/^(de|het) (.*)$/);
-    body=`<div class="row" style="justify-content:center">${spkBtn(w.nl)}</div><div class="q-big">___ ${esc(m[2])}</div><div class="small muted" style="text-align:center">${esc(w.uk)}</div><div class="opts"><button class="opt" data-a="${m[1]==='de'}"><span class="art-de">de</span></button><button class="opt" data-a="${m[1]==='het'}"><span class="art-het">het</span></button></div>`;
+    body=`<div class="q-pic">${w.em}</div><div class="row" style="justify-content:center;gap:12px"><div class="q-big">___ ${esc(m[2])}</div>${spkBtn(m[2])}</div><div class="small muted" style="text-align:center">${esc(w.uk)}</div><div class="opts"><button class="opt" data-a="${m[1]==='de'}" style="text-align:center;font-size:1.3rem"><span class="art-de">de</span></button><button class="opt" data-a="${m[1]==='het'}" style="text-align:center;font-size:1.3rem"><span class="art-het">het</span></button></div>`;
   }
-  v.innerHTML=`<section class="card">${head}${body}<div class="row"><button class="btn ghost" id="hint">Підказка</button><span id="hintText" class="small muted"></span></div><div id="fb" class="feedback" aria-live="polite"></div><div class="row" id="nextRow" hidden><button class="btn primary" id="next">Далі</button></div></section>`;
+  v.innerHTML=`<section class="card">${head}${body}<div class="row"><button class="btn sunny" id="hint">💡 Підказка</button><span id="hintText" class="small muted" style="flex:1;min-width:0"></span></div><div id="fb" class="feedback" aria-live="polite"></div><div class="row" id="nextRow" hidden><button class="btn primary" id="next">Далі →</button></div></section>`;
   $('#quit').onclick=()=>{QZ.mode=null;vQuiz()};
-  if($('#play')){$('#play').onclick=()=>say(w.nl);setTimeout(()=>say(w.nl),250)}
+  if($('#play')){$('#play').onclick=e=>say(w.nl,{btn:null});setTimeout(()=>say(w.nl,{auto:true}),300)}
   $('#hint').onclick=()=>{QZ.hint++;$('#hintText').textContent=hintFor(w,QZ.hint)};
   document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
     if(QZ.answered)return;const ok=b.dataset.a==='true';
     document.querySelectorAll('.opt').forEach(x=>{if(x.dataset.a==='true')x.classList.add('right')});
-    if(!ok)b.classList.add('wrong');finish(w,ok);
+    if(!ok)b.classList.add('wrong');else{const r=b.getBoundingClientRect();confetti(24,r.left+r.width/2,r.top+r.height/2);xpFloat(b,QZ.hint?'+5':'+10')}
+    finish(w,ok);
   });
   if($('#tf')){
-    $('#ans').focus();
+    $('#ans').focus({preventScroll:true});
     $('#tf').onsubmit=e=>{e.preventDefault();if(QZ.answered)return;const val=norm($('#ans').value);if(!val)return;
       const target=norm(w.nl);const alts=w.nl.split('/').map(norm);
       const ok=val===target||alts.includes(val);const close=!ok&&lev(val,target)<=1;
+      if(ok||close){const r=$('#ans').getBoundingClientRect();confetti(24,r.left+r.width/2,r.top);xpFloat($('#ans'),'+10')}else{$('#ans').animate([{transform:'translateX(-7px)'},{transform:'translateX(7px)'},{transform:'none'}],{duration:300,iterations:2})}
       finish(w,ok||close,close?`Майже! Правильно: ${w.nl}`:null)};
   }
 }
 function hintFor(w,n){
   const base=w.nl.replace(/^(de|het) /,'');
-  if(QZ.mode==='article'){return n===1?'Чи закінчується на -je? Тоді het. Множина завжди de.':(w.hint||'Приблизно 2/3 слів мають de.')}
+  if(QZ.mode==='article')return n===1?'Закінчується на -je? Тоді het. Множина завжди de.':(w.hint||'Приблизно 2/3 слів мають de.');
   if(n===1)return w.hint?w.hint:`Починається на «${base[0]}», ${base.length} літер`;
   if(n===2)return `Починається на «${base.slice(0,Math.ceil(base.length/2))}…»`;
-  say(w.nl);return 'Озвучую — слухай уважно';
+  say(w.nl);return '🔊 Озвучую — слухай уважно';
 }
 function lev(a,b){const d=[];for(let i=0;i<=a.length;i++){d[i]=[i];for(let j=1;j<=b.length;j++)d[i][j]=i?Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)):j}return d[a.length][b.length]}
 function finish(w,ok,msg){
   QZ.answered=true;if(ok)QZ.score++;
-  const b=S.box[w.id]||0;S.box[w.id]=ok?Math.max(b,Math.min(b+1,6)):Math.max(0,b-1);S.due[w.id]=Date.now()+INTERVALS[S.box[w.id]]*DAY-3600000;
+  const b=S.box[w.id]||0;setBox(w,ok?Math.min(b+1,6):Math.max(0,b-1));
   credit(ok?(QZ.hint?5:10):1);
   const fb=$('#fb');fb.className='feedback '+(ok?'ok':'no');
-  fb.innerHTML=(msg?esc(msg):ok?'Goed zo! Правильно.':`Ні. Правильно: ${artHTML(w.nl)} — ${esc(w.uk)}`)+(w.hint&&!ok?`<div class="small muted" style="font-weight:400">${esc(w.hint)}</div>`:'');
-  if(QZ.mode!=='listen')say(w.nl);
-  $('#nextRow').hidden=false;$('#next').focus();$('#next').onclick=()=>{QZ.i++;drawQ()};
+  fb.innerHTML=(msg?'🙂 '+esc(msg):ok?'🎉 Goed zo! Правильно.':`😅 Ні. Правильно: ${artHTML(w.nl)} — ${esc(w.uk)}`)+(w.hint&&!ok?`<div class="small muted" style="font-weight:600">💡 ${esc(w.hint)}</div>`:'');
+  if(QZ.mode!=='listen')say(w.nl,{auto:true});
+  $('#nextRow').hidden=false;$('#next').focus({preventScroll:true});$('#next').onclick=()=>{QZ.i++;drawQ()};
 }
 
 /* dialogs */
+const DEMO=['☕','☕','🛒','🗺️','🩺','📞','🚆','🏖️','💼'];
 const DS={i:null,trans:true,role:null};
 function vDialogs(){
   if(DS.i===null){
-    $('#view').innerHTML=`<section class="card"><h2>Діалоги</h2><div class="small muted">Слухай кожну репліку, вмикай переклад, а потім грай роль: програма приховає твої репліки — скажи їх уголос і перевір себе.</div></section>
-    <div class="grid2">${DIALOGS.map((d,i)=>`<button class="card" style="text-align:left;cursor:pointer;font:inherit;color:inherit" data-d="${i}"><span class="label">Діалог ${i+1}</span><h3>${esc(d.t)}</h3><span class="muted small">${esc(d.uk)} · ${d.lines.length} реплік</span></button>`).join('')}</div>`;
+    $('#view').innerHTML=`<section class="card"><h2>💬 Діалоги</h2><div class="muted small">Слухай кожну репліку, вмикай переклад, а потім грай роль: програма приховає твої репліки — скажи їх уголос і перевір себе.</div></section>
+    <div class="grid2">${DIALOGS.map((d,i)=>`<button class="card dlg-card c${i%6}" data-d="${i}"><span class="e">${i===0?'🤝':DEMO[i]}</span><span class="label">Діалог ${i+1}</span><h3>${esc(d.t)}</h3><span class="muted small">${esc(d.uk)} · ${d.lines.length} реплік</span></button>`).join('')}</div>`;
     document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{DS.i=+b.dataset.d;DS.role=null;vDialogs()});return;
   }
   const d=DIALOGS[DS.i];
   $('#view').innerHTML=`<section class="card">
-    <div class="row" style="justify-content:space-between"><button class="btn ghost" id="back">← Усі діалоги</button><span class="small muted">${DS.i+1} / ${DIALOGS.length}</span></div>
-    <h2>${esc(d.t)}</h2><div class="muted">${esc(d.uk)}</div>
+    <div class="row" style="justify-content:space-between"><button class="btn" id="back">← Усі діалоги</button><span class="small muted">${DS.i+1} / ${DIALOGS.length}</span></div>
+    <div class="row" style="flex-wrap:nowrap;gap:12px"><span style="font-size:2.4rem">${DS.i===0?'🤝':DEMO[DS.i]}</span><div><h2>${esc(d.t)}</h2><div class="muted">${esc(d.uk)}</div></div></div>
     <div class="row">
       <button class="btn primary" id="playAll">${SPK} Прослухати весь</button>
-      <button class="btn" id="tr">${DS.trans?'Сховати':'Показати'} переклад</button>
-      <select id="role" aria-label="Рольова гра"><option value="">Рольова гра: вимк.</option><option value="A" ${DS.role==='A'?'selected':''}>Я — A</option><option value="B" ${DS.role==='B'?'selected':''}>Я — B</option></select>
+      <button class="btn" id="tr">${DS.trans?'🙈 Сховати':'👀 Показати'} переклад</button>
+      <select id="role" aria-label="Рольова гра"><option value="">🎭 Рольова гра: вимк.</option><option value="A" ${DS.role==='A'?'selected':''}>🎭 Я — 👩 A</option><option value="B" ${DS.role==='B'?'selected':''}>🎭 Я — 👨 B</option></select>
     </div>
-    <div id="lines">${d.lines.map(([who,nl,uk],k)=>{const hide=DS.role===who;return `<div class="line" data-k="${k}"><span class="who ${who}">${who}</span><div style="min-width:0"><div class="nl ${hide?'hidden-text':''}" data-reveal>${esc(nl)}</div>${DS.trans||hide?`<div class="uk">${esc(uk)}</div>`:''}</div>${spkBtn(nl)}</div>`}).join('')}</div>
-    <div class="tipbox"><b>Корисно:</b> ${esc(d.tip)}</div>
-    ${DS.role?`<div class="small muted">Твої репліки розмиті: прочитай переклад, скажи нідерландською вголос, потім натисни на розмитий текст, щоб перевірити.</div>`:''}
+    <div class="chat" id="lines">${d.lines.map(([who,nl,uk],k)=>{const hide=DS.role===who;return `<div class="line ${who}" data-k="${k}"><span class="ava">${who==='A'?'👩':'👨'}</span><div class="bubble"><div style="min-width:0;flex:1"><div class="nl ${hide?'hidden-text':''}" data-reveal>${esc(nl)}</div>${DS.trans||hide?`<div class="uk">${esc(uk)}</div>`:''}</div>${spkBtn(nl)}</div></div>`}).join('')}</div>
+    <div class="tipbox"><b>💡 Корисно:</b> ${esc(d.tip)}</div>
+    ${DS.role?`<div class="small muted">Твої репліки розмиті: прочитай переклад, скажи нідерландською вголос, потім торкнись розмитого тексту, щоб перевірити.</div>`:''}
     <div class="row"><button class="btn" id="prev" ${DS.i?'':'disabled'}>← Попередній</button><button class="btn" id="nextD" ${DS.i<DIALOGS.length-1?'':'disabled'}>Наступний →</button></div>
   </section>`;
   $('#back').onclick=()=>{DS.i=null;vDialogs()};
@@ -1133,82 +1317,85 @@ function vDialogs(){
   $('#prev').onclick=()=>{DS.i--;vDialogs()};$('#nextD').onclick=()=>{DS.i++;vDialogs()};
   document.querySelectorAll('[data-reveal]').forEach(el=>el.onclick=()=>el.classList.remove('hidden-text'));
   $('#playAll').onclick=()=>{
-    if(!window.speechSynthesis){toast('Цей браузер не вміє озвучувати текст');return}
-    speechSynthesis.cancel();let k=0;const L=document.querySelectorAll('.line');
-    const next=()=>{L.forEach(x=>x.classList.remove('playing'));if(k>=d.lines.length){credit(5);return}
-      const [who,nl]=d.lines[k];L[k].classList.add('playing');
+    stopSpeech();let k=0;const L=document.querySelectorAll('.line');const run=DS.i+'-'+Date.now();DS.run=run;
+    const next=()=>{if(DS.run!==run||cur!=='dialogs')return;L.forEach(x=>x.classList.remove('playing'));if(k>=d.lines.length){credit(5);toast('Діалог прослухано! +5 XP');return}
+      const [who,nl]=d.lines[k];L[k].classList.add('playing');L[k].scrollIntoView({behavior:reduced?'auto':'smooth',block:'nearest'});
       if(DS.role===who){k++;setTimeout(next,Math.max(1800,nl.length*90));return}
-      say(nl,{queue:true,alt:who==='B',pitch:who==='B'?0.85:1.1,onend:()=>{k++;setTimeout(next,350)},onerror:()=>{}})};
+      say(nl,{queue:true,alt:who==='B',pitch:who==='B'?0.85:1.1,onend:()=>{k++;setTimeout(next,350)}})};
     next();
   };
 }
 
 /* grammar */
+const GEMO=['🎨','2️⃣','❓','🚫','⏱️','✂️','💪','⏪','👥','🐣','🌈'];
 function vGrammar(){
-  $('#view').innerHTML=`<section class="card"><h2>Граматика A1.2</h2><div class="small muted">11 тем, без яких не обійтися на рівні A1–A2. Кожна з прикладами, лайфхаком і міні-перевіркою.</div></section>
-  ${GRAMMAR.map((g,i)=>`<details class="g" ${i===0?'open':''}><summary>${esc(g.t)}</summary><div class="gb">${g.body}
+  $('#view').innerHTML=`<section class="card" style="background:linear-gradient(135deg,var(--blue-soft),var(--green-soft))"><h2>📘 Граматика A1.2</h2><div class="small">11 тем, без яких не обійтися на рівні A1–A2. Кожна з прикладами, лайфхаком і міні-перевіркою.</div></section>
+  ${GRAMMAR.map((g,i)=>`<details class="g" ${i===0?'open':''}><summary><span class="e">${GEMO[i]||'📘'}</span>${esc(g.t)}</summary><div class="gb">${g.body}
   ${g.ex.map(([nl,uk])=>`<div class="ex">${spkBtn(nl.split('→').pop().split('—')[0].trim(),nl)}<div style="min-width:0"><div class="nl">${esc(nl)}</div><div class="small muted">${esc(uk)}</div></div></div>`).join('')}
-  <div class="tipbox"><b>Лайфхак:</b> ${esc(g.tip)}</div>
-  <div><div class="label" style="margin-bottom:6px">Перевір себе</div><div class="small" style="margin-bottom:6px">${esc(g.q.q)}</div><div class="opts">${g.q.o.map((o,k)=>`<button class="opt gq" data-g="${i}" data-k="${k}">${esc(o)}</button>`).join('')}</div></div>
+  <div class="tipbox"><b>💡 Лайфхак:</b> ${esc(g.tip)}</div>
+  <div><div class="label" style="margin-bottom:6px">✏️ Перевір себе</div><div style="margin-bottom:8px;font-weight:700">${esc(g.q.q)}</div><div class="opts">${g.q.o.map((o,k)=>`<button class="opt gq" data-g="${i}" data-k="${k}">${esc(o)}</button>`).join('')}</div></div>
   </div></details>`).join('')}`;
   document.querySelectorAll('.gq').forEach(b=>b.onclick=()=>{
     const g=GRAMMAR[+b.dataset.g];const sib=document.querySelectorAll(`.gq[data-g="${b.dataset.g}"]`);
     if([...sib].some(x=>x.classList.contains('right')))return;
     sib.forEach(x=>{if(+x.dataset.k===g.q.a)x.classList.add('right')});
-    if(+b.dataset.k!==g.q.a)b.classList.add('wrong');else credit(5);
+    if(+b.dataset.k!==g.q.a)b.classList.add('wrong');else{credit(5);const r=b.getBoundingClientRect();confetti(24,r.left+r.width/2,r.top);xpFloat(b,'+5')}
   });
 }
 
 /* sounds */
 function vSounds(){
-  $('#view').innerHTML=`<section class="card"><h2>Лабораторія вимови</h2><div class="small muted">Натисни на слово, щоб почути. Кнопка «Повільно» вимовляє вдвічі повільніше — повторюй за диктором.</div>
-  <label class="small" for="rate">Швидкість мовлення: <b id="rv">${S.rate.toFixed(2)}</b></label><input type="range" id="rate" min="0.5" max="1.2" step="0.05" value="${S.rate}" style="width:100%"></section>
-  <div class="grid2">${SOUNDS.map(s=>`<section class="card sound"><div class="s">${esc(s.s)}</div><div class="small">${esc(s.how)}</div><div class="row">${s.ex.map(w=>`<button class="chip" data-say="${esc(w)}">${esc(w)}</button>`).join('')}</div><button class="btn ghost" data-say="${esc(s.ex.join(', '))}" data-rate="0.5">Повільно всі</button></section>`).join('')}</div>
-  <section class="card"><h2>Скоромовка для смільчаків</h2><div class="ex">${spkBtn('Achtentachtig angstige agenten aten achtentachtig ananassen')}<div><div class="nl">Achtentachtig angstige agenten aten achtentachtig ananassen.</div><div class="small muted">88 наляканих поліцейських з'їли 88 ананасів. Тренує горлове g/ch.</div></div></div>
-  <div class="ex">${spkBtn('Scheveningen')}<div><div class="nl">Scheveningen</div><div class="small muted">Курорт біля Гааги. Слово, яке видає іноземця за секунду — спробуй сказати правильно.</div></div></div></section>`;
+  $('#view').innerHTML=`<section class="card"><h2>🎙️ Лабораторія вимови</h2><div class="small muted">Торкнись слова, щоб почути. «🐢 Повільно» вимовляє вдвічі повільніше — повторюй за диктором.</div>
+  <label class="small" for="rate" style="font-weight:800">Швидкість мовлення: <span id="rv">${S.rate.toFixed(2)}</span></label><input type="range" id="rate" min="0.5" max="1.2" step="0.05" value="${S.rate}" style="width:100%;accent-color:var(--pink)">
+  <div class="row"><button class="btn" id="diag">🔧 Перевірити озвучку</button></div></section>
+  <div class="grid2">${SOUNDS.map((s,i)=>`<section class="card sound"><div class="s">${esc(s.s)}</div><div class="small">${esc(s.how)}</div><div class="row">${s.ex.map(w=>`<button class="chip" data-say="${esc(w)}">🔊 ${esc(w)}</button>`).join('')}</div><button class="btn sunny" data-say="${esc(s.ex.join(', '))}" data-rate="0.5">🐢 Повільно всі</button></section>`).join('')}</div>
+  <section class="card" style="background:linear-gradient(135deg,var(--orange-soft),var(--pink-soft))"><h2>🌀 Скоромовки для сміливих</h2><div class="ex">${spkBtn('Achtentachtig angstige agenten aten achtentachtig ananassen')}<div><div class="nl">Achtentachtig angstige agenten aten achtentachtig ananassen.</div><div class="small muted">88 наляканих поліцейських з'їли 88 ананасів 🍍. Тренує горлове g/ch.</div></div></div>
+  <div class="ex">${spkBtn('Scheveningen')}<div><div class="nl">Scheveningen</div><div class="small muted">Курорт біля Гааги 🏖️. Слово, яке видає іноземця за секунду.</div></div></div></section>`;
   $('#rate').oninput=e=>{S.rate=+e.target.value;$('#rv').textContent=S.rate.toFixed(2);save()};
+  $('#diag').onclick=()=>speechHelp(true);
 }
 
 /* hacks */
+const HEMO=['🏷️','⏱️','🔁','🗣️','👥','🌍','📝','📱','📻','🙌','🧩','🤪','⏲️'];
 function vHacks(){
-  $('#view').innerHTML=`<section class="card"><h2>Лайфхаки: як вивчити швидше</h2></section>
-  <div class="grid2">${HACKS.map(h=>`<section class="card"><h3>${esc(h[0])}</h3><div class="small">${esc(h[1])}</div></section>`).join('')}</div>
-  <section class="card"><h2>Фальшиві друзі перекладача</h2><div class="small muted">Слова, що звучать знайомо, але означають інше.</div>
+  $('#view').innerHTML=`<section class="card" style="background:linear-gradient(135deg,var(--sun-soft),var(--orange-soft))"><h2>💡 Лайфхаки: як вивчити швидше</h2></section>
+  <div class="grid2">${HACKS.map((h,i)=>`<section class="card"><div class="row" style="flex-wrap:nowrap;gap:12px;align-items:flex-start"><div class="mi c${i%6}" style="width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:24px;flex:none">${HEMO[i]||'💡'}</div><div><h3>${esc(h[0])}</h3><div class="small">${esc(h[1])}</div></div></div></section>`).join('')}</div>
+  <section class="card"><h2>🪤 Фальшиві друзі перекладача</h2><div class="small muted">Слова, що звучать знайомо, але означають інше.</div>
   <div class="scroll"><table class="ff">${FALSE_FRIENDS.map(f=>`<tr><td>${spkBtn(f[0])} ${artHTML(f[0])}</td><td>${esc(f[1])}</td><td class="muted">${esc(f[2])}</td></tr>`).join('')}</table></div></section>
-  <section class="card"><h2>Мінімальний «набір виживання»</h2><div class="small muted">10 фраз, які закривають 80% ситуацій у перший місяць.</div>
+  <section class="card"><h2>🧰 Набір виживання</h2><div class="small muted">10 фраз, які закривають 80% ситуацій у перший місяць.</div>
   ${[['Ik wil graag ...','Я б хотів ...'],['Mag ik ...?','Можна мені ...?'],['Hoeveel kost het?','Скільки коштує?'],['Waar is ...?','Де ...?'],['Kunt u dat herhalen?','Можете повторити?'],['Kunt u langzamer praten?','Можете говорити повільніше?'],['Hoe zeg je ... in het Nederlands?','Як сказати ... нідерландською?'],['Wat betekent dat?','Що це означає?'],['Ik spreek een beetje Nederlands.','Я трохи говорю нідерландською.'],['Ik wil graag Nederlands oefenen.','Я хочу попрактикувати нідерландську.']].map(([nl,uk])=>`<div class="ex">${spkBtn(nl)}<div><div class="nl">${esc(nl)}</div><div class="small muted">${esc(uk)}</div></div></div>`).join('')}</section>`;
 }
 
 /* progress */
 function vProgress(){
-  touchDay();
+  touchDay();loadVoices();
   const L=WORDS.filter(learned).length, P=WORDS.filter(w=>S.box[w.id]!==undefined&&!learned(w)).length;
-  $('#view').innerHTML=`<section class="card"><h2>Мій прогрес</h2>
-    <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
-      <div class="stat"><span class="label">Вивчено</span><span class="n">${L}</span><span class="small muted">з ${WORDS.length}</span></div>
-      <div class="stat"><span class="label">У процесі</span><span class="n">${P}</span></div>
-      <div class="stat"><span class="label">Серія</span><span class="n">${S.streak||0}</span><span class="small muted">днів</span></div>
-      <div class="stat"><span class="label">Досвід</span><span class="n">${S.xp}</span><span class="small muted">XP</span></div>
+  $('#view').innerHTML=`<section class="card"><h2>🏆 Мій прогрес</h2>
+    <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">
+      <div class="stat c3"><span class="label">📚 Вивчено</span><span class="n">${L}</span><span class="small muted">з ${WORDS.length}</span></div>
+      <div class="stat c0"><span class="label">⏳ У процесі</span><span class="n">${P}</span></div>
+      <div class="stat c5"><span class="label">🔥 Серія</span><span class="n">${S.streak||0}</span><span class="small muted">днів</span></div>
+      <div class="stat c2"><span class="label">⭐ Досвід</span><span class="n">${S.xp}</span><span class="small muted">XP</span></div>
     </div>
     <div class="bar"><i style="width:${L/WORDS.length*100}%"></i></div>
     <div class="small muted">«Вивчено» — слово, яке ти правильно згадав щонайменше 3 рази з інтервалами.</div>
   </section>
-  <section class="card"><h2>За темами</h2>${CATS.map(c=>{const ws=WORDS.filter(w=>w.cat===c);const l=ws.filter(learned).length;return `<div><div class="row" style="justify-content:space-between"><span class="small">${esc(c)}</span><span class="small muted" style="font-variant-numeric:tabular-nums">${l}/${ws.length}</span></div><div class="bar"><i style="width:${l/ws.length*100}%"></i></div></div>`}).join('')}</section>
-  <section class="card"><h2>Налаштування</h2>
-    <label class="small" for="goal">Денна ціль (вправ)</label><select id="goal">${[10,20,30,50].map(n=>`<option ${S.goal===n?'selected':''}>${n}</option>`).join('')}</select>
-    <label class="small" for="voice">Голос озвучки</label>
-    <select id="voice">${NLV.length?NLV.map(v=>`<option ${v.name===S.voice?'selected':''} value="${esc(v.name)}">${esc(v.name)} (${esc(v.lang)})</option>`).join(''):'<option>Нідерландський голос не знайдено</option>'}</select>
-    ${NLV.length?'':'<div class="small muted">Android: Налаштування → Мова → Синтез мовлення → Google → встановити «Nederlands». iPhone: Параметри → Універсальний доступ → Усний контент → Голоси → Nederlands.</div>'}
-    <div class="row"><button class="btn" data-say="Hallo! Welkom bij de cursus Nederlands.">${SPK} Перевірити голос</button></div>
+  <section class="card"><h2>За темами</h2>${CATS.map(c=>{const ws=WORDS.filter(w=>w.cat===c);const l=ws.filter(learned).length;return `<div><div class="row" style="justify-content:space-between"><span class="small" style="font-weight:700">${CATEMO[c]} ${esc(c)}</span><span class="small muted" style="font-variant-numeric:tabular-nums">${l}/${ws.length}</span></div><div class="bar" style="height:8px"><i style="width:${l/ws.length*100}%"></i></div></div>`}).join('')}</section>
+  <section class="card"><h2>⚙️ Налаштування</h2>
+    <label class="small" for="goal" style="font-weight:800">Денна ціль (вправ)</label><select id="goal">${[10,20,30,50].map(n=>`<option ${S.goal===n?'selected':''}>${n}</option>`).join('')}</select>
+    <label class="small" for="voice" style="font-weight:800">Голос озвучки</label>
+    <select id="voice">${NLV.length?NLV.map(v=>`<option ${v.name===S.voice?'selected':''} value="${esc(v.name)}">${esc(v.name)} (${esc(v.lang)})</option>`).join(''):'<option>Нідерландський голос не знайдено — використовується онлайн-озвучка</option>'}</select>
+    <div class="row"><button class="btn primary" data-say="Hallo! Welkom bij de cursus Nederlands.">${SPK} Перевірити голос</button><button class="btn" id="diag">🔧 Діагностика озвучки</button></div>
     <div class="row" id="resetRow"><button class="btn" id="reset">Скинути прогрес</button></div>
   </section>`;
   $('#goal').onchange=e=>{S.goal=+e.target.value;save()};
   $('#voice').onchange=e=>{S.voice=e.target.value;save();say('Dit is mijn stem.')};
+  $('#diag').onclick=()=>speechHelp(true);
   $('#reset').onclick=()=>{$('#resetRow').innerHTML='<span class="small">Точно скинути весь прогрес?</span><button class="btn bad" id="rYes">Так, скинути</button><button class="btn" id="rNo">Скасувати</button>';
-    $('#rYes').onclick=()=>{S.box={};S.due={};S.xp=0;S.streak=0;S.last='';S.done={date:'',n:0};save();toast('Прогрес скинуто');vProgress()};$('#rNo').onclick=vProgress};
+    $('#rYes').onclick=()=>{S.box={};S.due={};S.xp=0;S.streak=0;S.last='';S.done={date:'',n:0};save();toast('Прогрес скинуто');drawHero();vProgress()};$('#rNo').onclick=vProgress};
 }
 
-drawTabs();render();
+drawTabs();drawHero();render();
 </script>
 
 </body>
