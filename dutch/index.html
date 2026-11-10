@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Taalfiets A1.2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one narrow column of tools under a sticky tab rail; Delft-tile blue as the single accent */
+:root{
+  --bg:#f2f4f9; --surface:#ffffff; --ink:#131a2f; --muted:#5b6481; --line:#d9dfec;
+  --delft:#2340a8; --delft-soft:#e3e8f8; --tulip:#c9432a; --tulip-soft:#fbe7e2; --good:#1b7f55; --good-soft:#dff3ea;
+  --het:#b4361f; --de:#2340a8;
+  --f-display:"Unbounded","Inter",system-ui,sans-serif; --f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c1120; --surface:#151c33; --ink:#e7ebf7; --muted:#9aa3c1; --line:#27315a;
+  --delft:#8aa2ff; --delft-soft:#1c2752; --tulip:#ff8466; --tulip-soft:#3a1d18; --good:#52c995; --good-soft:#123326;
+  --het:#ff8466; --de:#8aa2ff; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c1120; --surface:#151c33; --ink:#e7ebf7; --muted:#9aa3c1; --line:#27315a;
+  --delft:#8aa2ff; --delft-soft:#1c2752; --tulip:#ff8466; --tulip-soft:#3a1d18; --good:#52c995; --good-soft:#123326;
+  --het:#ff8466; --de:#8aa2ff; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+header.top{padding-block:22px 14px;display:flex;align-items:center;gap:14px}
+.tile{width:46px;height:46px;flex:none;border-radius:8px;background:
+  radial-gradient(circle at 50% 50%,var(--surface) 0 5px,transparent 6px),
+  radial-gradient(circle at 50% 50%,var(--delft) 0 11px,transparent 12px),
+  conic-gradient(from 45deg,var(--delft) 0 25%,var(--delft-soft) 0 50%,var(--delft) 0 75%,var(--delft-soft) 0);border:2px solid var(--delft)}
+h1{font-family:var(--f-display);font-size:1.35rem;margin:0;letter-spacing:-.01em;line-height:1.15}
+.sub{color:var(--muted);font-size:.85rem;margin:2px 0 0}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line);margin:0;}
+.tabs-in{display:flex;gap:4px;overflow-x:auto;padding:8px 0;scrollbar-width:none}
+.tabs-in::-webkit-scrollbar{display:none}
+.tab{flex:none;border:0;background:transparent;color:var(--muted);font:600 .88rem var(--f-body);padding:8px 12px;border-radius:999px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--delft);color:var(--surface)}
+.tab:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--delft);outline-offset:2px}
+main{display:grid;gap:18px;padding-top:18px}
+h2{font-family:var(--f-display);font-size:1.05rem;margin:0;text-wrap:balance;font-weight:700}
+h3{font-size:1rem;margin:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:grid;gap:12px;min-width:0}
+.muted{color:var(--muted)}
+.small{font-size:.83rem}
+.label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+button.btn{font:600 .9rem var(--f-body);border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+button.btn:hover{border-color:var(--delft)}
+button.primary{background:var(--delft);border-color:var(--delft);color:var(--surface)}
+button.good{background:var(--good);border-color:var(--good);color:var(--surface)}
+button.bad{background:var(--tulip);border-color:var(--tulip);color:var(--surface)}
+button.ghost{border-color:transparent;background:var(--delft-soft);color:var(--delft)}
+button.speak{border:0;background:var(--delft-soft);color:var(--delft);width:34px;height:34px;border-radius:50%;display:inline-grid;place-items:center;cursor:pointer;flex:none}
+button.speak svg{width:16px;height:16px}
+select,input[type=text],input[type=search]{font:500 .92rem var(--f-body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 12px;max-width:100%}
+input[type=text]{width:100%}
+.flash{border-radius:18px;border:1px solid var(--line);background:var(--surface);min-height:220px;display:grid;place-items:center;text-align:center;padding:24px;cursor:pointer;position:relative;user-select:none}
+.flash .word{font-family:var(--f-display);font-size:clamp(1.5rem,6vw,2.2rem);font-weight:500;line-height:1.2;overflow-wrap:anywhere}
+.flash .back{font-size:1.15rem;margin-top:10px}
+.flash .hint{margin-top:10px;font-size:.88rem;color:var(--muted);max-width:44ch;margin-inline:auto}
+.flash .corner{position:absolute;top:12px;left:14px}
+.flash .spk{position:absolute;top:10px;right:10px}
+.art-de{color:var(--de)} .art-het{color:var(--het)}
+.pill{display:inline-block;font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--delft-soft);color:var(--delft)}
+.pill.ok{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--tulip-soft);color:var(--tulip)}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--delft);border-radius:99px;transition:width .3s}
+.list{display:grid;gap:0;max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+.li{display:flex;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
+.li:last-child{border-bottom:0}
+.li .nl{font-weight:600;min-width:0;flex:1}
+.li .uk{color:var(--muted);flex:1;min-width:0;font-size:.9rem}
+.opts{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.opt{font:500 1rem var(--f-body);text-align:left;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.opt:hover{border-color:var(--delft)}
+.opt.right{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.opt.wrong{background:var(--tulip-soft);border-color:var(--tulip);color:var(--tulip)}
+.q-big{font-family:var(--f-display);font-size:1.5rem;text-align:center;padding:10px 0;overflow-wrap:anywhere}
+.line{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;padding:10px 0;border-bottom:1px dashed var(--line)}
+.line:last-child{border-bottom:0}
+.who{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.8rem;background:var(--delft-soft);color:var(--delft)}
+.who.B{background:var(--tulip-soft);color:var(--tulip)}
+.line .nl{font-weight:600}
+.line .uk{color:var(--muted);font-size:.9rem}
+.line.playing .nl{color:var(--delft)}
+.hidden-text{filter:blur(6px);cursor:pointer}
+details.g{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:0 18px}
+details.g summary{cursor:pointer;padding:14px 0;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:10px}
+details.g summary::after{content:"+";color:var(--delft);font-weight:700}
+details.g[open] summary::after{content:"–"}
+details.g .gb{padding-bottom:16px;display:grid;gap:10px}
+details.g ul{margin:0;padding-left:20px}
+.tipbox{background:var(--delft-soft);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:.9rem}
+.tipbox b{color:var(--delft)}
+.ex{display:flex;gap:10px;align-items:center}
+.ex .nl{font-weight:600}
+.stat{display:grid;gap:2px}
+.stat .n{font-family:var(--f-display);font-size:1.6rem;font-variant-numeric:tabular-nums}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:.9rem;z-index:20;max-width:calc(100% - 32px)}
+.feedback{font-weight:600}
+.feedback.ok{color:var(--good)} .feedback.no{color:var(--tulip)}
+.sound{display:grid;gap:8px}
+.sound .s{font-family:var(--f-display);font-size:1.3rem;color:var(--delft)}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;font:600 .9rem var(--f-body);cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.chip:hover{border-color:var(--delft);color:var(--delft)}
+table.ff{width:100%;border-collapse:collapse;font-size:.92rem}
+table.ff td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+table.ff td:first-child{font-weight:600;white-space:nowrap}
+.scroll{overflow-x:auto}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="tile" aria-hidden="true"></div>
+    <div>
+      <h1>Taalfiets <span style="color:var(--delft)">A1.2</span></h1>
+      <p class="sub">Нідерландська для українців · 500 слів · діалоги · вимова</p>
+    </div>
+  </header>
+  <nav class="tabs" aria-label="Розділи"><div class="tabs-in" id="tabs" role="tablist"></div></nav>
+  <main id="view"></main>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const RAW = {
+"Привітання і фрази": `hallo|привіт
+goedemorgen|доброго ранку|goed = добрий, morgen = ранок
+goedemiddag|добрий день
+goedenavond|добрий вечір
+dag|привіт / бувай|Універсальне: і при зустрічі, і при прощанні
+tot ziens|до побачення|Дослівно «до бачення»
+tot straks|до скорого
+tot morgen|до завтра
+alsjeblieft|будь ласка (на «ти»)|Також кажуть, коли щось подають: «ось, тримай»
+alstublieft|будь ласка (ввічливо)
+dank je wel|дякую (на «ти»)
+dank u wel|дякую (ввічливо)
+graag gedaan|нема за що|graag = охоче
+sorry|вибачте
+ja|так
+nee|ні
+natuurlijk|звичайно
+prima|чудово, гаразд
+hoe gaat het?|як справи?
+het gaat goed|все добре
+ik begrijp het niet|я не розумію
+kunt u dat herhalen?|можете повторити?
+spreekt u Engels?|ви говорите англійською?
+eet smakelijk|смачного
+gezondheid|будь здоров (коли чхнули)
+proost|будьмо! (тост)`,
+"Числа": `nul|нуль
+een|один|Читається «ейн» (часто пишуть één)
+twee|два
+drie|три
+vier|чотири
+vijf|п'ять
+zes|шість
+zeven|сім
+acht|вісім
+negen|дев'ять
+tien|десять
+elf|одинадцять
+twaalf|дванадцять
+twintig|двадцять
+eenentwintig|двадцять один|Як у німецькій: «один-і-двадцять»
+dertig|тридцять
+honderd|сто
+duizend|тисяча
+eerste|перший
+tweede|другий`,
+"Час і дні": `de dag|день
+de week|тиждень
+de maand|місяць
+het jaar|рік
+het uur|година
+vandaag|сьогодні
+morgen|завтра (і «ранок»)
+gisteren|вчора
+nu|зараз
+straks|невдовзі, пізніше сьогодні
+vroeg|рано
+laat|пізно
+altijd|завжди
+vaak|часто
+soms|іноді
+nooit|ніколи
+maandag|понеділок|maan = місяць (Луна)
+dinsdag|вівторок
+woensdag|середа
+donderdag|четвер|donder = грім (день Тора)
+vrijdag|п'ятниця
+zaterdag|субота
+zondag|неділя|zon = сонце
+de avond|вечір
+de nacht|ніч
+januari|січень
+februari|лютий
+maart|березень
+april|квітень
+mei|травень
+juni|червень
+juli|липень
+augustus|серпень
+september|вересень
+oktober|жовтень
+november|листопад
+december|грудень
+de lente|весна
+de zomer|літо
+de herfst|осінь
+de winter|зима
+hoe laat is het?|котра година?
+half drie|пів на третю (2:30)|Пастка! half drie = 2:30, а не 3:30. Думай «пів до трьох»`,
+"Сім'я та люди": `de familie|родина (рідні)
+het gezin|сім'я (батьки й діти)
+de vader|батько
+de moeder|мати
+de ouders|батьки
+het kind|дитина
+de kinderen|діти
+de zoon|син
+de dochter|донька
+de broer|брат
+de zus|сестра
+de opa|дідусь
+de oma|бабуся
+de man|чоловік
+de vrouw|жінка; дружина
+de jongen|хлопець
+het meisje|дівчинка|Усі слова на -je мають артикль het
+de vriend|друг; хлопець (партнер)
+de vriendin|подруга; дівчина (партнерка)
+de buurman|сусід
+de collega|колега
+de mensen|люди
+de naam|ім'я`,
+"Їжа": `het eten|їжа
+het ontbijt|сніданок
+de lunch|обід
+het avondeten|вечеря
+het brood|хліб
+de boter|масло
+de kaas|сир|Gouda, Edam — нідерландська гордість
+het ei|яйце
+de melk|молоко
+het vlees|м'ясо
+de kip|курка
+de vis|риба
+de groente|овочі
+de aardappel|картопля|aard + appel = «земляне яблуко»
+de ui|цибуля
+de wortel|морква|Також «корінь»
+de appel|яблуко
+de sinaasappel|апельсин|«китайське яблуко»
+de aardbei|полуниця|«земляна ягода»
+de rijst|рис
+de suiker|цукор
+het zout|сіль
+het broodje|булочка, бутерброд
+de hagelslag|шоколадна посипка (на хліб)|Голландці їдять її на сніданок на хлібі з маслом
+de stroopwafel|вафля з сиропом
+de patat|картопля фрі
+de pindakaas|арахісова паста|«арахісовий сир», хоча це не сир`,
+"Напої": `het water|вода
+de koffie|кава
+de thee|чай
+het sap|сік
+het bier|пиво
+de wijn|вино
+de frisdrank|газована вода
+ik heb honger|я голодний
+ik heb dorst|я хочу пити`,
+"Кафе і магазин": `het restaurant|ресторан
+het café|кафе, бар
+de kaart|меню; карта; квиток
+de rekening|рахунок
+de ober|офіціант
+bestellen|замовляти
+betalen|платити
+pinnen|платити карткою|Від PIN-коду. «Kan ik pinnen?» — можна карткою?
+contant|готівкою
+de winkel|магазин
+de supermarkt|супермаркет
+de bakker|пекарня, пекар
+de apotheek|аптека
+de prijs|ціна
+duur|дорогий
+goedkoop|дешевий
+de korting|знижка
+het geld|гроші
+kopen|купувати
+hoeveel kost het?|скільки коштує?
+ik wil graag...|я б хотів...|Найввічливіший спосіб замовити
+mag ik...?|можна мені...?
+de kassa|каса
+open|відчинено
+dicht|зачинено`,
+"Дім": `het huis|дім
+het appartement|квартира
+de kamer|кімната
+de keuken|кухня
+de badkamer|ванна кімната
+de slaapkamer|спальня|slapen = спати
+de woonkamer|вітальня|wonen = жити
+het toilet|туалет
+de tuin|сад
+de deur|двері
+het raam|вікно
+de tafel|стіл
+de stoel|стілець
+de bank|диван; банк|Пастка: «op de bank» = на дивані
+het bed|ліжко
+de kast|шафа
+de douche|душ
+de koelkast|холодильник|koel = прохолодний + kast = шафа
+het mes|ніж
+de vork|виделка
+de lepel|ложка
+de sleutel|ключ
+de verwarming|опалення`,
+"Місто і транспорт": `de stad|місто
+het dorp|село
+de straat|вулиця
+de weg|дорога|«de weg vragen» = питати дорогу
+de gracht|канал (у місті)
+het centrum|центр
+het station|вокзал
+de trein|потяг
+de bus|автобус
+de tram|трамвай
+de fiets|велосипед|У Нідерландах велосипедів більше, ніж людей
+de auto|автомобіль
+het vliegtuig|літак|vliegen = літати
+het vliegveld|аеропорт
+de halte|зупинка
+het kaartje|квиток
+de ingang|вхід
+de uitgang|вихід|Шукай табличку UITGANG
+links|ліворуч
+rechts|праворуч
+rechtdoor|прямо
+dichtbij|близько
+ver|далеко
+het ziekenhuis|лікарня|ziek = хворий + huis = дім
+de school|школа
+het gemeentehuis|мерія, ратуша|Тут реєструють адресу (BSN)`,
+"Тіло і здоров'я": `het lichaam|тіло
+het hoofd|голова
+het haar|волосся
+het oog|око
+het oor|вухо
+de neus|ніс
+de mond|рот
+de tand|зуб
+de arm|рука (від плеча)
+de hand|кисть руки
+de buik|живіт
+het been|нога
+de voet|стопа
+de huisarts|сімейний лікар|До спеціаліста — тільки через huisarts
+de dokter|лікар
+het medicijn|ліки
+de pijn|біль
+ziek|хворий
+gezond|здоровий
+moe|втомлений
+de koorts|температура (жар)
+verkouden|застуджений
+ik heb hoofdpijn|у мене болить голова
+de afspraak|запис, зустріч|afspreken = домовлятися`,
+"Одяг і кольори": `de kleren|одяг
+de broek|штани
+het shirt|футболка
+de trui|светр
+de jas|куртка, пальто
+de jurk|сукня
+de rok|спідниця|Пастка: не «рок», а спідниця
+de schoen|черевик
+de bril|окуляри
+de paraplu|парасолька|Найважливіша річ у Нідерландах
+passen|приміряти; пасувати
+de kleur|колір
+rood|червоний
+oranje|помаранчевий|Колір королівської родини
+geel|жовтий
+groen|зелений
+blauw|синій
+bruin|коричневий
+zwart|чорний
+wit|білий`,
+"Погода": `het weer|погода
+de zon|сонце
+de regen|дощ
+de wind|вітер
+de sneeuw|сніг
+de wolk|хмара
+het regent|йде дощ
+het waait|дме вітер
+warm|теплий, жаркий
+koud|холодний
+lekker weer|гарна погода
+nat|мокрий
+droog|сухий
+de graad|градус
+de lucht|небо; повітря`,
+"Робота і навчання": `het werk|робота
+werken|працювати
+de baan|посада, робоче місце
+het kantoor|офіс
+de baas|начальник|Звідси англ. boss
+het salaris|зарплата
+de vergadering|нарада
+de leraar|вчитель
+de les|урок
+de taal|мова
+het woord|слово
+de zin|речення; бажання|«Ik heb zin in koffie» = хочу кави
+het boek|книга
+de computer|комп'ютер
+de telefoon|телефон
+leren|вчити; вчитися
+studeren|навчатися (в універі)
+lezen|читати
+schrijven|писати
+het huiswerk|домашнє завдання
+het formulier|бланк, анкета
+de vakantie|відпустка, канікули
+vrij|вільний, вихідний
+druk|зайнятий; людно|«Het is druk» = людно, багато справ`,
+"Хобі і дозвілля": `de hobby|хобі
+sporten|займатися спортом
+zwemmen|плавати
+fietsen|їздити на велосипеді
+wandelen|гуляти
+koken|готувати їжу
+dansen|танцювати
+zingen|співати
+de muziek|музика
+de film|фільм
+het spel|гра
+de vrije tijd|вільний час
+het feest|свято, вечірка
+de verjaardag|день народження
+het cadeau|подарунок
+uitgaan|ходити розважатися
+reizen|подорожувати`,
+"Дієслова": `zijn|бути|ik ben, jij bent, hij is
+hebben|мати|ik heb, jij hebt, hij heeft
+gaan|йти, їхати
+komen|приходити
+doen|робити
+maken|робити, виготовляти
+zeggen|казати
+spreken|говорити (мовою)
+praten|розмовляти
+vragen|питати
+antwoorden|відповідати
+weten|знати (факт)|Ik weet het = я знаю це
+kennen|знати (людину, місце)|Ik ken hem = я його знаю
+denken|думати
+zien|бачити
+kijken|дивитися
+horen|чути
+luisteren|слухати
+eten|їсти
+drinken|пити
+slapen|спати
+wonen|жити (мешкати)|Ik woon in Utrecht
+wachten|чекати
+zoeken|шукати
+vinden|знаходити; вважати|Ik vind het leuk = мені подобається
+geven|давати
+nemen|брати
+brengen|приносити
+beginnen|починати
+stoppen|зупиняти(ся)
+helpen|допомагати
+bellen|дзвонити|Пастка: не «белькотіти» :)
+staan|стояти
+zitten|сидіти
+liggen|лежати
+lopen|іти пішки|Не «бігти»! Бігти = rennen
+rijden|їхати (за кермом)
+blijven|залишатися
+worden|ставати
+kunnen|могти
+willen|хотіти
+moeten|мусити
+mogen|мати дозвіл
+houden van|любити|Ik hou van jou = я тебе кохаю
+wassen|мити, прати
+opstaan|вставати|Відокремлюване: ik sta om 7 uur op
+meenemen|брати з собою
+afspreken|домовлятися
+proberen|пробувати
+gebruiken|використовувати
+begrijpen|розуміти
+vergeten|забувати
+betekenen|означати|Wat betekent dit? = що це означає?
+krijgen|отримувати
+openen|відкривати
+sluiten|закривати`,
+"Прикметники": `groot|великий
+klein|маленький
+lang|довгий; високий (людина)
+kort|короткий
+nieuw|новий
+oud|старий
+jong|молодий
+mooi|гарний
+goed|добрий
+slecht|поганий
+leuk|класний, приємний|Найчастіше слово в розмові: «Leuk!»
+saai|нудний
+makkelijk|легкий (простий)
+moeilijk|важкий (складний)
+snel|швидкий
+langzaam|повільний
+blij|радий
+verdrietig|сумний
+boos|злий, сердитий
+bang|наляканий|Ik ben bang voor honden = боюся собак
+aardig|милий, привітний
+vriendelijk|дружній
+gezellig|затишний, приємний (з людьми)|Найголландське слово — затишок, тепло, компанія
+lekker|смачний; приємний
+vol|повний
+leeg|порожній
+schoon|чистий
+vies|брудний; гидкий
+hoog|високий
+zwaar|важкий (вагою)
+licht|легкий; світлий
+sterk|сильний
+belangrijk|важливий
+klaar|готовий|Ben je klaar? = ти готовий?
+rustig|спокійний
+stil|тихий
+zeker|впевнений; звісно
+fijn|приємний, гарний
+raar|дивний
+slim|розумний|Пастка: не «худий»!`,
+"Питання і зв'язки": `wie|хто
+wat|що
+waar|де
+wanneer|коли
+waarom|чому
+hoe|як
+hoeveel|скільки
+welke|який (з)
+en|і
+of|або
+maar|але
+want|бо
+omdat|тому що|Після omdat дієслово йде в кінець!
+dus|отже
+als|якщо; коли
+dan|тоді; ніж
+ook|також
+nog|ще
+al|вже
+heel|дуже; цілий
+erg|дуже; жахливий
+te|занадто
+zo|так
+veel|багато
+weinig|мало
+meer|більше
+alleen|сам; лише
+samen|разом
+misschien|можливо
+niet|не|Заперечує дієслово, прикметник
+geen|жодного, ні|Заперечує іменник: ik heb geen auto`,
+"Прийменники": `in|в
+op|на
+onder|під
+naast|поруч
+achter|позаду
+voor|перед; для
+tussen|між
+bij|біля, у (когось)|Ik ben bij de dokter = я у лікаря
+met|з
+zonder|без
+naar|до (напрямок)
+van|від; з (кого)
+uit|з (звідки)
+door|через
+over|про; над
+tegen|проти
+om|о (годині); навколо|om 8 uur = о 8-й
+na|після`,
+"Займенники": `ik|я
+jij / je|ти
+u|ви (ввічливо)
+hij|він
+zij / ze|вона
+wij / we|ми
+jullie|ви (множина)
+zij / ze (мн.)|вони
+mijn|мій
+jouw / je|твій
+uw|ваш (ввічливо)
+zijn (zijn boek)|його
+haar|її
+ons / onze|наш
+hun|їхній
+mij / me|мене, мені
+hem|його, йому`,
+"Подорожі": `de reis|подорож
+het hotel|готель
+de koffer|валіза
+het paspoort|паспорт
+het land|країна
+Nederland|Нідерланди
+België|Бельгія
+Oekraïne|Україна
+het Nederlands|нідерландська мова
+de zee|море
+het strand|пляж
+het bos|ліс
+het meer|озеро|Також «більше»
+de molen|млин
+de tulp|тюльпан
+boeken|бронювати`
+};
+
+const DIALOGS = [
+{t:"Kennismaken", uk:"Знайомство", lines:[
+["A","Hallo, ik ben Anna. Hoe heet jij?","Привіт, я Анна. Як тебе звати?"],
+["B","Hoi Anna, ik heet Mark. Leuk je te ontmoeten!","Привіт, Анно, мене звати Марк. Приємно познайомитися!"],
+["A","Insgelijks. Waar kom je vandaan?","Взаємно. Звідки ти?"],
+["B","Ik kom uit Nederland, uit Utrecht. En jij?","Я з Нідерландів, з Утрехта. А ти?"],
+["A","Ik kom uit Oekraïne. Ik woon nu in Amsterdam.","Я з України. Зараз живу в Амстердамі."],
+["B","Wat doe je hier?","Чим ти тут займаєшся?"],
+["A","Ik werk in een kantoor en ik leer Nederlands.","Я працюю в офісі і вчу нідерландську."],
+["B","Je spreekt al goed Nederlands!","Ти вже добре говориш нідерландською!"],
+["A","Dank je wel! Het is soms moeilijk.","Дякую! Іноді це складно."]],
+tip:"«Waar kom je vandaan?» — найчастіше питання при знайомстві. Відповідь: «Ik kom uit ...»."},
+{t:"In het café", uk:"У кафе", lines:[
+["A","Goedemiddag! Wat wilt u drinken?","Добрий день! Що будете пити?"],
+["B","Ik wil graag een koffie met melk, alstublieft.","Я б хотів каву з молоком, будь ласка."],
+["A","Wilt u er iets bij eten?","Бажаєте щось до неї з'їсти?"],
+["B","Ja, een broodje kaas graag.","Так, бутерброд із сиром, будь ласка."],
+["A","Komt eraan. Nog iets anders?","Зараз буде. Ще щось?"],
+["B","Nee, dat is alles. Mag ik de rekening?","Ні, це все. Можна рахунок?"],
+["A","Dat is zes euro vijftig. Pinnen of contant?","Шість євро п'ятдесят. Карткою чи готівкою?"],
+["B","Pinnen, graag.","Карткою, будь ласка."]],
+tip:"«Ik wil graag...» звучить ввічливо. «Ik wil...» без graag — грубувато."},
+{t:"In de supermarkt", uk:"У супермаркеті", lines:[
+["A","Pardon, waar vind ik de melk?","Перепрошую, де знайти молоко?"],
+["B","De melk staat achterin, naast de kaas.","Молоко стоїть у глибині, поруч із сиром."],
+["A","En hebben jullie ook vers brood?","А у вас є свіжий хліб?"],
+["B","Ja, het brood ligt bij de ingang.","Так, хліб лежить біля входу."],
+["A","Dank u wel. Hoeveel kosten de appels?","Дякую. Скільки коштують яблука?"],
+["B","Twee euro per kilo. Ze zijn vandaag in de aanbieding.","Два євро за кіло. Сьогодні вони по акції."],
+["A","Mooi! Dan neem ik er twee kilo.","Чудово! Тоді візьму два кілограми."]],
+tip:"Зверни увагу: staan (стояти) — для пляшок, liggen (лежати) — для хліба, фруктів."},
+{t:"De weg vragen", uk:"Питаємо дорогу", lines:[
+["A","Sorry, mag ik u iets vragen? Waar is het station?","Вибачте, можна вас запитати? Де вокзал?"],
+["B","Het station? Dat is niet ver. Ga hier rechtdoor.","Вокзал? Це недалеко. Ідіть тут прямо."],
+["B","Bij het stoplicht gaat u links.","Біля світлофора поверніть ліворуч."],
+["A","En dan?","А потім?"],
+["B","Dan de brug over, en het station is rechts.","Потім через міст, і вокзал праворуч."],
+["A","Is het ver lopen?","Пішки далеко?"],
+["B","Nee, ongeveer tien minuten.","Ні, приблизно десять хвилин."],
+["A","Hartelijk bedankt!","Щиро дякую!"]],
+tip:"«Mag ik u iets vragen?» — чарівна фраза, щоб почати розмову з незнайомцем."},
+{t:"Bij de huisarts", uk:"У сімейного лікаря", lines:[
+["A","Goedemorgen, wat is er aan de hand?","Доброго ранку, що сталося?"],
+["B","Ik voel me niet lekker. Ik heb hoofdpijn en keelpijn.","Мені недобре. Болить голова і горло."],
+["A","Hoe lang heeft u dat al?","Як давно це у вас?"],
+["B","Sinds drie dagen. Ik heb ook koorts.","Три дні. У мене також температура."],
+["A","U bent verkouden. Drink veel water en rust goed uit.","Ви застуджені. Пийте багато води і добре відпочивайте."],
+["B","Moet ik medicijnen nemen?","Мені треба приймати ліки?"],
+["A","Neem paracetamol als het nodig is. Kom terug als het niet beter wordt.","Приймайте парацетамол, якщо треба. Приходьте ще, якщо не покращає."]],
+tip:"Нідерландські лікарі часто радять просто paracetamol і відпочинок — не дивуйся."},
+{t:"Een afspraak maken", uk:"Запис по телефону", lines:[
+["A","Goedemiddag, met de tandartspraktijk.","Добрий день, стоматологічна клініка."],
+["B","Hallo, met Olena Kovalenko. Ik wil graag een afspraak maken.","Добрий день, це Олена Коваленко. Я хотіла б записатися."],
+["A","Natuurlijk. Kunt u volgende week dinsdag?","Звичайно. Вам підходить наступний вівторок?"],
+["B","Dinsdag kan ik niet, ik moet werken. Kan het ook op donderdag?","У вівторок не можу, мушу працювати. А в четвер можна?"],
+["A","Donderdag om half vier?","У четвер о пів на четверту?"],
+["B","Half vier, dus 15:30? Ja, dat is prima.","Пів на четверту, тобто 15:30? Так, чудово."],
+["A","Goed, tot donderdag!","Добре, до четверга!"]],
+tip:"По телефону голландці представляються «met + ім'я»: «Met Olena» = «Це Олена»."},
+{t:"Op het station", uk:"На вокзалі", lines:[
+["A","Goedendag, ik wil graag een kaartje naar Rotterdam.","Добрий день, мені квиток до Роттердама."],
+["B","Enkele reis of retour?","В один бік чи туди й назад?"],
+["A","Retour, alstublieft. Hoe laat gaat de volgende trein?","Туди й назад, будь ласка. О котрій наступний потяг?"],
+["B","Om tien over twee, van spoor vijf.","О 14:10, з колії п'ять."],
+["A","Moet ik overstappen?","Мені треба робити пересадку?"],
+["B","Nee, het is een directe trein.","Ні, це прямий потяг."]],
+tip:"«tien over twee» = 10 хвилин після другої. «tien voor twee» = за 10 хв друга."},
+{t:"Wat heb je gedaan?", uk:"Що ти робив? (минулий час)", lines:[
+["A","Hoi! Wat heb je dit weekend gedaan?","Привіт! Що ти робив на вихідних?"],
+["B","Ik heb veel gefietst. Zaterdag ben ik naar het strand gegaan.","Я багато катався на велосипеді. У суботу я їздив на пляж."],
+["A","Leuk! Was het lekker weer?","Класно! Була гарна погода?"],
+["B","Ja, de zon scheen. En jij?","Так, світило сонце. А ти?"],
+["A","Ik ben thuis gebleven. Ik heb gekookt en een film gekeken.","Я залишився вдома. Готував і дивився фільм."],
+["B","Gezellig! Welke film heb je gezien?","Затишно! Який фільм ти бачив?"],
+["A","Een Nederlandse film, met ondertitels natuurlijk.","Нідерландський фільм, звісно, з субтитрами."]],
+tip:"Рух (gaan, komen, blijven) → zijn: «ik ben gegaan». Більшість інших → hebben: «ik heb gekookt»."},
+{t:"Op het werk", uk:"На роботі", lines:[
+["A","Goedemorgen! Heb je even tijd?","Доброго ранку! Маєш хвилинку?"],
+["B","Ja hoor, wat is er?","Так, звісно, що таке?"],
+["A","De vergadering begint om tien uur, niet om negen.","Нарада починається о десятій, а не о дев'ятій."],
+["B","O, goed dat je het zegt. Moet ik iets voorbereiden?","О, добре, що сказав. Мені щось треба підготувати?"],
+["A","Ja, kun je de cijfers van vorige maand meenemen?","Так, можеш взяти цифри за минулий місяць?"],
+["B","Geen probleem. Zullen we daarna samen lunchen?","Без проблем. Пообідаємо потім разом?"],
+["A","Gezellig, graag!","Із задоволенням!"]],
+tip:"«Ja hoor» — дружнє «так, звісно». hoor пом'якшує фразу."}
+];
+
+const GRAMMAR = [
+{t:"De чи het?", body:`<p>У нідерландській два артиклі: <b>de</b> (чоловічий і жіночий рід) і <b>het</b> (середній). Приблизно 2/3 іменників мають <b>de</b>.</p>
+<ul><li>Усі слова в множині — <b>de</b>: het kind → de kinderen</li>
+<li>Зменшувальні на <b>-je</b> — завжди <b>het</b>: het meisje, het broodje</li>
+<li>Слова на <b>-ing</b>, <b>-heid</b> — <b>de</b>: de vergadering</li>
+<li>Мови, метали та інфінітив як іменник — <b>het</b>: het Nederlands, het eten</li>
+<li>Неозначений артикль один для всіх: <b>een</b></li></ul>`,
+ex:[["het huis — de huizen","дім — доми"],["het meisje","дівчинка"],["de vergadering","нарада"]],
+tip:"Вчи слово тільки разом з артиклем. Фарбуй: de — синім, het — червоним. Мозок запам'ятає колір.",
+q:{q:"Який артикль: ___ broodje?",o:["de","het"],a:1}},
+{t:"Порядок слів: дієслово на 2-му місці", body:`<p>Головне правило: <b>дієслово завжди стоїть другим</b>. Якщо речення починається не з підмета, підмет іде <b>після</b> дієслова (інверсія).</p>`,
+ex:[["Ik werk morgen.","Я працюю завтра."],["Morgen werk ik.","Завтра я працюю."],["In Amsterdam woon ik.","В Амстердамі я живу."]],
+tip:"Уяви дієслово як «стовпчик» на 2-й позиції: усе інше обертається навколо нього.",
+q:{q:"Як правильно?",o:["Vandaag ik ga naar school.","Vandaag ga ik naar school."],a:1}},
+{t:"Питання", body:`<p>Питання без питального слова: <b>дієслово на початок</b>. З питальним словом: питальне слово + дієслово + підмет. Увага: у питанні з <b>jij</b> після дієслова відпадає -t.</p>`,
+ex:[["Werk jij morgen?","Ти працюєш завтра?"],["Waar woon je?","Де ти живеш?"],["Spreekt u Nederlands?","Ви говорите нідерландською?"]],
+tip:"jij werkt → werk jij? Закінчення -t «втікає», коли jij стоїть позаду.",
+q:{q:"Оберіть правильне питання:",o:["Woont jij hier?","Woon jij hier?"],a:1}},
+{t:"Заперечення: niet і geen", body:`<p><b>geen</b> — заперечує іменник з een або без артикля. <b>niet</b> — усе інше (дієслово, прикметник, означений іменник).</p>`,
+ex:[["Ik heb geen auto.","У мене немає машини."],["Ik werk niet.","Я не працюю."],["Het is niet duur.","Це не дорого."]],
+tip:"Якщо можна сказати «een + слово» — став geen. Een auto → geen auto.",
+q:{q:"Ik drink ___ koffie.",o:["niet","geen"],a:1}},
+{t:"Теперішній час", body:`<p>Основа = інфінітив без <b>-en</b>. ik + основа, jij/hij + основа + <b>t</b>, wij/jullie/zij + інфінітив.</p>
+<p>Правопис: <b>werken → ik werk</b>, але <b>maken → ik maak</b> (довгий голосний зберігається подвоєнням), <b>leven → ik leef</b> (v → f).</p>`,
+ex:[["ik woon, jij woont, wij wonen","я живу, ти живеш, ми живемо"],["ik ben, jij bent, hij is","я є, ти є, він є"],["ik heb, jij hebt, hij heeft","я маю, ти маєш, він має"]],
+tip:"Якщо основа вже закінчується на -t (zitten → ik zit), друге t не додаємо: hij zit.",
+q:{q:"Hij ___ in Utrecht. (wonen)",o:["woon","woont","wonen"],a:1}},
+{t:"Відокремлювані дієслова", body:`<p>Префікси <b>op-, af-, mee-, uit-, aan-, terug-</b> у реченні відриваються і йдуть <b>у кінець</b>.</p>`,
+ex:[["opstaan → Ik sta om 7 uur op.","вставати → Я встаю о 7."],["meenemen → Neem je paraplu mee!","брати з собою → Візьми парасольку!"],["afspreken → We spreken morgen af.","домовлятися → Ми домовляємося завтра."]],
+tip:"Наголос падає на префікс (OPstaan) — це знак, що він відокремлюється.",
+q:{q:"Ik ___ morgen vroeg ___. (opstaan)",o:["opsta … —","sta … op","sta … opstaan"],a:1}},
+{t:"Модальні дієслова", body:`<p><b>kunnen</b> (могти), <b>willen</b> (хотіти), <b>moeten</b> (мусити), <b>mogen</b> (мати дозвіл), <b>zullen</b> (пропозиція, майбутнє). Модальне — на 2-му місці, інфінітив — <b>у кінці</b>.</p>`,
+ex:[["Ik kan goed zwemmen.","Я добре вмію плавати."],["Wij moeten morgen werken.","Ми мусимо завтра працювати."],["Mag ik hier zitten?","Можна мені тут сісти?"],["Zullen we gaan?","Ходімо?"]],
+tip:"Форми: ik kan, jij kunt; ik wil, jij wilt; ik mag, jij mag; ik moet. Zullen we...? = пропозиція «а давай...?»",
+q:{q:"Ik wil een kaartje ___.",o:["koop","kopen","koopt"],a:1}},
+{t:"Минулий час: perfectum", body:`<p><b>hebben/zijn + дієприкметник</b> (у кінці). Утворення: <b>ge + основа + t/d</b>.</p>
+<p>Правило <b>'t kofschip</b>: якщо основа закінчується на t, k, f, s, ch, p — додаємо <b>-t</b>, інакше <b>-d</b>. werken → gewerkt, wonen → gewoond.</p>
+<p>Дієслова руху й зміни стану беруть <b>zijn</b>: gaan, komen, blijven, worden.</p>`,
+ex:[["Ik heb gewerkt.","Я працював."],["Wij hebben gekookt.","Ми готували."],["Zij is naar huis gegaan.","Вона пішла додому."],["Ik heb een film gezien.","Я подивився фільм."]],
+tip:"Приголосні 't kofschip: t, k, f, s, ch, p. «Кавовий корабель» — уяви корабель, що везе каву: на ньому всі -t.",
+q:{q:"Wij hebben gisteren ___. (fietsen)",o:["gefietsd","gefietst","fietsen"],a:1}},
+{t:"Множина", body:`<p>Більшість слів: <b>+en</b> (het boek → boeken). Слова на -el, -er, -em, -je і багато запозичень: <b>+s</b> (de tafel → tafels, het meisje → meisjes).</p>`,
+ex:[["de fiets → de fietsen","велосипед → велосипеди"],["de lepel → de lepels","ложка → ложки"],["het kind → de kinderen","дитина → діти (виняток)"]],
+tip:"Довгий голосний у відкритому складі пишеться одною літерою: de straat → de straten.",
+q:{q:"Множина: de tafel →",o:["tafelen","tafels"],a:1}},
+{t:"Зменшувальні -je", body:`<p>Нідерландці обожнюють зменшувальні. Це не тільки «маленьке», а й «миле, неформальне». Завжди <b>het</b>.</p>`,
+ex:[["het huis → het huisje","дім → будиночок"],["het brood → het broodje","хліб → булочка"],["even een biertje?","по пивку?"]],
+tip:"Зменшувальне робить фразу дружньою: «een kopje koffie» звучить тепліше, ніж «een kop koffie».",
+q:{q:"Артикль у «___ kopje»:",o:["de","het"],a:1}},
+{t:"Прикметник: -e чи без?", body:`<p>Перед іменником прикметник отримує <b>-e</b>. Виняток: <b>het</b>-слово в однині з <b>een</b> або без артикля — без -e.</p>`,
+ex:[["de mooie fiets","гарний велосипед"],["een mooi huis","гарний дім"],["het mooie huis","той гарний дім"]],
+tip:"Запам'ятай одну фразу-зразок: «een groot huis, de grote stad». Решта — за аналогією.",
+q:{q:"een ___ kind (klein)",o:["klein","kleine"],a:0}}
+];
+
+const SOUNDS = [
+{s:"g / ch",how:"Хрипкий звук у горлі, як українське «х», але глибше. Ніколи не «ґ»!",ex:["goed","gezellig","acht","morgen"]},
+{s:"sch",how:"«с» + горлове «х»: «сх». Не «ш»!",ex:["school","schoon","Scheveningen"]},
+{s:"ui",how:"Близько до «ей» з округленими губами, ніби «ау»+«ей». Тренуй: huis.",ex:["huis","tuin","uit","ui"]},
+{s:"ij / ei",how:"Звучать однаково — як «ей» з відкритим ротом, ближче до «ай».",ex:["mijn","wijn","klein","ijs"]},
+{s:"oe",how:"Звичайне українське «у».",ex:["goed","boek","moeder","voet"]},
+{s:"uu / u",how:"Як німецьке ü: скажи «і», а губи зроби як для «у».",ex:["huur","muur","duur","nu"]},
+{s:"eu",how:"Як німецьке ö: скажи «е» з губами для «о».",ex:["neus","deur","keuken","leuk"]},
+{s:"ie",how:"Довге «і».",ex:["drie","bier","fiets","zien"]},
+{s:"aa / a",how:"aa — довге «а», a — коротке. Від цього змінюється значення!",ex:["man","maan","tak","taak"]},
+{s:"-en у кінці",how:"У розмові n зникає: «werken» звучить як «верке».",ex:["werken","lopen","eten","kinderen"]},
+{s:"w",how:"Між «в» і англійським w, губи злегка торкаються.",ex:["water","wit","waar","wonen"]},
+{s:"v / z на початку",how:"Часто оглушуються: v ≈ «ф», z ≈ «с» (особливо на півночі).",ex:["vader","vis","zon","zee"]}
+];
+
+const HACKS = [
+["Артикль — частина слова","Ніколи не вчи «huis», вчи «het huis». Через рік скажеш спасибі."],
+["20 хвилин щодня > 3 години в неділю","Мозок закріплює слова уві сні. Короткі щоденні сесії працюють у 3–4 рази краще."],
+["Інтервальні повторення","Цей курс сам повертає слова: через 1, 2, 4, 7 і 14 днів. Просто відкривай вкладку «Сьогодні»."],
+["Говори вголос","Повтори кожне слово після озвучки 3 рази. Слухова й м'язова пам'ять разом — найсильніша."],
+["Shadowing (тінь)","Увімкни діалог і говори одночасно з диктором, копіюючи інтонацію. 5 хвилин на день — і акцент м'якшає."],
+["Використовуй англійську й німецьку","Water, appel, boek, huis — схожі на English/Deutsch. Шукай «родичів» — половина слів вивчиться сама."],
+["Наклейки вдома","Підпиши стікерами речі: de deur, het raam, de koelkast. Бачиш 20 разів на день — пам'ятаєш назавжди."],
+["Переключи телефон на Nederlands","Ти й так знаєш, де кнопки. За тиждень вивчиш 50 слів інтерфейсу."],
+["Слухай NPO Radio і подкасти","«Zeg het maar», «NOS Journaal in makkelijke taal» — новини простою мовою для A1–A2."],
+["Не бійся помилок","Голландці часто переходять на англійську. Скажи: «Ik wil graag Nederlands oefenen» — і вони підуть назустріч."],
+["Фрази, а не слова","Вчи блоками: «Ik heb zin in...», «Mag ik...?», «Hoe zeg je ... in het Nederlands?»"],
+["Ментальні образи","bang = боїться «бах!»; lopen = «лопаті-ноги» йдуть. Що абсурдніше, то краще запам'ятовується."],
+["Правило 2 хвилин","Немає настрою? Пообіцяй собі лише 2 хвилини карток. Зазвичай залишаєшся на 15."]
+];
+
+const FALSE_FRIENDS = [
+["de bank","диван (і банк)","не тільки банк"],
+["slim","розумний","не «худий» (англ. slim)"],
+["de rok","спідниця","не «рок»"],
+["bellen","дзвонити (телефоном)","не «белькотіти»"],
+["lopen","іти пішки","не «бігти» (нім. laufen)"],
+["het meer","озеро","і «більше»"],
+["eng","страшний, моторошний","не «англійський»"],
+["brutaal","нахабний","не «брутальний»"],
+["de kast","шафа","не «каста»"],
+["de map","папка","не «мапа»"],
+["raar","дивний","не «рідкісний» (англ. rare)"],
+["de room","вершки","не «кімната» (англ. room)"],
+["doen","робити","не «done»"]
+];
+
+
+/* ---------- data prep ---------- */
+const WORDS=[];
+for(const [cat,txt] of Object.entries(RAW)){
+  txt.trim().split('\n').forEach(l=>{const [nl,uk,hint]=l.split('|');WORDS.push({id:nl.trim(),nl:nl.trim(),uk:(uk||'').trim(),hint:(hint||'').trim(),cat})});
+}
+const CATS=Object.keys(RAW);
+const NOUNS=WORDS.filter(w=>/^(de|het) [a-zà-ÿ]/i.test(w.nl)&&!w.nl.includes('?'));
+
+/* ---------- storage ---------- */
+const KEY='taalfiets-v1';
+const DAY=86400000;
+const INTERVALS=[0,1,2,4,7,14,30];
+function today(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+let S={box:{},due:{},xp:0,streak:0,last:'',done:{date:'',n:0},goal:20,rate:0.9,voice:''};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)S=Object.assign(S,s)}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function touchDay(){
+  const t=today();
+  if(S.done.date!==t){
+    const y=new Date(Date.now()-DAY);const ys=y.getFullYear()+'-'+(y.getMonth()+1)+'-'+y.getDate();
+    if(S.last!==t){S.streak=(S.last===ys)?S.streak:0}
+    S.done={date:t,n:0};
+  }
+}
+function credit(xp){touchDay();const t=today();if(S.last!==t){S.streak=(S.streak||0)+1;S.last=t}S.done.n++;S.xp+=xp;save()}
+function grade(w,ok){
+  let b=S.box[w.id]||0;b=ok?Math.min(b+1,6):Math.max(0,b-2);S.box[w.id]=b;
+  S.due[w.id]=Date.now()+INTERVALS[b]*DAY-3600000;credit(ok?10:2);
+}
+function isDue(w){return S.box[w.id]!==undefined&&(S.due[w.id]||0)<=Date.now()}
+function learned(w){return (S.box[w.id]||0)>=3}
+
+/* ---------- speech ---------- */
+let NLV=[];
+function loadVoices(){try{NLV=speechSynthesis.getVoices().filter(v=>/^nl/i.test(v.lang))}catch(e){NLV=[]}}
+if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=()=>{loadVoices();if(cur==='progress')render()}}
+function pickVoice(alt){
+  if(!NLV.length)return null;
+  let list=NLV.slice().sort((a,b)=>(b.lang==='nl-NL')-(a.lang==='nl-NL'));
+  let v=list.find(v=>v.name===S.voice)||list[0];
+  if(alt&&list.length>1)v=list.find(x=>x!==v)||v;
+  return v;
+}
+let warned=false;
+function say(text,o={}){
+  if(!('speechSynthesis' in window)){toast('Цей браузер не вміє озвучувати текст');return}
+  if(!o.queue)speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text.replace(/\s\/\s/g,', ').replace(/\(.*?\)/g,'').replace(/\.\.\./g,''));
+  u.lang='nl-NL';const v=pickVoice(o.alt);if(v)u.voice=v;
+  u.rate=o.rate||S.rate;u.pitch=o.pitch||1;
+  if(o.onend)u.onend=o.onend;if(o.onerror)u.onerror=o.onerror;
+  if(!NLV.length&&!warned){warned=true;toast('Нідерландський голос не знайдено — встанови його в налаштуваннях телефону (Мова → Синтез мовлення)')}
+  speechSynthesis.speak(u);
+}
+const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>';
+function spkBtn(text,label){return `<button class="speak" data-say="${esc(text)}" aria-label="Слухати: ${esc(label||text)}" title="Слухати">${SPK}</button>`}
+
+/* ---------- helpers ---------- */
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function artHTML(nl){const m=nl.match(/^(de|het) (.*)$/);return m?`<span class="art-${m[1]}">${m[1]}</span> ${esc(m[2])}`:esc(nl)}
+function norm(s){return s.toLowerCase().replace(/^(de|het|een) /,'').replace(/[?!.,¿¡'’]/g,'').replace(/\s+/g,' ').trim()}
+let tt;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3200)}
+function hashStr(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)}
+const $=s=>document.querySelector(s);
+
+/* ---------- tabs ---------- */
+const TABS=[['today','Сьогодні'],['words','Слова'],['quiz','Тренажер'],['dialogs','Діалоги'],['grammar','Граматика'],['sounds','Вимова'],['hacks','Лайфхаки'],['progress','Прогрес']];
+let cur=(location.hash||'').slice(1);if(!TABS.some(t=>t[0]===cur))cur='today';
+function drawTabs(){$('#tabs').innerHTML=TABS.map(([id,n])=>`<button class="tab" role="tab" data-tab="${id}" aria-selected="${id===cur}">${n}</button>`).join('')}
+function go(id){cur=id;try{history.replaceState(null,'','#'+id)}catch(e){location.hash=id}drawTabs();render();window.scrollTo({top:0})}
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h!==cur&&TABS.some(t=>t[0]===h)){cur=h;drawTabs();render()}});
+
+document.addEventListener('click',e=>{
+  const s=e.target.closest('[data-say]');if(s){e.stopPropagation();say(s.dataset.say,{rate:s.dataset.rate?+s.dataset.rate:undefined});return}
+  const t=e.target.closest('[data-tab]');if(t){go(t.dataset.tab);return}
+  const g=e.target.closest('[data-go]');if(g){go(g.dataset.go);return}
+});
+
+/* ---------- views ---------- */
+function render(){try{window.speechSynthesis&&speechSynthesis.cancel()}catch(e){}({today:vToday,words:vWords,quiz:vQuiz,dialogs:vDialogs,grammar:vGrammar,sounds:vSounds,hacks:vHacks,progress:vProgress})[cur]()}
+
+function vToday(){
+  touchDay();
+  const wod=WORDS[hashStr(today())%WORDS.length];
+  const due=WORDS.filter(isDue).length;
+  const nw=WORDS.filter(w=>S.box[w.id]===undefined).length;
+  const pct=Math.min(100,Math.round(S.done.n/S.goal*100));
+  const hack=HACKS[hashStr(today()+'h')%HACKS.length];
+  $('#view').innerHTML=`
+  <section class="card">
+    <div class="label">Слово дня</div>
+    <div class="row" style="justify-content:space-between;flex-wrap:nowrap">
+      <div style="min-width:0"><div class="q-big" style="text-align:left;padding:0">${artHTML(wod.nl)}</div>
+      <div>${esc(wod.uk)}</div>${wod.hint?`<div class="small muted">${esc(wod.hint)}</div>`:''}</div>
+      ${spkBtn(wod.nl)}
+    </div>
+  </section>
+  <section class="card">
+    <div class="row" style="justify-content:space-between"><h2>Ціль на сьогодні</h2><span class="pill ${S.streak?'ok':''}">Серія: ${S.streak||0} дн.</span></div>
+    <div class="bar" role="progressbar" aria-valuenow="${S.done.n}" aria-valuemax="${S.goal}"><i style="width:${pct}%"></i></div>
+    <div class="small muted">${S.done.n} з ${S.goal} вправ · ${S.xp} XP</div>
+    <div class="row">
+      <button class="btn primary" id="startDue">${due?`Повторити (${due})`:'Нові слова'}</button>
+      <button class="btn" data-go="quiz">Тренажер</button>
+      <button class="btn" data-go="dialogs">Діалог дня</button>
+    </div>
+    <div class="small muted">${due?`Слів на повторення: ${due}. Інтервальне повторення — не дасть їм забутися.`:`Ще ${nw} нових слів чекають на тебе.`}</div>
+  </section>
+  <section class="card">
+    <div class="label">Лайфхак дня</div>
+    <h3>${esc(hack[0])}</h3><div>${esc(hack[1])}</div>
+  </section>
+  <section class="card">
+    <h2>Як проходити курс</h2>
+    <div class="grid2 small">
+      <div><b>1. Слова</b><br>Картки з озвучкою. Натисни «Знаю» чи «Ще раз» — програма сама вирішить, коли повторити.</div>
+      <div><b>2. Тренажер</b><br>Переклад, аудіювання, написання й гра de/het. Кнопка «Підказка», коли застряг.</div>
+      <div><b>3. Діалоги</b><br>9 життєвих ситуацій. Слухай, а потім грай роль одного зі співрозмовників.</div>
+      <div><b>4. Граматика й вимова</b><br>Коротко про головне A1.2 з прикладами, які можна почути.</div>
+    </div>
+  </section>`;
+  $('#startDue').onclick=()=>{wordsState.cat=due?'__due':'__new';go('words')};
+}
+
+/* words / flashcards */
+const wordsState={cat:'__new',dir:'nl',q:[],i:0,flipped:false,search:''};
+function buildDeck(){
+  let pool;const c=wordsState.cat;
+  if(c==='__due')pool=WORDS.filter(isDue);
+  else if(c==='__new')pool=WORDS.filter(w=>S.box[w.id]===undefined).slice(0,15);
+  else if(c==='__all')pool=shuffle(WORDS).slice(0,25);
+  else pool=WORDS.filter(w=>w.cat===c);
+  wordsState.q=c==='__new'?pool:shuffle(pool);wordsState.i=0;wordsState.flipped=false;
+}
+function vWords(){
+  if(!wordsState.q.length||wordsState.i>=wordsState.q.length)buildDeck();
+  const opts=[['__new','Нові (15)'],['__due','На повторення ('+WORDS.filter(isDue).length+')'],['__all','Мікс із усіх']].concat(CATS.map(c=>[c,c+' ('+WORDS.filter(w=>w.cat===c).length+')']));
+  $('#view').innerHTML=`
+  <section class="card">
+    <div class="row">
+      <select id="cat" aria-label="Набір слів">${opts.map(([v,n])=>`<option value="${esc(v)}" ${v===wordsState.cat?'selected':''}>${esc(n)}</option>`).join('')}</select>
+      <button class="btn ghost" id="dir">${wordsState.dir==='nl'?'NL → UA':'UA → NL'}</button>
+    </div>
+    <div id="cardArea"></div>
+  </section>
+  <section class="card">
+    <div class="row" style="justify-content:space-between"><h2>Словник</h2><span class="small muted">${WORDS.length} слів · <span class="art-de">de</span> / <span class="art-het">het</span></span></div>
+    <input type="search" id="search" placeholder="Пошук нідерландською чи українською" value="${esc(wordsState.search)}" aria-label="Пошук слова">
+    <div class="list" id="dict"></div>
+  </section>`;
+  $('#cat').onchange=e=>{wordsState.cat=e.target.value;buildDeck();drawCard()};
+  $('#dir').onclick=()=>{wordsState.dir=wordsState.dir==='nl'?'uk':'nl';wordsState.flipped=false;vWords()};
+  $('#search').oninput=e=>{wordsState.search=e.target.value;drawDict()};
+  drawCard();drawDict();
+}
+function drawCard(){
+  const a=$('#cardArea');const st=wordsState;
+  if(!st.q.length){a.innerHTML=`<div class="flash" style="cursor:default"><div><div class="word">Klaar!</div><div class="back muted">${st.cat==='__due'?'Немає слів на повторення. Приходь завтра або вчи нові.':'У цьому наборі вже немає нових слів.'}</div></div></div>`;return}
+  if(st.i>=st.q.length){a.innerHTML=`<div class="flash" style="cursor:default"><div><div class="word">Goed gedaan!</div><div class="back">Набір пройдено: ${st.q.length} карток</div><div class="row" style="justify-content:center;margin-top:14px"><button class="btn primary" id="again">Ще набір</button><button class="btn" data-go="quiz">Перевірити в тренажері</button></div></div></div>`;$('#again').onclick=()=>{buildDeck();drawCard()};return}
+  const w=st.q[st.i];const front=st.dir==='nl'?artHTML(w.nl):esc(w.uk);const back=st.dir==='nl'?esc(w.uk):artHTML(w.nl);
+  const b=S.box[w.id];
+  a.innerHTML=`
+  <div class="small muted">${st.i+1} / ${st.q.length} · ${esc(w.cat)}</div>
+  <div class="flash" id="flash" tabindex="0" role="button" aria-label="Перевернути картку">
+    <span class="corner pill ${b>=3?'ok':''}">${b===undefined?'нове':'рівень '+b}</span>
+    <span class="spk">${spkBtn(w.nl)}</span>
+    <div>
+      <div class="word">${front}</div>
+      ${st.flipped?`<div class="back">${back}</div>${w.hint?`<div class="hint">${esc(w.hint)}</div>`:''}`:`<div class="hint">Натисни, щоб перевернути</div>`}
+    </div>
+  </div>
+  <div class="row" style="justify-content:center">
+    ${st.flipped?`<button class="btn bad" id="no">Ще раз</button><button class="btn good" id="yes">Знаю</button>`:`<button class="btn primary" id="flip">Показати переклад</button>`}
+  </div>`;
+  const flip=()=>{if(!st.flipped){st.flipped=true;if(st.dir==='uk')say(w.nl);drawCard()}};
+  $('#flash').onclick=flip;$('#flash').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}};
+  if($('#flip'))$('#flip').onclick=flip;
+  if($('#yes'))$('#yes').onclick=()=>{grade(w,true);st.i++;st.flipped=false;drawCard()};
+  if($('#no'))$('#no').onclick=()=>{grade(w,false);st.q.push(w);st.i++;st.flipped=false;drawCard()};
+  if(st.dir==='nl'&&!st.flipped&&cur==='words'&&a.dataset.last!==w.id+st.i){a.dataset.last=w.id+st.i;}
+}
+function drawDict(){
+  const q=norm(wordsState.search||'');
+  const list=WORDS.filter(w=>!q||norm(w.nl).includes(q)||w.uk.toLowerCase().includes(q)).slice(0,500);
+  $('#dict').innerHTML=list.length?list.map(w=>`<div class="li">${spkBtn(w.nl)}<div class="nl">${artHTML(w.nl)}</div><div class="uk">${esc(w.uk)}</div>${learned(w)?'<span class="pill ok">вивчено</span>':''}</div>`).join(''):'<div class="li muted">Нічого не знайдено</div>';
+}
+
+/* quiz */
+const QZ={mode:null,qs:[],i:0,score:0,answered:false,hint:0};
+const MODES=[
+ ['choice','Вибери переклад','Бачиш нідерландське слово — обираєш український переклад.'],
+ ['listen','На слух','Чуєш слово — обираєш, яке саме прозвучало. Тренує розуміння мови.'],
+ ['type','Напиши слово','Бачиш український переклад — пишеш нідерландською. Артикль можна не писати.'],
+ ['article','De чи het?','Гра на артиклі. Найкорисніші 2 хвилини для граматики.']
+];
+function vQuiz(){
+  if(!QZ.mode){
+    $('#view').innerHTML=`<section class="card"><h2>Тренажер</h2><div class="muted small">Раунд — 10 питань. Слова, з якими ти помиляєшся, частіше повертатимуться в картках.</div></section>
+    ${MODES.map(([id,n,d])=>`<section class="card"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;gap:14px"><div style="min-width:0"><h3>${n}</h3><div class="small muted">${d}</div></div><button class="btn primary" data-mode="${id}">Почати</button></div></section>`).join('')}
+    <section class="card"><label class="label" for="qcat">Тема для тренажера</label><select id="qcat"><option value="">Усі теми</option>${CATS.map(c=>`<option ${QZ.cat===c?'selected':''}>${esc(c)}</option>`).join('')}</select></section>`;
+    $('#qcat').onchange=e=>QZ.cat=e.target.value;
+    document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>startQuiz(b.dataset.mode));
+    return;
+  }
+  drawQ();
+}
+function startQuiz(mode){
+  let pool=mode==='article'?NOUNS:WORDS;
+  if(QZ.cat)pool=pool.filter(w=>w.cat===QZ.cat);
+  if(pool.length<4)pool=mode==='article'?NOUNS:WORDS;
+  const weak=pool.filter(w=>S.box[w.id]!==undefined&&S.box[w.id]<3);
+  const qs=shuffle(weak).slice(0,4).concat(shuffle(pool)).filter((w,i,a)=>a.indexOf(w)===i).slice(0,10);
+  Object.assign(QZ,{mode,qs:shuffle(qs),i:0,score:0,answered:false,hint:0,pool});
+  vQuiz();
+}
+function distractors(w,key){
+  const same=QZ.pool.filter(x=>x!==w&&x[key]!==w[key]);
+  return shuffle(same).slice(0,3);
+}
+function drawQ(){
+  const v=$('#view');
+  if(QZ.i>=QZ.qs.length){
+    const p=QZ.score/QZ.qs.length;
+    v.innerHTML=`<section class="card" style="text-align:center"><div class="label">Результат</div><div class="q-big">${QZ.score} / ${QZ.qs.length}</div>
+    <div>${p>=.9?'Uitstekend! Відмінно!':p>=.6?'Goed zo! Добре, ще трохи практики.':'Niet erg! Повтори картки й спробуй ще.'}</div>
+    <div class="row" style="justify-content:center"><button class="btn primary" id="rq">Ще раунд</button><button class="btn" id="bq">Інший режим</button></div></section>`;
+    $('#rq').onclick=()=>startQuiz(QZ.mode);$('#bq').onclick=()=>{QZ.mode=null;vQuiz()};return;
+  }
+  const w=QZ.qs[QZ.i];QZ.answered=false;QZ.hint=0;
+  const head=`<div class="row" style="justify-content:space-between"><span class="small muted">Питання ${QZ.i+1} / ${QZ.qs.length} · ${QZ.score} правильних</span><button class="btn ghost" id="quit">Вийти</button></div><div class="bar"><i style="width:${QZ.i/QZ.qs.length*100}%"></i></div>`;
+  let body='';
+  if(QZ.mode==='choice'){
+    const o=shuffle([w,...distractors(w,'uk')]);
+    body=`<div class="row" style="justify-content:center">${spkBtn(w.nl)}</div><div class="q-big">${artHTML(w.nl)}</div><div class="opts">${o.map(x=>`<button class="opt" data-a="${x===w}">${esc(x.uk)}</button>`).join('')}</div>`;
+  }else if(QZ.mode==='listen'){
+    const o=shuffle([w,...distractors(w,'nl')]);
+    body=`<div class="q-big"><button class="btn primary" id="play">${SPK} Слухати</button> <button class="btn ghost" data-say="${esc(w.nl)}" data-rate="0.55">Повільно</button></div><div class="opts">${o.map(x=>`<button class="opt" data-a="${x===w}">${artHTML(x.nl)}</button>`).join('')}</div>`;
+  }else if(QZ.mode==='type'){
+    body=`<div class="q-big">${esc(w.uk)}</div><form id="tf" class="row" style="flex-wrap:nowrap"><input type="text" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="нідерландською…" aria-label="Відповідь"><button class="btn primary">Перевірити</button></form>`;
+  }else{
+    const m=w.nl.match(/^(de|het) (.*)$/);
+    body=`<div class="row" style="justify-content:center">${spkBtn(w.nl)}</div><div class="q-big">___ ${esc(m[2])}</div><div class="small muted" style="text-align:center">${esc(w.uk)}</div><div class="opts"><button class="opt" data-a="${m[1]==='de'}"><span class="art-de">de</span></button><button class="opt" data-a="${m[1]==='het'}"><span class="art-het">het</span></button></div>`;
+  }
+  v.innerHTML=`<section class="card">${head}${body}<div class="row"><button class="btn ghost" id="hint">Підказка</button><span id="hintText" class="small muted"></span></div><div id="fb" class="feedback" aria-live="polite"></div><div class="row" id="nextRow" hidden><button class="btn primary" id="next">Далі</button></div></section>`;
+  $('#quit').onclick=()=>{QZ.mode=null;vQuiz()};
+  if($('#play')){$('#play').onclick=()=>say(w.nl);setTimeout(()=>say(w.nl),250)}
+  $('#hint').onclick=()=>{QZ.hint++;$('#hintText').textContent=hintFor(w,QZ.hint)};
+  document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    if(QZ.answered)return;const ok=b.dataset.a==='true';
+    document.querySelectorAll('.opt').forEach(x=>{if(x.dataset.a==='true')x.classList.add('right')});
+    if(!ok)b.classList.add('wrong');finish(w,ok);
+  });
+  if($('#tf')){
+    $('#ans').focus();
+    $('#tf').onsubmit=e=>{e.preventDefault();if(QZ.answered)return;const val=norm($('#ans').value);if(!val)return;
+      const target=norm(w.nl);const alts=w.nl.split('/').map(norm);
+      const ok=val===target||alts.includes(val);const close=!ok&&lev(val,target)<=1;
+      finish(w,ok||close,close?`Майже! Правильно: ${w.nl}`:null)};
+  }
+}
+function hintFor(w,n){
+  const base=w.nl.replace(/^(de|het) /,'');
+  if(QZ.mode==='article'){return n===1?'Чи закінчується на -je? Тоді het. Множина завжди de.':(w.hint||'Приблизно 2/3 слів мають de.')}
+  if(n===1)return w.hint?w.hint:`Починається на «${base[0]}», ${base.length} літер`;
+  if(n===2)return `Починається на «${base.slice(0,Math.ceil(base.length/2))}…»`;
+  say(w.nl);return 'Озвучую — слухай уважно';
+}
+function lev(a,b){const d=[];for(let i=0;i<=a.length;i++){d[i]=[i];for(let j=1;j<=b.length;j++)d[i][j]=i?Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)):j}return d[a.length][b.length]}
+function finish(w,ok,msg){
+  QZ.answered=true;if(ok)QZ.score++;
+  const b=S.box[w.id]||0;S.box[w.id]=ok?Math.max(b,Math.min(b+1,6)):Math.max(0,b-1);S.due[w.id]=Date.now()+INTERVALS[S.box[w.id]]*DAY-3600000;
+  credit(ok?(QZ.hint?5:10):1);
+  const fb=$('#fb');fb.className='feedback '+(ok?'ok':'no');
+  fb.innerHTML=(msg?esc(msg):ok?'Goed zo! Правильно.':`Ні. Правильно: ${artHTML(w.nl)} — ${esc(w.uk)}`)+(w.hint&&!ok?`<div class="small muted" style="font-weight:400">${esc(w.hint)}</div>`:'');
+  if(QZ.mode!=='listen')say(w.nl);
+  $('#nextRow').hidden=false;$('#next').focus();$('#next').onclick=()=>{QZ.i++;drawQ()};
+}
+
+/* dialogs */
+const DS={i:null,trans:true,role:null};
+function vDialogs(){
+  if(DS.i===null){
+    $('#view').innerHTML=`<section class="card"><h2>Діалоги</h2><div class="small muted">Слухай кожну репліку, вмикай переклад, а потім грай роль: програма приховає твої репліки — скажи їх уголос і перевір себе.</div></section>
+    <div class="grid2">${DIALOGS.map((d,i)=>`<button class="card" style="text-align:left;cursor:pointer;font:inherit;color:inherit" data-d="${i}"><span class="label">Діалог ${i+1}</span><h3>${esc(d.t)}</h3><span class="muted small">${esc(d.uk)} · ${d.lines.length} реплік</span></button>`).join('')}</div>`;
+    document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{DS.i=+b.dataset.d;DS.role=null;vDialogs()});return;
+  }
+  const d=DIALOGS[DS.i];
+  $('#view').innerHTML=`<section class="card">
+    <div class="row" style="justify-content:space-between"><button class="btn ghost" id="back">← Усі діалоги</button><span class="small muted">${DS.i+1} / ${DIALOGS.length}</span></div>
+    <h2>${esc(d.t)}</h2><div class="muted">${esc(d.uk)}</div>
+    <div class="row">
+      <button class="btn primary" id="playAll">${SPK} Прослухати весь</button>
+      <button class="btn" id="tr">${DS.trans?'Сховати':'Показати'} переклад</button>
+      <select id="role" aria-label="Рольова гра"><option value="">Рольова гра: вимк.</option><option value="A" ${DS.role==='A'?'selected':''}>Я — A</option><option value="B" ${DS.role==='B'?'selected':''}>Я — B</option></select>
+    </div>
+    <div id="lines">${d.lines.map(([who,nl,uk],k)=>{const hide=DS.role===who;return `<div class="line" data-k="${k}"><span class="who ${who}">${who}</span><div style="min-width:0"><div class="nl ${hide?'hidden-text':''}" data-reveal>${esc(nl)}</div>${DS.trans||hide?`<div class="uk">${esc(uk)}</div>`:''}</div>${spkBtn(nl)}</div>`}).join('')}</div>
+    <div class="tipbox"><b>Корисно:</b> ${esc(d.tip)}</div>
+    ${DS.role?`<div class="small muted">Твої репліки розмиті: прочитай переклад, скажи нідерландською вголос, потім натисни на розмитий текст, щоб перевірити.</div>`:''}
+    <div class="row"><button class="btn" id="prev" ${DS.i?'':'disabled'}>← Попередній</button><button class="btn" id="nextD" ${DS.i<DIALOGS.length-1?'':'disabled'}>Наступний →</button></div>
+  </section>`;
+  $('#back').onclick=()=>{DS.i=null;vDialogs()};
+  $('#tr').onclick=()=>{DS.trans=!DS.trans;vDialogs()};
+  $('#role').onchange=e=>{DS.role=e.target.value||null;vDialogs()};
+  $('#prev').onclick=()=>{DS.i--;vDialogs()};$('#nextD').onclick=()=>{DS.i++;vDialogs()};
+  document.querySelectorAll('[data-reveal]').forEach(el=>el.onclick=()=>el.classList.remove('hidden-text'));
+  $('#playAll').onclick=()=>{
+    if(!window.speechSynthesis){toast('Цей браузер не вміє озвучувати текст');return}
+    speechSynthesis.cancel();let k=0;const L=document.querySelectorAll('.line');
+    const next=()=>{L.forEach(x=>x.classList.remove('playing'));if(k>=d.lines.length){credit(5);return}
+      const [who,nl]=d.lines[k];L[k].classList.add('playing');
+      if(DS.role===who){k++;setTimeout(next,Math.max(1800,nl.length*90));return}
+      say(nl,{queue:true,alt:who==='B',pitch:who==='B'?0.85:1.1,onend:()=>{k++;setTimeout(next,350)},onerror:()=>{}})};
+    next();
+  };
+}
+
+/* grammar */
+function vGrammar(){
+  $('#view').innerHTML=`<section class="card"><h2>Граматика A1.2</h2><div class="small muted">11 тем, без яких не обійтися на рівні A1–A2. Кожна з прикладами, лайфхаком і міні-перевіркою.</div></section>
+  ${GRAMMAR.map((g,i)=>`<details class="g" ${i===0?'open':''}><summary>${esc(g.t)}</summary><div class="gb">${g.body}
+  ${g.ex.map(([nl,uk])=>`<div class="ex">${spkBtn(nl.split('→').pop().split('—')[0].trim(),nl)}<div style="min-width:0"><div class="nl">${esc(nl)}</div><div class="small muted">${esc(uk)}</div></div></div>`).join('')}
+  <div class="tipbox"><b>Лайфхак:</b> ${esc(g.tip)}</div>
+  <div><div class="label" style="margin-bottom:6px">Перевір себе</div><div class="small" style="margin-bottom:6px">${esc(g.q.q)}</div><div class="opts">${g.q.o.map((o,k)=>`<button class="opt gq" data-g="${i}" data-k="${k}">${esc(o)}</button>`).join('')}</div></div>
+  </div></details>`).join('')}`;
+  document.querySelectorAll('.gq').forEach(b=>b.onclick=()=>{
+    const g=GRAMMAR[+b.dataset.g];const sib=document.querySelectorAll(`.gq[data-g="${b.dataset.g}"]`);
+    if([...sib].some(x=>x.classList.contains('right')))return;
+    sib.forEach(x=>{if(+x.dataset.k===g.q.a)x.classList.add('right')});
+    if(+b.dataset.k!==g.q.a)b.classList.add('wrong');else credit(5);
+  });
+}
+
+/* sounds */
+function vSounds(){
+  $('#view').innerHTML=`<section class="card"><h2>Лабораторія вимови</h2><div class="small muted">Натисни на слово, щоб почути. Кнопка «Повільно» вимовляє вдвічі повільніше — повторюй за диктором.</div>
+  <label class="small" for="rate">Швидкість мовлення: <b id="rv">${S.rate.toFixed(2)}</b></label><input type="range" id="rate" min="0.5" max="1.2" step="0.05" value="${S.rate}" style="width:100%"></section>
+  <div class="grid2">${SOUNDS.map(s=>`<section class="card sound"><div class="s">${esc(s.s)}</div><div class="small">${esc(s.how)}</div><div class="row">${s.ex.map(w=>`<button class="chip" data-say="${esc(w)}">${esc(w)}</button>`).join('')}</div><button class="btn ghost" data-say="${esc(s.ex.join(', '))}" data-rate="0.5">Повільно всі</button></section>`).join('')}</div>
+  <section class="card"><h2>Скоромовка для смільчаків</h2><div class="ex">${spkBtn('Achtentachtig angstige agenten aten achtentachtig ananassen')}<div><div class="nl">Achtentachtig angstige agenten aten achtentachtig ananassen.</div><div class="small muted">88 наляканих поліцейських з'їли 88 ананасів. Тренує горлове g/ch.</div></div></div>
+  <div class="ex">${spkBtn('Scheveningen')}<div><div class="nl">Scheveningen</div><div class="small muted">Курорт біля Гааги. Слово, яке видає іноземця за секунду — спробуй сказати правильно.</div></div></div></section>`;
+  $('#rate').oninput=e=>{S.rate=+e.target.value;$('#rv').textContent=S.rate.toFixed(2);save()};
+}
+
+/* hacks */
+function vHacks(){
+  $('#view').innerHTML=`<section class="card"><h2>Лайфхаки: як вивчити швидше</h2></section>
+  <div class="grid2">${HACKS.map(h=>`<section class="card"><h3>${esc(h[0])}</h3><div class="small">${esc(h[1])}</div></section>`).join('')}</div>
+  <section class="card"><h2>Фальшиві друзі перекладача</h2><div class="small muted">Слова, що звучать знайомо, але означають інше.</div>
+  <div class="scroll"><table class="ff">${FALSE_FRIENDS.map(f=>`<tr><td>${spkBtn(f[0])} ${artHTML(f[0])}</td><td>${esc(f[1])}</td><td class="muted">${esc(f[2])}</td></tr>`).join('')}</table></div></section>
+  <section class="card"><h2>Мінімальний «набір виживання»</h2><div class="small muted">10 фраз, які закривають 80% ситуацій у перший місяць.</div>
+  ${[['Ik wil graag ...','Я б хотів ...'],['Mag ik ...?','Можна мені ...?'],['Hoeveel kost het?','Скільки коштує?'],['Waar is ...?','Де ...?'],['Kunt u dat herhalen?','Можете повторити?'],['Kunt u langzamer praten?','Можете говорити повільніше?'],['Hoe zeg je ... in het Nederlands?','Як сказати ... нідерландською?'],['Wat betekent dat?','Що це означає?'],['Ik spreek een beetje Nederlands.','Я трохи говорю нідерландською.'],['Ik wil graag Nederlands oefenen.','Я хочу попрактикувати нідерландську.']].map(([nl,uk])=>`<div class="ex">${spkBtn(nl)}<div><div class="nl">${esc(nl)}</div><div class="small muted">${esc(uk)}</div></div></div>`).join('')}</section>`;
+}
+
+/* progress */
+function vProgress(){
+  touchDay();
+  const L=WORDS.filter(learned).length, P=WORDS.filter(w=>S.box[w.id]!==undefined&&!learned(w)).length;
+  $('#view').innerHTML=`<section class="card"><h2>Мій прогрес</h2>
+    <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
+      <div class="stat"><span class="label">Вивчено</span><span class="n">${L}</span><span class="small muted">з ${WORDS.length}</span></div>
+      <div class="stat"><span class="label">У процесі</span><span class="n">${P}</span></div>
+      <div class="stat"><span class="label">Серія</span><span class="n">${S.streak||0}</span><span class="small muted">днів</span></div>
+      <div class="stat"><span class="label">Досвід</span><span class="n">${S.xp}</span><span class="small muted">XP</span></div>
+    </div>
+    <div class="bar"><i style="width:${L/WORDS.length*100}%"></i></div>
+    <div class="small muted">«Вивчено» — слово, яке ти правильно згадав щонайменше 3 рази з інтервалами.</div>
+  </section>
+  <section class="card"><h2>За темами</h2>${CATS.map(c=>{const ws=WORDS.filter(w=>w.cat===c);const l=ws.filter(learned).length;return `<div><div class="row" style="justify-content:space-between"><span class="small">${esc(c)}</span><span class="small muted" style="font-variant-numeric:tabular-nums">${l}/${ws.length}</span></div><div class="bar"><i style="width:${l/ws.length*100}%"></i></div></div>`}).join('')}</section>
+  <section class="card"><h2>Налаштування</h2>
+    <label class="small" for="goal">Денна ціль (вправ)</label><select id="goal">${[10,20,30,50].map(n=>`<option ${S.goal===n?'selected':''}>${n}</option>`).join('')}</select>
+    <label class="small" for="voice">Голос озвучки</label>
+    <select id="voice">${NLV.length?NLV.map(v=>`<option ${v.name===S.voice?'selected':''} value="${esc(v.name)}">${esc(v.name)} (${esc(v.lang)})</option>`).join(''):'<option>Нідерландський голос не знайдено</option>'}</select>
+    ${NLV.length?'':'<div class="small muted">Android: Налаштування → Мова → Синтез мовлення → Google → встановити «Nederlands». iPhone: Параметри → Універсальний доступ → Усний контент → Голоси → Nederlands.</div>'}
+    <div class="row"><button class="btn" data-say="Hallo! Welkom bij de cursus Nederlands.">${SPK} Перевірити голос</button></div>
+    <div class="row" id="resetRow"><button class="btn" id="reset">Скинути прогрес</button></div>
+  </section>`;
+  $('#goal').onchange=e=>{S.goal=+e.target.value;save()};
+  $('#voice').onchange=e=>{S.voice=e.target.value;save();say('Dit is mijn stem.')};
+  $('#reset').onclick=()=>{$('#resetRow').innerHTML='<span class="small">Точно скинути весь прогрес?</span><button class="btn bad" id="rYes">Так, скинути</button><button class="btn" id="rNo">Скасувати</button>';
+    $('#rYes').onclick=()=>{S.box={};S.due={};S.xp=0;S.streak=0;S.last='';S.done={date:'',n:0};save();toast('Прогрес скинуто');vProgress()};$('#rNo').onclick=vProgress};
+}
+
+drawTabs();render();
+</script>
+
+</body>
+</html>
