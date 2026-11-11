@@ -1,7 +1,7 @@
 /* Service Worker для CRM — кешує лише оболонку застосунку.
    Дані Supabase НІКОЛИ не кешуються, щоб не показувати застарілі замовлення. */
 
-const CACHE = 'crm-shell-v6';
+const CACHE = 'crm-shell-v7';
 const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './axis-logo.svg'];
 
 self.addEventListener('install', e => {

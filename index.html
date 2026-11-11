@@ -1579,6 +1579,114 @@ body .debt-tag { border-radius: 6px; font-weight: 600; }
 body .cm-d { border-radius: var(--r-sm); }
 body .ev-chk { color: var(--muted2); }
 body .cal-rel { border-radius: 6px; }
+/* ============================================================
+   ВИРАЗНИЙ СТИЛЬ (за замовчуванням): ті самі чіткі форми, але з кольором і глибиною.
+   «Простий» стиль вмикається в налаштуваннях (клас look-plain на body).
+   ============================================================ */
+body:not(.look-plain) {
+  --r-sm: 10px; --r: 12px; --r-lg: 16px; --r-xl: 20px;
+  --sh-card: 0 1px 2px rgba(16,24,40,.04), 0 8px 24px -12px rgba(30,45,110,.16);
+  --sh-card-h: 0 2px 4px rgba(16,24,40,.05), 0 18px 36px -14px rgba(30,45,110,.28);
+  background: radial-gradient(1000px 520px at 92% -160px, color-mix(in srgb, var(--p2) 11%, transparent), transparent 70%), radial-gradient(820px 480px at -10% 0%, color-mix(in srgb, var(--violet) 7%, transparent), transparent 70%), var(--bg);
+  background-attachment: fixed;
+}
+html.dark body:not(.look-plain) {
+  --sh-card: 0 1px 2px rgba(0,0,0,.5), 0 14px 30px -16px rgba(0,0,0,.85);
+  --sh-card-h: 0 2px 4px rgba(0,0,0,.5), 0 22px 40px -16px rgba(0,0,0,.95);
+  background: radial-gradient(900px 500px at 90% -150px, color-mix(in srgb, var(--p2) 13%, transparent), transparent 70%), radial-gradient(700px 420px at -10% 0%, color-mix(in srgb, var(--violet) 8%, transparent), transparent 70%), var(--bg);
+  background-attachment: fixed;
+}
+body.look-plain .sum-ic { display: none; }
+
+/* поверхні */
+body:not(.look-plain) :is(.card, .sum-tile, .td-tile, .td-card, .st-box, .chart-box, .pl-card, .ot-wrap, .cal-mon, .kc, .st-donut-card, .cnt) { border-color: color-mix(in srgb, var(--line) 75%, transparent); box-shadow: var(--sh-card); border-radius: var(--r-lg); }
+html.dark body:not(.look-plain) :is(.card, .sum-tile, .td-tile, .td-card, .st-box, .chart-box, .pl-card, .ot-wrap, .cal-mon, .kc, .st-donut-card, .cnt) { box-shadow: var(--sh-card); border-color: #2a2c33; }
+body:not(.look-plain) header { background: color-mix(in srgb, var(--surface) 80%, transparent); -webkit-backdrop-filter: blur(16px) saturate(1.6); backdrop-filter: blur(16px) saturate(1.6); }
+body:not(.look-plain) .nav-s { background: color-mix(in srgb, var(--bg) 70%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-bottom-color: transparent; }
+body.hd-grad header, body.hd-dark header, body.hd-solid header { -webkit-backdrop-filter: none; backdrop-filter: none; }
+body.hd-grad header { background: linear-gradient(105deg, var(--p) 0%, color-mix(in srgb, var(--p2) 74%, var(--p)) 100%); } body.hd-dark header { background: var(--p); } body.hd-solid header { background: var(--p2); }
+
+/* картка замовлення: кольоровий відблиск статусу, живі аватари, кольорові мітки */
+body:not(.look-plain) .card { isolation: isolate; }
+body:not(.look-plain) .card::after { content: ""; z-index: -1; position: absolute; right: -90px; top: -110px; width: 260px; height: 220px; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--sc, var(--p2)) 13%, transparent), transparent); pointer-events: none; }
+body:not(.look-plain) .card.cl::after { display: none; }
+body:not(.look-plain) .card:not(.is-open):not(.sel):not(.over):hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--sc, var(--p2)) 38%, var(--line)); box-shadow: var(--sh-card-h); }
+body:not(.look-plain) .avatar { border-radius: 12px; background: linear-gradient(135deg, hsl(var(--h, 220) 68% 56%), hsl(calc(var(--h, 220) + 32) 64% 44%)); color: #fff; font-weight: 700; box-shadow: 0 5px 12px -6px hsl(var(--h, 220) 65% 40% / .55); }
+html.dark body:not(.look-plain) .avatar { background: linear-gradient(135deg, hsl(var(--h, 220) 60% 52%), hsl(calc(var(--h, 220) + 32) 58% 40%)); color: #fff; }
+body:not(.look-plain) .mav { background: linear-gradient(135deg, hsl(var(--h, 220) 68% 58%), hsl(calc(var(--h, 220) + 32) 64% 46%)); color: #fff; }
+html.dark body:not(.look-plain) .mav { background: linear-gradient(135deg, hsl(var(--h, 220) 60% 52%), hsl(calc(var(--h, 220) + 32) 58% 40%)); color: #fff; }
+body:not(.look-plain) .kc .avatar { border-radius: 7px; box-shadow: none; }
+body:not(.look-plain) .status-badge { background: color-mix(in srgb, var(--sc, var(--muted2)) 13%, var(--surface)); border-color: transparent; color: var(--sc, var(--muted)); font-weight: 600; border-radius: 999px; padding: 4px 10px; }
+body:not(.look-plain) .status-badge::before { background: currentColor; }
+body:not(.look-plain) .status-badge.st-click:hover { background: color-mix(in srgb, var(--sc, var(--muted2)) 20%, var(--surface)); border-color: transparent; }
+body:not(.look-plain) .status-badge.st-click::after { color: currentColor; }
+body:not(.look-plain) .o-chip { border-radius: 999px; }
+body:not(.look-plain) .chip { background: var(--line-soft); padding: 4px 9px; border-radius: 999px; color: var(--muted); font-weight: 500; }
+body:not(.look-plain) .c-chips { gap: 6px; }
+body:not(.look-plain) .chip.late { color: var(--danger); background: color-mix(in srgb, var(--danger) 11%, var(--surface)); }
+body:not(.look-plain) .chip.soon, body:not(.look-plain) .chip.warn { color: var(--warning); background: color-mix(in srgb, var(--warning) 13%, var(--surface)); }
+body:not(.look-plain) .chip.cross { color: var(--violet); background: color-mix(in srgb, var(--violet) 12%, var(--surface)); }
+body:not(.look-plain) .chip.as { padding: 3px 9px 3px 4px; background: hsl(var(--h, 220) 60% 95%); color: hsl(var(--h, 220) 50% 30%); }
+html.dark body:not(.look-plain) .chip.as { background: hsl(var(--h, 220) 30% 20%); color: hsl(var(--h, 220) 70% 84%); padding: 3px 9px 3px 4px; }
+body:not(.look-plain) .c-acts a { border: 0; background: var(--line-soft); border-radius: 10px; color: var(--muted); }
+body:not(.look-plain) .c-acts a:hover { background: var(--line); }
+body:not(.look-plain) .c-acts a.wa-btn { background: #22c55e; color: #fff; border: 0; box-shadow: 0 5px 12px -6px rgba(34,197,94,.7); }
+body:not(.look-plain) .c-acts a.wa-btn:hover { background: #16a34a; }
+body:not(.look-plain) .ps.on i { background: linear-gradient(90deg, color-mix(in srgb, var(--p2) 70%, #fff), var(--p2)); }
+body:not(.look-plain) .am .val { font-weight: 700; }
+body:not(.look-plain) .urg, body:not(.look-plain) .cl-st, body:not(.look-plain) .lg-res, body:not(.look-plain) .tl-pill, body:not(.look-plain) .debt-tag, body:not(.look-plain) .cal-rel { border-radius: 999px; }
+body:not(.look-plain) .urg.crit { background: var(--danger); color: #fff; }
+
+/* плитки-підсумки: колір, іконка, великі цифри */
+body:not(.look-plain) .sum-tile { position: relative; overflow: hidden; background: linear-gradient(135deg, color-mix(in srgb, var(--dot, var(--p2)) 8%, var(--surface)) 0%, var(--surface) 62%); }
+body:not(.look-plain) .sum-tile .sn, body:not(.look-plain) .td-tile .tn { font-weight: 700; font-size: 24px; letter-spacing: -.03em; }
+.sum-ic { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 16px; color: var(--dot, var(--p2)); background: color-mix(in srgb, var(--dot, var(--p2)) 15%, var(--surface)); }
+@media (max-width: 640px) { .sum-ic { width: 32px; height: 32px; font-size: 13px; right: 10px; top: 14px; transform: none; border-radius: 10px; } }
+body:not(.look-plain) .td-tile { background: linear-gradient(135deg, color-mix(in srgb, var(--p2) 6%, var(--surface)) 0%, var(--surface) 62%); }
+body:not(.look-plain) :is(.sum-tile, .td-tile, .cnt, .st-box):hover { transform: translateY(-1px); box-shadow: var(--sh-card-h); }
+
+/* кнопки й активні стани */
+body:not(.look-plain) .btn-s, body:not(.look-plain) .btn-s:hover { background: linear-gradient(180deg, color-mix(in srgb, var(--p2) 90%, #fff), var(--p2)); box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 6px 14px -6px color-mix(in srgb, var(--p2) 75%, transparent); border-radius: var(--r); }
+body:not(.look-plain) .btn-s:active { box-shadow: inset 0 1px 0 rgba(255,255,255,.2); }
+body:not(.look-plain) .cal-add, body:not(.look-plain) .hdr-add { background: linear-gradient(180deg, color-mix(in srgb, var(--p2) 90%, #fff), var(--p2)); box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 5px 12px -6px color-mix(in srgb, var(--p2) 75%, transparent); }
+body:not(.look-plain) .fab-add { background: linear-gradient(180deg, color-mix(in srgb, var(--p2) 90%, #fff), var(--p2)); box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 10px 22px -8px color-mix(in srgb, var(--p2) 80%, transparent); }
+body:not(.look-plain) .s-t.active { background: var(--p2-soft); color: var(--p2); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--p2) 26%, transparent); font-weight: 600; }
+body:not(.look-plain) .s-t.active .chip-n { background: var(--p2); color: #fff; }
+html.dark body:not(.look-plain) .s-t.active { color: var(--p2); } html.dark body:not(.look-plain) .s-t.active .chip-n { background: var(--p2); color: #0c0d10; }
+body:not(.look-plain) .cl-fc.on { background: var(--p2-soft); color: var(--p2); border-color: color-mix(in srgb, var(--p2) 30%, transparent); } body:not(.look-plain) .cl-fc.on b { background: var(--p2); color: #fff; }
+html.dark body:not(.look-plain) .cl-fc.on { color: var(--p2); } html.dark body:not(.look-plain) .cl-fc.on b { color: #0c0d10; }
+@media (min-width: 900px) {
+  body:not(.look-plain) .bottom-nav { background: color-mix(in srgb, var(--surface) 86%, transparent); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+  body:not(.look-plain) .n-i.active { background: var(--p2-soft); color: var(--p2); box-shadow: inset 3px 0 0 var(--p2); }
+}
+body:not(.look-plain) .o-tabs button.on { color: var(--p2); border-bottom-color: var(--p2); }
+body:not(.look-plain) .ot select.stsel { background-color: color-mix(in srgb, var(--sc) 12%, var(--surface)); border-color: transparent; border-radius: 999px; }
+body:not(.look-plain) .kb-body { background: color-mix(in srgb, var(--line) 45%, transparent); }
+
+/* «Сьогодні»: кольоровий банер-привітання */
+body:not(.look-plain) .td-hero { background: linear-gradient(120deg, #101b3f 0%, color-mix(in srgb, var(--p2) 72%, #101b3f) 100%); color: #fff; padding: 24px 28px; border-radius: var(--r-xl); border: 0; box-shadow: 0 18px 36px -20px color-mix(in srgb, var(--p2) 70%, transparent); margin-bottom: var(--s5); }
+body:not(.look-plain) .td-hero::after { display: block; }
+body:not(.look-plain) .th-hi { font-size: 26px; font-weight: 700; }
+body:not(.look-plain) .th-date { color: rgba(255,255,255,.72); } body:not(.look-plain) .th-sub { color: rgba(255,255,255,.9); } body:not(.look-plain) .th-sub b { color: #fff; }
+body:not(.look-plain) .th-btns button { background: rgba(255,255,255,.14); color: #fff; border: 1px solid rgba(255,255,255,.3); box-shadow: none; }
+body:not(.look-plain) .th-btns button:hover { background: rgba(255,255,255,.24); }
+body:not(.look-plain) .th-btns button.pri, html.dark body:not(.look-plain) .th-btns button.pri { background: #fff; color: #101b3f; border-color: #fff; }
+@media (max-width: 640px) { body:not(.look-plain) .td-hero { padding: 18px; } body:not(.look-plain) .th-hi { font-size: 22px; } }
+body:not(.look-plain) .dl-c { background: var(--line-soft); border-color: transparent; }
+body:not(.look-plain) .tm-big { font-size: 26px; font-weight: 800; }
+
+/* вікна */
+@media (min-width: 900px) { body:not(.look-plain) .mbox { border-radius: var(--r-xl); } }
+@media (min-width: 1100px) { body:not(.look-plain) #mO .mbox, body:not(.look-plain) #mCc .mbox { border-radius: 0; box-shadow: -24px 0 60px -28px rgba(30,45,110,.4); } }
+body:not(.look-plain) .modal-w { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+body:not(.look-plain) .o-money { background: linear-gradient(160deg, color-mix(in srgb, var(--p2) 7%, var(--surface)), var(--surface) 70%); }
+/* --- пропозиція встановити програму --- */
+#instBar { position: fixed; left: 50%; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 220%); z-index: 6900; display: flex; align-items: center; gap: 12px; background: var(--txt); color: var(--bg); padding: 10px 12px 10px 16px; border-radius: 14px; font-size: 13.5px; font-weight: 600; box-shadow: var(--sh-3); transition: transform .35s cubic-bezier(.16,1,.3,1); max-width: calc(100vw - 24px); }
+#instBar.on { transform: translate(-50%, 0); }
+@media (min-width: 900px) { #instBar { bottom: 28px; } }
+#instBar button { border: 0; border-radius: 9px; height: 34px; padding: 0 14px; font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap; }
+#instBar .ok { background: var(--p2); color: #fff; } html.dark #instBar .ok { color: #0c0d10; }
+#instBar .no { background: none; color: inherit; opacity: .7; padding: 0 6px; }
 </style>
 </head>
 <body>
@@ -1978,6 +2086,12 @@ body .cal-rel { border-radius: 6px; }
         <button type="button" data-v="solid" onclick="setHdr('solid')">Колір</button>
       </div>
     </div>
+    <div class="fg"><label>Стиль</label>
+      <div class="seg" id="lookSeg" style="margin-bottom:0">
+        <button type="button" data-v="rich" onclick="setLook('rich')">Виразний</button>
+        <button type="button" data-v="plain" onclick="setLook('plain')">Простий</button>
+      </div>
+    </div>
     <div class="fg"><label>Тло сторінки</label>
       <div class="seg" id="bgSeg" style="margin-bottom:0">
         <button type="button" data-v="0" onclick="setBg('0')">Чисте</button>
@@ -2050,6 +2164,10 @@ body .cal-rel { border-radius: 6px; }
       <button type="button" class="btn-alt" style="display:block;margin:0" onclick="openDups()"><i class="fa fa-user-group"></i> Дублікати клієнтів</button>
       <button type="button" class="btn-alt" style="display:block;margin:0" onclick="exportBackup()"><i class="fa fa-download"></i> Резервна копія всіх даних (JSON)</button>
     </div>
+
+    <div class="sec">Програма</div>
+    <div class="fg"><button type="button" class="btn-alt" id="instBtn" style="display:block;margin:0 0 8px" onclick="doInstall()"><i class="fa fa-download"></i> Встановити Axis як програму</button>
+      <small id="instNote" style="color:var(--muted);display:block;line-height:1.5"></small></div>
 
     <div class="sec">Акаунт</div>
     <div class="fg"><small id="accInfo" style="color:var(--muted)"></small></div>
@@ -2137,6 +2255,7 @@ body .cal-rel { border-radius: 6px; }
 </div>
 
 <div id="toast"></div>
+<div id="instBar"><span><i class="fa fa-download"></i> Встановити Axis як програму?</span><button type="button" class="ok" onclick="doInstall()">Встановити</button><button type="button" class="no" onclick="snoozeInstall()">Не зараз</button></div>
 <div id="updBar"><span><i class="fa fa-arrows-rotate"></i> Вийшла нова версія програми</span><button type="button" class="ok" onclick="doUpdate()">Оновити</button><button type="button" class="no" onclick="snoozeUpdate()">Пізніше</button></div>
 
 <!-- МОДАЛКА: ДАТИ ЗАМОВЛЕННЯ -->
@@ -2865,7 +2984,7 @@ async function sync() {
   if (curT==='stats') renderStats();
   if (curT==='calendar') renderCal();
   if (curT==='partners') renderPartners();
-  if (!_synced) { playEnter(document.getElementById('p-' + curT)); maybeTour(); maybeWhat(); }
+  if (!_synced) { playEnter(document.getElementById('p-' + curT)); maybeTour(); maybeWhat(); maybeInstallBar(); }
   _synced = true; topbar(false);
   document.getElementById('loader').style.display = 'none';
 }
@@ -2880,13 +2999,13 @@ function renderSummary() {
   const calls   = orders.filter(isRem).length;
   const debt    = orders.filter(isDebtor).reduce((s,o) => s + (n(o.total_ttc) - n(o.paid_amount)), 0);
   const tiles = [
-    { s:'Нова',        n: waiting,                 l:'Чекають прорахунку', dot:'var(--new)',  alert: waiting > 0 },
-    { s:'В роботі',    n: inWork,                  l:'В роботі',           dot:'var(--work)' },
-    { s:'Нагадування', n: calls,                   l:'Дзвінки',            dot:'var(--canc)', alert: calls > 0 },
-    { s:'Боржники',    n: fN(Math.round(debt)) + ' €', l:'Борги клієнтів', dot:'var(--danger)', alert: debt > 1 }
+    { s:'Нова',        n: waiting,                 l:'Чекають прорахунку', dot:'var(--p2)',  alert: waiting > 0, ic: 'fa-inbox' },
+    { s:'В роботі',    n: inWork,                  l:'В роботі',           dot:'var(--g-ok)', ic: 'fa-gears' },
+    { s:'Нагадування', n: calls,                   l:'Дзвінки',            dot:'var(--warning)', alert: calls > 0, ic: 'fa-phone' },
+    { s:'Боржники',    n: fN(Math.round(debt)) + ' €', l:'Борги клієнтів', dot:'var(--danger)', alert: debt > 1, ic: 'fa-money-bill-wave' }
   ];
   box.innerHTML = tiles.map(t =>
-    `<div class="sum-tile ${t.alert?'alert':''}" style="--dot:${t.dot}" onclick="flt('${t.s}', document.querySelector('[data-s=\\'${t.s}\\']'))"><div class="sn" data-k="${t.s}" data-v="${typeof t.n === 'number' ? t.n : (parseInt(String(t.n).replace(/\D/g, ''), 10) || 0)}"${typeof t.n === 'number' ? '' : ' data-eur="1"'}>${t.n}</div><div class="sl">${t.l}</div></div>`
+    `<div class="sum-tile ${t.alert?'alert':''}" style="--dot:${t.dot}" onclick="flt('${t.s}', document.querySelector('[data-s=\\'${t.s}\\']'))">${t.ic ? `<div class="sum-ic"><i class="fa ${t.ic}"></i></div>` : ''}<div class="sn" data-k="${t.s}" data-v="${typeof t.n === 'number' ? t.n : (parseInt(String(t.n).replace(/\D/g, ''), 10) || 0)}"${typeof t.n === 'number' ? '' : ' data-eur="1"'}>${t.n}</div><div class="sl">${t.l}</div></div>`
   ).join('');
   box.querySelectorAll('.sn').forEach(el => tween(el, 'sn_' + el.dataset.k, +el.dataset.v, v => el.dataset.eur ? fN(v) + ' €' : String(v)));
 }
@@ -4441,8 +4560,10 @@ function applyLook() {
   if (a) document.body.style.setProperty('--ua', a); else document.body.style.removeProperty('--ua');
   const hd = LS.get('crm_hdr', 'glass'); ['grad', 'dark', 'solid'].forEach(k => document.body.classList.toggle('hd-' + k, hd === k));
   document.body.classList.toggle('bg-tint', LS.get('crm_bg', '0') === '1');
+  document.body.classList.toggle('look-plain', LS.get('crm_look', 'rich') === 'plain');
 }
 function setHdr(v) { LS.set('crm_hdr', v); applyLook(); renderSettings(); }
+function setLook(v) { LS.set('crm_look', v); applyLook(); renderSettings(); }
 function setBg(v) { LS.set('crm_bg', v); applyLook(); renderSettings(); }
 function setDense(v) { LS.set('crm_dense', v); applyLook(); renderSettings(); render(); }
 function setAccent(c) { LS.set('crm_accent', c); applyLook(); renderSettings(); }
@@ -4450,6 +4571,7 @@ function renderLookSettings() {
   document.querySelectorAll('#densSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === LS.get('crm_dense', '0')));
   document.querySelectorAll('#hdrSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === LS.get('crm_hdr', 'glass')));
   document.querySelectorAll('#bgSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === LS.get('crm_bg', '0')));
+  document.querySelectorAll('#lookSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === LS.get('crm_look', 'rich')));
   const cur = LS.get('crm_accent', ''), box = document.getElementById('accSw'); if (!box) return;
   box.innerHTML = ACCENTS.map(c => `<button type="button" class="${cur === c ? 'on' : ''}" data-c="${c}" onclick="setAccent(this.dataset.c)" title="${c ? c : 'Колір компанії'}" style="${c ? 'background:' + c : ''}">${c ? '' : '<i class="fa fa-wand-magic-sparkles"></i>'}</button>`).join('');
 }
@@ -4507,13 +4629,53 @@ function tourSkip() { LS.set('crm_tour', '1'); closeM('mTour'); }
 let _tourAsked = false;
 function maybeTour() { if (_tourAsked || LS.get('crm_tour', '') === '1') return; _tourAsked = true; setTimeout(openTour, 1500); }
 
+/* ================= ВСТАНОВЛЕННЯ ЯК ПРОГРАМИ (іконка на робочому столі / екрані телефона) ================= */
+let _instEvt = null;
+const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); _instEvt = e; renderInstall(); maybeInstallBar(); });
+window.addEventListener('appinstalled', () => { _instEvt = null; LS.set('crm_inst_done', '1'); hideInstBar(); renderInstall(); toast('Axis встановлено як програму'); });
+function instHelpText() {
+  if (isStandalone()) return 'Програму вже встановлено: ви працюєте в окремому вікні.';
+  if (_instEvt) return 'Axis відкриватиметься окремим вікном, з іконкою на робочому столі чи екрані телефона.';
+  if (isIOS()) return 'iPhone / iPad: відкрийте сайт у Safari, натисніть «Поділитись» (квадрат зі стрілкою) і виберіть «На екран Додому».';
+  return 'У Chrome чи Edge: значок встановлення в рядку адреси (монітор зі стрілкою) або меню ⋮ → «Встановити Axis». Якщо програму вже встановлено, кнопка не спрацює. У Firefox на компʼютері встановлення недоступне.';
+}
+async function doInstall() {
+  if (!_instEvt) { alert(instHelpText()); return; }
+  _instEvt.prompt(); try { await _instEvt.userChoice; } catch (e) {}
+  _instEvt = null; hideInstBar(); renderInstall();
+}
+function renderInstall() {
+  const b = document.getElementById('instBtn'), n = document.getElementById('instNote'); if (!b || !n) return;
+  b.style.display = isStandalone() ? 'none' : 'block'; n.textContent = instHelpText();
+}
+function hideInstBar() { const b = document.getElementById('instBar'); if (b) b.classList.remove('on'); }
+function snoozeInstall() { LS.set('crm_inst_snooze', String(Date.now() + 14 * 864e5)); hideInstBar(); }
+// Пропонуємо один раз після входу; «Не зараз» відкладає на 14 днів
+function maybeInstallBar() {
+  if (isStandalone() || LS.get('crm_inst_done', '') === '1' || Date.now() < +LS.get('crm_inst_snooze', '0')) return;
+  if (!_instEvt && !isIOS()) return;
+  if (document.getElementById('mainUI').style.display !== 'block') return;
+  setTimeout(() => {
+    const u = document.getElementById('updBar'), b = document.getElementById('instBar');
+    if (b && !isStandalone() && !(u && u.classList.contains('on')) && !document.querySelector('.modal-w[style*="flex"]')) b.classList.add('on');
+  }, 5000);
+}
+
 /* ================= ЩО НОВОГО ================= */
 // При кожному оновленні піднімайте APP_VERSION і додавайте новий запис угору списку CHANGELOG: користувачі побачать його один раз.
-const APP_VERSION = '2026.11.15';
+const APP_VERSION = '2026.11.17';
 const CHANGELOG = [
-  { v: '2026.11.15', date: '15.11.2026',
+  { v: '2026.11.17', date: '17.11.2026',
     news: [
-      'Новий сучасний вигляд: чисті картки з тонкими межами, спокійні кольори, без зайвих тіней. Розташування кнопок не змінилось.'
+      'Axis можна встановити як програму: іконка на робочому столі чи екрані телефона (Налаштування → Програма).'
+    ],
+    fixes: [] },
+  { v: '2026.11.16', date: '16.11.2026',
+    news: [
+      'Новий вигляд: чіткі картки, кольорові статуси й аватари, плитки з іконками. Розташування кнопок не змінилось.',
+      'У Налаштуваннях → Вигляд можна вибрати стиль: «Виразний» або «Простий».'
     ],
     fixes: [
       'Імʼя клієнта на картці більше не обрізається, коли поруч є мітки «Терміново» чи VIP.'
@@ -5702,7 +5864,7 @@ function resetScale() { LS.del('crm_zoom'); applyScale(); renderSettings(); }
 function setMinMk(v) { LS.set('crm_min_markup', String(Math.max(0, parseFloat(v) || 0))); render(); }
 function openSettings() { renderSettings(); showModal('mS'); }
 function renderSettings() {
-  renderLookSettings(); renderTeamSettings(); renderNotifSettings(); renderPoolSettings();
+  renderLookSettings(); renderInstall(); renderTeamSettings(); renderNotifSettings(); renderPoolSettings();
   document.querySelectorAll('#autoSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === (AUTO_ON() ? '1' : '0')));
   document.querySelectorAll('#autoEvSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === (AUTO_EV_ON() ? '1' : '0')));
   document.getElementById('setAutoDays').value = AUTO_DAYS();
