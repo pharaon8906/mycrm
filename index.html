@@ -1352,6 +1352,20 @@ input[readonly]:not(.ro-yel):not(.ro-grn):not(.ro-blu) { background: var(--line-
   #mDt .mbox, #mE .mbox, #mC .mbox, #mWhat .mbox, #mTour .mbox, #mW .mbox { height: auto; max-height: 88vh; border-radius: 24px 24px 0 0; padding-top: 22px; padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); position: relative; }
   #mDt .mbox::before, #mE .mbox::before, #mC .mbox::before, #mWhat .mbox::before, #mTour .mbox::before, #mW .mbox::before { content: ""; position: absolute; left: 50%; top: 8px; width: 40px; height: 4px; margin-left: -20px; border-radius: 4px; background: var(--line-in); }
 }
+/* --- журнал спілкування в картці --- */
+.log-add { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.log-add input { grid-column: 1 / 2; } .log-add button { height: 46px; border: 0; border-radius: var(--r-sm); background: var(--txt); color: var(--bg); font: inherit; font-weight: 600; font-size: 13px; cursor: pointer; }
+.log-add select { width: 100%; }
+.lg-res { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--line-soft); color: var(--muted); }
+.lg-res.ok { color: var(--success); background: color-mix(in srgb, var(--success) 14%, var(--surface)); }
+.lg-res.info { color: var(--p2); background: color-mix(in srgb, var(--p2) 12%, var(--surface)); }
+.lg-res.warn { color: var(--warning); background: color-mix(in srgb, var(--warning) 15%, var(--surface)); }
+.lg-res.bad { color: var(--danger); background: color-mix(in srgb, var(--danger) 13%, var(--surface)); }
+@media (max-width: 640px) { .cc-logadd { grid-template-columns: 1fr 1fr !important; } .cc-logadd input { grid-column: 1 / 2; } }
+/* --- статус «Призупинено» --- */
+.st-paused { --sc: var(--g-off); }
+.card.st-paused { opacity: .8; }
+.card.st-paused .am .val { color: var(--muted); }
 </style>
 </head>
 <body>
@@ -1423,6 +1437,7 @@ input[readonly]:not(.ro-yel):not(.ro-grn):not(.ro-blu) { background: var(--line-
   <div class="s-t" data-s="В роботі" onclick="flt('В роботі',this)"><i class="fa fa-industry"></i> В роботі</div>
   <div class="s-t" data-s="На складі" onclick="flt('На складі',this)"><i class="fa fa-warehouse"></i> На складі</div>
   <div class="s-t" data-s="Виконано" onclick="flt('Виконано',this)"><i class="fa fa-box-archive"></i> Виконано</div>
+  <div class="s-t" data-s="Призупинено" onclick="flt('Призупинено',this)"><i class="fa fa-circle-pause"></i> Призупинено</div>
   <div class="s-t" data-s="Скасовано" onclick="flt('Скасовано',this)"><i class="fa fa-ban"></i> Скасовано</div>
 </div>
 
@@ -1549,7 +1564,7 @@ input[readonly]:not(.ro-yel):not(.ro-grn):not(.ro-blu) { background: var(--line-
   <div class="bulk-row">
     <select id="bulkSt">
       <option>Нова</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option>
-      <option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option>
+      <option>В роботі</option><option>На складі</option><option>Виконано</option><option>Призупинено</option><option>Скасовано</option>
     </select>
     <button class="bulk-ok" onclick="applyBulk()">Змінити статус</button>
   </div>
@@ -1571,7 +1586,7 @@ input[readonly]:not(.ro-yel):not(.ro-grn):not(.ro-blu) { background: var(--line-
       <button type="button" data-t="money" onclick="oTab('money')">Гроші</button>
       <button type="button" data-t="pay" onclick="oTab('pay')">Платежі</button>
       <button type="button" data-t="files" onclick="oTab('files')">Файли</button>
-      <button type="button" data-t="log" onclick="oTab('log')">Журнал</button>
+      <button type="button" data-t="log" onclick="oTab('log')">Історія</button>
     </div>
 
     <div class="o-body">
@@ -1589,10 +1604,20 @@ input[readonly]:not(.ro-yel):not(.ro-grn):not(.ro-blu) { background: var(--line-
       <button type="button" class="btn-alt" id="clBoxSave" style="margin:0" onclick="clBoxSave()"><i class="fa fa-floppy-disk"></i> Зберегти дані клієнта</button>
     </div>
     <div class="grid"><div class="fg"><label>Номер замовлення</label><input id="fPr" placeholder="напр. WEB/26/0947426"></div><div class="fg"><label>Фабрика 1</label><select id="fFa" onchange="renderFacPay()"></select></div></div>
-    <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan(); autoOnStatus(); oChip()"><option>Нова</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
+    <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan(); autoOnStatus(); oChip()"><option>Нова</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Призупинено</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
     <div id="autoHint" style="font-size:12px;color:var(--p2);margin:-6px 0 10px"></div>
     <div class="fg"><label>Відповідальний</label><select id="fAs"></select><small class="fc-hint" id="fAsHint"></small></div>
     <div class="fg"><label>Терміновість</label><select id="fUrg"><option value="">Звичайна</option><option>Терміново</option><option>Дуже терміново</option></select></div>
+    <div id="logWrap" style="display:none">
+      <div class="sec" style="margin-top:6px">Журнал спілкування <span class="fld-hint">· дзвінки, повідомлення та їх результат</span></div>
+      <div class="log-add">
+        <select id="logKind"><option value="call">📞 Дзвінок</option><option value="noans">📵 Не відповів</option><option value="msg">💬 Повідомлення</option><option value="note">📝 Нотатка</option></select>
+        <select id="logRes"><option value="">Результат…</option><option>Домовились</option><option>Надіслано пропозицію</option><option>Чекає рішення</option><option>Передзвонити пізніше</option><option>Не відповів</option><option>Відмовився</option></select>
+        <input id="logText" placeholder="Коментар (необовʼязково)" onkeydown="if(event.key==='Enter'){event.preventDefault();addLog()}">
+        <button type="button" onclick="addLog()" title="Додати запис"><i class="fa fa-plus"></i> Додати</button>
+      </div>
+      <div id="logList" style="margin-top:8px"></div>
+    </div>
     <div id="canB" class="fg" style="display:none"><label style="color:var(--danger)">Причина скасування</label><textarea id="fCan" rows="2"></textarea></div>
 
 
@@ -1657,16 +1682,6 @@ input[readonly]:not(.ro-yel):not(.ro-grn):not(.ro-blu) { background: var(--line-
     </div>
         </div>
         <div class="otab" data-t="log">
-    <div id="logWrap" style="display:none">
-      <div class="sec">Журнал спілкування</div>
-      <div class="pay-add" style="grid-template-columns:auto 1fr auto">
-        <select id="logKind" style="width:auto;padding:10px 8px"><option value="call">📞 Дзвінок</option><option value="noans">📵 Не відповів</option><option value="msg">💬 Повідомлення</option><option value="note">📝 Нотатка</option></select>
-        <input id="logText" placeholder="Що відбулося…" onkeydown="if(event.key==='Enter'){event.preventDefault();addLog()}">
-        <button type="button" onclick="addLog()" title="Додати запис"><i class="fa fa-plus"></i></button>
-      </div>
-      <div id="logList" style="margin-top:8px"></div>
-    </div>
-
     <details class="hist" id="histBox" style="display:none" ontoggle="if(this.open) loadHistory(editId)">
       <summary>Історія змін</summary>
       <div id="histList"></div>
@@ -2026,7 +2041,7 @@ const orderCost = o => n(o.cost_price) + n(o.cost_price2);
 const DEBT_STATUSES = ['Підтверджено','В роботі','На складі'];
 const isDebtor = o => DEBT_STATUSES.includes(o.status) && (n(o.total_ttc) - n(o.paid_amount)) > 1;
 // Нагадування «передзвонити» настало (сьогодні або раніше), замовлення ще не закрите
-const isRem = o => !!o.reminder_date && o.reminder_date <= new Date().toISOString().split('T')[0] && o.status !== 'Виконано' && o.status !== 'Скасовано';
+const isRem = o => !!o.reminder_date && o.reminder_date <= new Date().toISOString().split('T')[0] && o.status !== 'Виконано' && o.status !== 'Скасовано' && o.status !== 'Призупинено';
 
 let co='heimek', orders=[], clients=[], editId=null, curT='orders', curS='Усі';
 let curFiles=[], curPay=[], curFacPay=[], statPeriod='all';
@@ -2117,7 +2132,7 @@ const progHtml = o => `<div class="c-prog">${STEPS.map(([k, l]) => `<div class="
 function deadlineChip(o) {
   if (!o.deadline) return '';
   const t = Date.parse(o.deadline + 'T00:00:00'); if (isNaN(t)) return '';
-  const open = o.status !== 'Виконано' && o.status !== 'Скасовано';
+  const open = o.status !== 'Виконано' && o.status !== 'Скасовано' && o.status !== 'Призупинено';
   const left = Math.round((t - new Date().setHours(0, 0, 0, 0)) / 864e5);
   const cls = open && left < 0 ? 'late' : open && left <= 3 ? 'soon' : '';
   const hint = open && left < 0 ? `Прострочено на ${-left} дн.` : open && left === 0 ? 'Дедлайн сьогодні' : 'Дедлайн';
@@ -2198,7 +2213,7 @@ const NONE = '__none';                          // значення фільтр
 let TEAM = DEFAULT_TEAM.slice(), TEAM_DB = false, qnAsInit = false;
 let MEMBER = '';                                 // співробітник, прив'язаний до логіна (profiles.member_name)
 const ME = () => MEMBER || LS.get('crm_me', ''); // хто працює: за логіном, інакше — вибір на цьому пристрої (для фільтра «Мої»)
-const isOpen = o => o.status !== 'Виконано' && o.status !== 'Скасовано';
+const isOpen = o => o.status !== 'Виконано' && o.status !== 'Скасовано' && o.status !== 'Призупинено';   // призупинені проєкти не вважаються «в роботі»
 
 // Вибір значення в списку; якщо людини вже немає в команді — додаємо її як варіант, щоб значення не загубилось
 function setAs(id, val) {
@@ -2533,7 +2548,7 @@ function addFacPay() {
 function rmFacPay(i) { curFacPay.splice(i, 1); renderFacPay(); saveDraft(); }
 
 // ---- Картка замовлення: вкладки, чіп статусу, права панель грошей ----
-const STG = { 'Нова': 'wait', 'Кошторис': 'wait', 'Перевірка': 'wait', 'Підтверджено': 'work', 'В роботі': 'work', 'На складі': 'ok', 'Виконано': 'ok', 'Скасовано': 'off' };
+const STG = { 'Нова': 'wait', 'Кошторис': 'wait', 'Перевірка': 'wait', 'Підтверджено': 'work', 'В роботі': 'work', 'На складі': 'ok', 'Виконано': 'ok', 'Призупинено': 'off', 'Скасовано': 'off' };
 const stColor = st => `var(--g-${STG[st] || 'work'})`;
 function oTab(k) {
   document.querySelectorAll('#oTabs button').forEach(b => b.classList.toggle('on', b.dataset.t === k));
@@ -2714,7 +2729,7 @@ const render = () => {
   if (dTo)   { const t1 = Date.parse(dTo + 'T23:59:59');   f = f.filter(o => orderTs(o) <= t1); }
   updateFltBtn();
 
-  const stPriority = { 'Нова':0, 'В роботі':1, 'На складі':2, 'Перевірка':3, 'Підтверджено':4, 'Кошторис':5, 'Виконано':6, 'Скасовано':7 };
+  const stPriority = { 'Нова':0, 'В роботі':1, 'На складі':2, 'Перевірка':3, 'Підтверджено':4, 'Кошторис':5, 'Виконано':6, 'Призупинено':7, 'Скасовано':8 };
   if(sort === 'status') f.sort((a,b) => (stPriority[a.status]||99) - (stPriority[b.status]||99));
   else if(sort === 'deadline') f.sort((a,b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
   else if(sort === 'urgency') f.sort((a,b) => urgRank(b) - urgRank(a) || orderTs(b) - orderTs(a));
@@ -2735,11 +2750,11 @@ const render = () => {
 
   list.innerHTML = f.map(o=>{
     const ttc = n(o.total_ttc), paid = n(o.paid_amount), debt = ttc - paid;
-    const over = o.deadline && o.deadline < today && o.status !== 'Виконано' && o.status !== 'Скасовано';
+    const over = o.deadline && o.deadline < today && o.status !== 'Виконано' && o.status !== 'Скасовано' && o.status !== 'Призупинено';
     const rem = isRem(o);
     const nFiles = parseFiles(o.file_url).length;
     const wa = waNum(orderPhone(o));
-    let stCl = o.status==='Виконано'?'st-done':o.status==='Скасовано'?'st-cancelled':o.status==='В роботі'?'st-inwork':o.status==='На складі'?'st-storage':o.status==='Перевірка'?'st-verify':o.status==='Кошторис'?'st-est':o.status==='Нова'?'st-new':o.status==='Підтверджено'?'st-conf':'';
+    let stCl = o.status==='Виконано'?'st-done':o.status==='Скасовано'?'st-cancelled':o.status==='Призупинено'?'st-paused':o.status==='В роботі'?'st-inwork':o.status==='На складі'?'st-storage':o.status==='Перевірка'?'st-verify':o.status==='Кошторис'?'st-est':o.status==='Нова'?'st-new':o.status==='Підтверджено'?'st-conf':'';
     const sel = selMode && selIds.has(o.id);
     const mk = markupOf(o), thr = LOW_MK();
     const low = !isMgr() && thr > 0 && mk !== null && mk < thr && o.status !== 'Скасовано' && o.status !== 'Нова';
@@ -2784,7 +2799,7 @@ const render = () => {
 /* ================= КАНБАН ================= */
 const BOARD_ST = [
   { k: 'Нова', c: '--new' }, { k: 'Кошторис', c: '--est' }, { k: 'Підтверджено', c: '--conf' }, { k: 'Перевірка', c: '--verify' },
-  { k: 'В роботі', c: '--work' }, { k: 'На складі', c: '--store' }, { k: 'Виконано', c: '--done' }, { k: 'Скасовано', c: '--canc' }
+  { k: 'В роботі', c: '--work' }, { k: 'На складі', c: '--store' }, { k: 'Виконано', c: '--done' }, { k: 'Призупинено', c: '--g-off' }, { k: 'Скасовано', c: '--canc' }
 ];
 const KB_PAGE = 25;                 // скільки карток показуємо в колонці (кошторисів сотні — решту підвантажує кнопка)
 const kbLimit = {};
@@ -2878,7 +2893,7 @@ async function autoEvents(o, st) {
   try {
     // закриваємо події, які втратили сенс: кошторис — після виходу зі статусу; монтаж — коли замовлення завершене чи скасоване
     const close = events.filter(e => e.created_by === 'auto' && !e.done && e.order_id === o.id &&
-      ((e.title === AEV['Кошторис'].title && st !== 'Кошторис') || (e.title === AEV['На складі'].title && ['Виконано', 'Скасовано'].includes(st)) || st === 'Скасовано'));
+      ((e.title === AEV['Кошторис'].title && st !== 'Кошторис') || (e.title === AEV['На складі'].title && ['Виконано', 'Скасовано'].includes(st)) || st === 'Скасовано' || st === 'Призупинено'));
     for (const e of close) { const r = await _sb.from('events').update({ done: true }).eq('id', e.id); if (!r.error) e.done = true; }
     const r = AEV[st];
     if (!AUTO_EV_ON() || !r) return;
@@ -2978,6 +2993,14 @@ document.addEventListener('touchmove', e => { if (kbDrag && kbDrag.active) e.pre
 
 /* ================= ЖУРНАЛ СПІЛКУВАННЯ ================= */
 const LOG_ICON = { call: '📞', noans: '📵', msg: '💬', note: '📝' };
+const LOG_RES = ['Домовились', 'Надіслано пропозицію', 'Чекає рішення', 'Передзвонити пізніше', 'Не відповів', 'Відмовився'];
+const LOG_RES_OPTS = '<option value="">Результат…</option>' + LOG_RES.map(r => `<option>${r}</option>`).join('');
+const logCompose = (res, text) => (res ? `[${res}] ` : '') + text;
+const LOG_RES_CL = { 'Домовились': 'ok', 'Надіслано пропозицію': 'info', 'Чекає рішення': 'info', 'Передзвонити пізніше': 'warn', 'Не відповів': 'warn', 'Відмовився': 'bad' };
+function logRender(raw) {
+  const m = String(raw || '').match(/^\[([^\]]{2,40})\]\s*(.*)$/s);
+  return m ? `<span class="lg-res ${LOG_RES_CL[m[1]] || ''}">${esc(m[1])}</span>${m[2] ? ' ' + esc(m[2]) : ''}` : esc(raw || '');
+}
 const authorName = () => ME() || (USER_EMAIL || '').split('@')[0] || '—';
 async function loadLog(id) {
   const box = document.getElementById('logList'); if (!id) return;
@@ -2985,7 +3008,7 @@ async function loadLog(id) {
   const { data, error } = await _sb.from('order_log').select('*').eq('order_id', id).order('created_at', { ascending: false }).limit(100);
   if (error || !data) { box.innerHTML = '<small style="color:var(--muted2)">Журнал ще не ввімкнено: виконайте SQL для order_log</small>'; return; }
   box.innerHTML = data.length
-    ? data.map(r => `<div class="h-row" data-id="${esc(r.id)}"><div class="h-meta">${fmtDateTime(Date.parse(r.created_at))} · ${esc(r.author || '—')}<i class="fa fa-trash" style="float:right;cursor:pointer" title="Видалити запис" onclick="delLog(this.closest('[data-id]').dataset.id)"></i></div>${LOG_ICON[r.kind] || '📝'} ${esc(r.text)}</div>`).join('')
+    ? data.map(r => `<div class="h-row" data-id="${esc(r.id)}"><div class="h-meta">${fmtDateTime(Date.parse(r.created_at))} · ${esc(r.author || '—')}<i class="fa fa-trash" style="float:right;cursor:pointer" title="Видалити запис" onclick="delLog(this.closest('[data-id]').dataset.id)"></i></div>${LOG_ICON[r.kind] || '📝'} ${logRender(r.text)}</div>`).join('')
     : '<small style="color:var(--muted2)">Записів ще немає</small>';
 }
 // Додає запис у журнал і оновлює «останній контакт» (якщо такої колонки немає — це мовчки пропускається)
@@ -2998,8 +3021,8 @@ async function addLogEntry(o, kind, text, silent) {
 }
 async function addLog() {
   const o = orders.find(x => x.id == editId); if (!o) return;
-  const inp = document.getElementById('logText'), text = inp.value.trim(); if (!text) return;
-  if (await addLogEntry(o, document.getElementById('logKind').value, text)) { inp.value = ''; loadLog(o.id); render(); }
+  const inp = document.getElementById('logText'), res = document.getElementById('logRes').value, text = inp.value.trim(); if (!text && !res) return;
+  if (await addLogEntry(o, document.getElementById('logKind').value, logCompose(res, text))) { inp.value = ''; document.getElementById('logRes').value = ''; loadLog(o.id); render(); }
 }
 async function delLog(id) {
   if (!confirm('Видалити запис журналу?')) return;
@@ -3045,7 +3068,7 @@ const WA_TPL = [
   { k: 'nouvelles',  ua: 'Клієнт не відповідає',           fr: c => `${hello(c)}\n\nJe vous écris au sujet de votre demande${c.num}. Je n'arrive pas à vous joindre : pourriez-vous me rappeler ou me dire quand vous êtes disponible ? Merci d'avance.` }
 ];
 // Які шаблони пропонувати першими за статусом
-const WA_SUGGEST = { 'Нова': ['devis', 'recu', 'preciser', 'photos', 'nouvelles'], 'Кошторис': ['devis', 'relance', 'acompte'], 'Підтверджено': ['confirm', 'acompte', 'mesure'], 'Перевірка': ['mesure', 'confirm'], 'В роботі': ['production', 'retard', 'solde'], 'На складі': ['stock', 'pose', 'solde'], 'Виконано': ['fin', 'solde'], 'Скасовано': ['relance'] };
+const WA_SUGGEST = { 'Нова': ['devis', 'recu', 'preciser', 'photos', 'nouvelles'], 'Кошторис': ['devis', 'relance', 'acompte'], 'Підтверджено': ['confirm', 'acompte', 'mesure'], 'Перевірка': ['mesure', 'confirm'], 'В роботі': ['production', 'retard', 'solde'], 'На складі': ['stock', 'pose', 'solde'], 'Виконано': ['fin', 'solde'], 'Скасовано': ['relance'], 'Призупинено': ['relance', 'nouvelles'] };
 function waCtx(o) {
   const ttc = n(o.total_ttc), paid = n(o.paid_amount);
   return { nom: /\p{L}/u.test(o.client || '') ? String(o.client).trim() : '', num: o.product ? ` n° ${o.product}` : '', ttc: ttc > 0 ? frN(ttc) : '', acompte: frN(Math.round(ttc * 0.3)), solde: frN(Math.max(0, ttc - paid)), date: o.deadline ? frDate(o.deadline) : 'la date convenue', eta: o.eta_date ? frDate(o.eta_date) : '' };
@@ -3076,6 +3099,7 @@ function sendWa() {
   window.open(`https://wa.me/${wa}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
   const t = WA_TPL.find(x => x.k === waKey);
   addLogEntry(waOrder, 'msg', 'WhatsApp: ' + (t ? t.ua : 'повідомлення'), true);
+  toast('Записано в журнал. Результат розмови можна додати в картці замовлення.');
 }
 async function copyWa() {
   const ta = document.getElementById('waText');
@@ -3111,7 +3135,7 @@ async function loadEvents() {
 function calItems(ignoreKind) {
   let items = [];
   orders.forEach(o => {
-    if (o.status === 'Виконано' || o.status === 'Скасовано') return;
+    if (o.status === 'Виконано' || o.status === 'Скасовано' || o.status === 'Призупинено') return;
     if (o.deadline) items.push({ d: o.deadline, t: 'dl', o });
     if (o.reminder_date) items.push({ d: o.reminder_date, t: 'rem', o });
     if (o.eta_date && SUPPLY_WAIT.includes(o.status)) items.push({ d: o.eta_date, t: 'eta', o });
@@ -3854,9 +3878,10 @@ function openClient(id) {
     <div class="fg"><textarea id="ccNotes" rows="3" oninput="autoGrow(this)" placeholder="уподобання, умови, важливі домовленості…">${esc(c.notes || '')}</textarea></div>
     <button type="button" class="btn-alt" style="display:block" onclick="ccSaveNotes()"><i class="fa fa-floppy-disk"></i> Зберегти нотатки</button>
     <div class="sec">Історія спілкування</div>
-    <div class="pay-add cc-logadd" style="grid-template-columns:auto 1fr auto">
+    <div class="pay-add cc-logadd" style="grid-template-columns:auto auto 1fr auto">
       <select id="ccLogKind"><option value="call">📞 Дзвінок</option><option value="noans">📵 Не відповів</option><option value="msg">💬 Повідомлення</option><option value="note">📝 Нотатка</option></select>
-      <input id="ccLogText" placeholder="Що відбулося…" onkeydown="if(event.key==='Enter'){event.preventDefault();ccAddLog()}">
+      <select id="ccLogRes">${LOG_RES_OPTS}</select>
+      <input id="ccLogText" placeholder="Коментар…" onkeydown="if(event.key==='Enter'){event.preventDefault();ccAddLog()}">
       <button type="button" onclick="ccAddLog()" title="Додати запис"><i class="fa fa-plus"></i></button>
     </div>
     <div id="ccLog"><small style="color:var(--muted2)">Завантаження…</small></div>`;
@@ -3872,16 +3897,16 @@ async function ccLoadLog(ids) {
   if (!data) { box.innerHTML = '<small style="color:var(--muted2)">Журнал спілкування недоступний (треба SQL для order_log)</small>'; return; }
   if (!data.length) { box.innerHTML = '<small style="color:var(--muted2)">Записів ще немає. Їх додають у замовленні в розділі «Журнал спілкування», а також при відправці повідомлень з шаблонів.</small>'; return; }
   box.innerHTML = '<div class="cc-log">' + data.map(l => { const o = orders.find(x => x.id === l.order_id);
-    return `<div class="cc-le"><div class="lm">${fmtDateTime(Date.parse(l.created_at))} · ${esc(l.author || '—')}${o && o.product ? ' · №' + esc(o.product) : ''}</div>${esc(l.text || '')}</div>`; }).join('') + '</div>';
+    return `<div class="cc-le"><div class="lm">${fmtDateTime(Date.parse(l.created_at))} · ${esc(l.author || '—')}${o && o.product ? ' · №' + esc(o.product) : ''}</div>${logRender(l.text)}</div>`; }).join('') + '</div>';
 }
 // Запис спілкування з картки клієнта: іде в журнал його найновішого відкритого замовлення (інакше — найновішого)
 async function ccAddLog() {
   const c = clients.find(x => x.id == ccId); if (!c) return;
-  const inp = document.getElementById('ccLogText'), text = inp.value.trim(); if (!text) return;
+  const inp = document.getElementById('ccLogText'), res = document.getElementById('ccLogRes').value, text = inp.value.trim(); if (!text && !res) return;
   const ords = clientOrders(c).slice().sort((a, b) => orderTs(b) - orderTs(a));
   const o = ords.find(isOpen) || ords[0];
   if (!o) return alert('У клієнта ще немає замовлення, до якого можна додати запис.');
-  if (await addLogEntry(o, document.getElementById('ccLogKind').value, text)) { inp.value = ''; ccLoadLog(ords.map(x => x.id)); render(); refreshBell(); }
+  if (await addLogEntry(o, document.getElementById('ccLogKind').value, logCompose(res, text))) { inp.value = ''; document.getElementById('ccLogRes').value = ''; ccLoadLog(ords.map(x => x.id)); render(); refreshBell(); }
 }
 async function ccSaveNotes() {
   const c = clients.find(x => x.id == ccId); if (!c) return;
@@ -4271,8 +4296,19 @@ function maybeTour() { if (_tourAsked || LS.get('crm_tour', '') === '1') return;
 
 /* ================= ЩО НОВОГО ================= */
 // При кожному оновленні піднімайте APP_VERSION і додавайте новий запис угору списку CHANGELOG: користувачі побачать його один раз.
-const APP_VERSION = '2026.11.11';
+const APP_VERSION = '2026.11.13';
 const CHANGELOG = [
+  { v: '2026.11.13', date: '13.11.2026',
+    news: [
+      'Новий статус «Призупинено» для проєктів на паузі: без нагадувань і прострочок, з полем причини.'
+    ],
+    fixes: [] },
+  { v: '2026.11.12', date: '12.11.2026',
+    news: [
+      'Журнал спілкування знову в основній вкладці картки замовлення, з вибором результату: Домовились, Чекає рішення, Не відповів, Відмовився та інші.',
+      'Результат можна вказати і з картки клієнта.'
+    ],
+    fixes: [] },
   { v: '2026.11.11', date: '11.11.2026',
     news: [
       'Готові повідомлення стали теплішими й коротшими.',
@@ -4512,6 +4548,7 @@ function renderStats() {
     {k:'На складі', ic:'fa-warehouse', c:'var(--store)'},
     {k:'Підтверджено', ic:'fa-circle-check', c:'var(--conf)'},
     {k:'Кошторис', ic:'fa-file-lines', c:'var(--est)'},
+    {k:'Призупинено', ic:'fa-circle-pause', c:'var(--g-off)'},
     {k:'Скасовано', ic:'fa-ban', c:'var(--canc)'}
   ];
   const cHtml = S.map(s => {
@@ -4708,7 +4745,7 @@ function statSeries(mgr) {
   return ms;
 }
 function donutHtml(src) {
-  const G = [['wait', 'Чекають', ['Нова', 'Кошторис', 'Перевірка']], ['work', 'В роботі', ['Підтверджено', 'В роботі']], ['ok', 'Склад і готово', ['На складі', 'Виконано']], ['off', 'Скасовано', ['Скасовано']]];
+  const G = [['wait', 'Чекають', ['Нова', 'Кошторис', 'Перевірка']], ['work', 'В роботі', ['Підтверджено', 'В роботі']], ['ok', 'Склад і готово', ['На складі', 'Виконано']], ['off', 'Скасовано і пауза', ['Скасовано', 'Призупинено']]];
   const cnt = G.map(g => src.filter(o => g[2].includes(o.status)).length), total = cnt.reduce((a, b) => a + b, 0);
   if (!total) return '<div class="sa-empty">Немає замовлень за цей період</div>';
   const R = 42, C = 2 * Math.PI * R; let off = 0;
@@ -4969,7 +5006,12 @@ const closeM = (id, fromPop) => {
   // якщо закрили вручну — прибрати запис з історії
   if (!fromPop && history.state && history.state.m === id) { _progBack++; history.back(); }
 }
-const tglCan = () => { document.getElementById('canB').style.display = document.getElementById('fSt').value === 'Скасовано' ? 'block' : 'none'; autoGrow(document.getElementById('fCan')); };
+const tglCan = () => {
+  const v = document.getElementById('fSt').value, b = document.getElementById('canB');
+  b.style.display = (v === 'Скасовано' || v === 'Призупинено') ? 'block' : 'none';
+  const l = b.querySelector('label'); if (l) l.textContent = v === 'Призупинено' ? 'Причина паузи (необовʼязково)' : 'Причина скасування';
+  autoGrow(document.getElementById('fCan'));
+};
 const updateDl = () => { document.getElementById('dlC').innerHTML = clients.map(c=>`<option value="${esc(c.name)}">`).join(''); }
 const flt = (s,el) => { curS=s; document.querySelectorAll('.s-t').forEach(t=>t.classList.remove('active')); if(el) el.classList.add('active'); else { const t=document.querySelector(`[data-s='${s}']`); if(t) t.classList.add('active'); } render(); }
 const tab = (t, fromPop) => {
