@@ -3029,20 +3029,23 @@ const frDate = s => { const t = Date.parse(String(s).slice(0, 10) + 'T00:00:00')
 const hello = c => c.nom ? `Bonjour ${c.nom},` : 'Bonjour,';
 const WA_TPL = [
   { k: 'devis',      ua: 'Надіслати цінову пропозицію',    fr: c => `Bonjour\n\nL’équipe ${SOC()} vous remercie pour votre demande. Nous avons bien reçu votre demande et vous prions de trouver ci-joint notre proposition\n\nSi vous avez la moindre question, n’hésitez pas à nous contacter : nous serons ravis d’ajuster notre offre et d’en discuter avec vous.` },
-  { k: 'relance',   ua: 'Нагадати про кошторис',          fr: c => `${hello(c)}\n\nJe me permets de revenir vers vous au sujet de votre devis${c.num}. Avez-vous eu l'occasion de le consulter ? Je reste à votre disposition pour toute question ou pour l'ajuster si nécessaire.` },
-  { k: 'confirm',    ua: 'Підтвердження замовлення',       fr: c => `${hello(c)}\n\nNous vous confirmons la prise en compte de votre commande${c.num}. Nous reviendrons vers vous dès que les prochaines étapes seront planifiées.` },
-  { k: 'acompte',    ua: 'Запит передоплати (30%)',        fr: c => `${hello(c)}\n\nPour lancer la fabrication de votre commande${c.num}, nous vous remercions de bien vouloir régler l'acompte de ${c.acompte} €. Dès réception, nous passons la commande en production.` },
-  { k: 'mesure',     ua: 'Узгодити замір',                 fr: c => `${hello(c)}\n\nNous souhaiterions convenir d'un rendez-vous pour la prise de mesures concernant votre commande${c.num}. Quelles sont vos disponibilités cette semaine ?` },
-  { k: 'production', ua: 'Замовлення у виробництві',       fr: c => `${hello(c)}\n\nVotre commande${c.num} est actuellement en cours de fabrication. Nous vous tiendrons informé(e) de son avancement et vous préviendrons dès son arrivée.` },
-  { k: 'retard',     ua: 'Затримка поставки',              fr: c => `${hello(c)}\n\nNous vous informons que la livraison de votre commande${c.num} connaît un léger retard${c.eta ? `. La nouvelle date prévue est le ${c.eta}` : ''}. Nous vous prions de bien vouloir nous excuser pour ce désagrément et restons à votre disposition.` },
-  { k: 'stock',      ua: 'Товар на складі: узгодити монтаж', fr: c => `${hello(c)}\n\nBonne nouvelle : votre commande${c.num} est arrivée dans notre dépôt. Quand souhaiteriez-vous convenir de la livraison et de la pose ?` },
-  { k: 'pose',       ua: 'Підтвердження дати монтажу',     fr: c => `${hello(c)}\n\nNous vous confirmons l'intervention de pose prévue le ${c.date}. Merci de vous assurer que l'accès aux ouvertures est dégagé. N'hésitez pas à nous contacter pour toute question.` },
-  { k: 'solde',      ua: 'Нагадати про залишок до сплати', fr: c => `${hello(c)}\n\nIl reste un solde de ${c.solde} € à régler pour votre commande${c.num}. Pourriez-vous nous indiquer la date de règlement prévue ?` },
-  { k: 'fin',        ua: 'Замовлення виконано, подяка',    fr: c => `${hello(c)}\n\nVotre commande${c.num} est terminée. Nous vous remercions de votre confiance et restons à votre disposition pour toute question.` },
-  { k: 'nouvelles',  ua: 'Клієнт не відповідає',           fr: c => `${hello(c)}\n\nJe vous contacte au sujet de votre demande${c.num}. Pourriez-vous me rappeler ou m'indiquer quand vous êtes joignable ? Merci d'avance.` }
+  { k: 'recu',        ua: 'Отримали запит',                  fr: c => `${hello(c)}\n\nMerci pour votre demande${c.num}, nous l'avons bien reçue. Nous l'étudions et revenons vers vous très rapidement avec une proposition.` },
+  { k: 'preciser',   ua: 'Отримали запит, потрібно уточнити', fr: c => `${hello(c)}\n\nMerci pour votre demande${c.num}, nous l'avons bien reçue. Avant de vous faire une proposition, j'aurais besoin de quelques précisions :\n\n{|}` },
+  { k: 'photos',     ua: 'Попросити фото й розміри',        fr: c => `${hello(c)}\n\nPour préparer votre devis${c.num}, pourriez-vous nous envoyer quelques photos des ouvertures concernées, ainsi que les dimensions approximatives si vous les avez ? Cela nous aidera à vous proposer quelque chose de précis.` },
+  { k: 'relance',   ua: 'Нагадати про кошторис',          fr: c => `${hello(c)}\n\nJ'espère que vous allez bien. Je reviens vers vous au sujet de votre devis${c.num} : avez-vous eu le temps de le regarder ? Si vous avez des questions, ou si vous souhaitez que nous ajustions quelque chose, n'hésitez pas, je suis là pour vous aider.` },
+  { k: 'confirm',    ua: 'Підтвердження замовлення',       fr: c => `${hello(c)}\n\nMerci pour votre confiance, nous avons bien enregistré votre commande${c.num}. Nous revenons vers vous très vite pour vous indiquer les prochaines étapes.` },
+  { k: 'acompte',    ua: 'Запит передоплати (30%)',        fr: c => `${hello(c)}\n\nPour lancer la fabrication de votre commande${c.num}, nous aurions besoin de l'acompte de ${c.acompte} €. Dès que nous l'aurons reçu, nous passerons votre commande en production. N'hésitez pas à me dire si vous avez la moindre question.` },
+  { k: 'mesure',     ua: 'Узгодити замір',                 fr: c => `${hello(c)}\n\nPour votre commande${c.num}, nous aimerions fixer un rendez-vous afin de prendre les mesures chez vous. Quels jours vous conviendraient le mieux cette semaine ?` },
+  { k: 'production', ua: 'Замовлення у виробництві',       fr: c => `${hello(c)}\n\nUne petite nouvelle de votre commande${c.num} : elle est actuellement en fabrication. Nous vous tiendrons informé(e) de son avancement et vous préviendrons dès qu'elle sera prête.` },
+  { k: 'retard',     ua: 'Затримка поставки',              fr: c => `${hello(c)}\n\nJe préfère vous prévenir moi-même : la livraison de votre commande${c.num} a un peu de retard${c.eta ? `, la nouvelle date prévue est le ${c.eta}` : ''}. Nous sommes désolés pour la gêne occasionnée et restons à votre disposition pour toute question.` },
+  { k: 'stock',      ua: 'Товар на складі: узгодити монтаж', fr: c => `${hello(c)}\n\nBonne nouvelle : votre commande${c.num} est arrivée dans notre dépôt. Nous pouvons maintenant convenir ensemble de la livraison et de la pose. Quels jours vous arrangeraient ?` },
+  { k: 'pose',       ua: 'Підтвердження дати монтажу',     fr: c => `${hello(c)}\n\nNous vous confirmons la pose le ${c.date}. Pour que tout se passe au mieux, merci de dégager l'accès aux ouvertures. Si vous avez la moindre question d'ici là, n'hésitez pas à nous écrire.` },
+  { k: 'solde',      ua: 'Нагадати про залишок до сплати', fr: c => `${hello(c)}\n\nIl reste un solde de ${c.solde} € à régler pour votre commande${c.num}. Pourriez-vous nous indiquer quand le règlement pourra être effectué ? Merci beaucoup.` },
+  { k: 'fin',        ua: 'Замовлення виконано, подяка',    fr: c => `${hello(c)}\n\nVotre commande${c.num} est terminée. Merci sincèrement pour votre confiance ! Si vous avez la moindre question ou un besoin à l'avenir, nous restons à votre disposition.` },
+  { k: 'nouvelles',  ua: 'Клієнт не відповідає',           fr: c => `${hello(c)}\n\nJe vous écris au sujet de votre demande${c.num}. Je n'arrive pas à vous joindre : pourriez-vous me rappeler ou me dire quand vous êtes disponible ? Merci d'avance.` }
 ];
 // Які шаблони пропонувати першими за статусом
-const WA_SUGGEST = { 'Нова': ['devis', 'nouvelles', 'mesure'], 'Кошторис': ['devis', 'relance', 'acompte'], 'Підтверджено': ['confirm', 'acompte', 'mesure'], 'Перевірка': ['mesure', 'confirm'], 'В роботі': ['production', 'retard', 'solde'], 'На складі': ['stock', 'pose', 'solde'], 'Виконано': ['fin', 'solde'], 'Скасовано': ['relance'] };
+const WA_SUGGEST = { 'Нова': ['devis', 'recu', 'preciser', 'photos', 'nouvelles'], 'Кошторис': ['devis', 'relance', 'acompte'], 'Підтверджено': ['confirm', 'acompte', 'mesure'], 'Перевірка': ['mesure', 'confirm'], 'В роботі': ['production', 'retard', 'solde'], 'На складі': ['stock', 'pose', 'solde'], 'Виконано': ['fin', 'solde'], 'Скасовано': ['relance'] };
 function waCtx(o) {
   const ttc = n(o.total_ttc), paid = n(o.paid_amount);
   return { nom: /\p{L}/u.test(o.client || '') ? String(o.client).trim() : '', num: o.product ? ` n° ${o.product}` : '', ttc: ttc > 0 ? frN(ttc) : '', acompte: frN(Math.round(ttc * 0.3)), solde: frN(Math.max(0, ttc - paid)), date: o.deadline ? frDate(o.deadline) : 'la date convenue', eta: o.eta_date ? frDate(o.eta_date) : '' };
@@ -3062,8 +3065,10 @@ function pickWa(k) {
   waKey = k;
   document.querySelectorAll('#waTpls .tpl').forEach(b => b.classList.toggle('on', b.dataset.k === k));
   const ta = document.getElementById('waText');
-  ta.value = t.fr(waCtx(waOrder)) + `\n\nCordialement,\n${SOC()}`;
+  const raw = t.fr(waCtx(waOrder)), pos = raw.indexOf('{|}');
+  ta.value = raw.replace('{|}', '') + `\n\nCordialement,\n${SOC()}`;
   autoGrow(ta);
+  if (pos >= 0) { ta.focus(); ta.setSelectionRange(pos, pos); }   // шаблон з відкритим місцем: курсор там, де дописувати
 }
 function sendWa() {
   const wa = waNum(orderPhone(waOrder)); if (!wa) return alert('У клієнта немає номера телефону');
@@ -4266,8 +4271,14 @@ function maybeTour() { if (_tourAsked || LS.get('crm_tour', '') === '1') return;
 
 /* ================= ЩО НОВОГО ================= */
 // При кожному оновленні піднімайте APP_VERSION і додавайте новий запис угору списку CHANGELOG: користувачі побачать його один раз.
-const APP_VERSION = '2026.10.25';
+const APP_VERSION = '2026.11.11';
 const CHANGELOG = [
+  { v: '2026.11.11', date: '11.11.2026',
+    news: [
+      'Готові повідомлення стали теплішими й коротшими.',
+      'Нові: «Отримали запит», «Отримали запит, потрібно уточнити» (текст дописуєте самі), «Попросити фото й розміри».'
+    ],
+    fixes: [] },
   { v: '2026.10.25', date: '25.10.2026',
     news: [
       'Сповіщення «Клієнт мовчить»: заявка чи кошторис без руху кілька днів.',
