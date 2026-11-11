@@ -1366,6 +1366,68 @@ input[readonly]:not(.ro-yel):not(.ro-grn):not(.ro-blu) { background: var(--line-
 .st-paused { --sc: var(--g-off); }
 .card.st-paused { opacity: .8; }
 .card.st-paused .am .val { color: var(--muted); }
+/* ============================================================
+   ОНОВЛЕНА ПАЛІТРА Й ТІНІ (розміри й розташування кнопок не змінено)
+   ============================================================ */
+:root {
+  --bg: #f3f5fa; --line: #e6eaf2; --line-soft: #eff2f8; --line-in: #d3dae8;
+  --txt: #0f1729; --muted: #566179; --muted2: #66718a;
+  --p2: #3b55e6; --p2-soft: #ebeefd; --a: #8ea0ff; --conf: #3b55e6;
+  --success: #0b8059; --danger: #d02d49; --warning: #b45f06; --violet: #6a42d6; --cyan: #0b87a0;
+  --g-work: #3a67e8; --g-ok: #0b8059; --g-wait: #5f6b82; --g-off: #98a2b5;
+  --sh-1: 0 1px 2px rgba(15,23,41,.05);
+  --sh-2: 0 6px 18px -6px rgba(24,39,100,.16);
+  --sh-3: 0 28px 56px -18px rgba(18,28,76,.34);
+  --sh-card: 0 1px 2px rgba(15,23,41,.04), 0 10px 28px -14px rgba(32,48,120,.20);
+  --sh-card-h: 0 2px 4px rgba(15,23,41,.05), 0 22px 44px -16px rgba(32,48,120,.30);
+  --grad: linear-gradient(135deg, color-mix(in srgb, var(--p2) 86%, #fff) 0%, var(--p2) 55%, color-mix(in srgb, var(--p2) 84%, #000) 100%);
+  --glow: 0 8px 18px -8px color-mix(in srgb, var(--p2) 65%, transparent);
+}
+[data-co="luxwin"] { --p2: #078058; --p2-soft: #e6f6ef; --a: #4fc79f; --conf: #078058; }
+html.dark {
+  --sh-card: 0 1px 2px rgba(0,0,0,.5), 0 18px 38px -18px rgba(0,0,0,.8);
+  --sh-card-h: 0 2px 4px rgba(0,0,0,.5), 0 26px 48px -18px rgba(0,0,0,.92);
+  --glow: 0 8px 20px -8px color-mix(in srgb, var(--p2) 55%, transparent);
+}
+::selection { background: color-mix(in srgb, var(--p2) 85%, #000); }
+
+/* головні кнопки — з градієнтом і м'яким світінням */
+.btn-s, .btn-s:hover { background: var(--grad); color: #fff; box-shadow: var(--glow); }
+.btn-s:hover { filter: brightness(1.07); }
+.btn-s:active { box-shadow: none; }
+html.dark .btn-s, html.dark .btn-s:hover { color: #0b101c; }
+.cal-add { background: var(--grad); box-shadow: var(--glow); } .cal-add:hover { filter: brightness(1.07); }
+.hdr-add { background: var(--grad); box-shadow: var(--glow); }
+.bulk-ok { background: var(--grad); }
+/* активні фільтри й перемикачі — кольором акценту, а не чорним */
+.s-t.active, .seg button.on { background: var(--p2); color: #fff; box-shadow: var(--glow); }
+.s-t.active .chip-n { background: rgba(255,255,255,.24); color: #fff; }
+html.dark .s-t.active, html.dark .seg button.on { color: #0b101c; }
+html.dark .s-t.active .chip-n { background: rgba(11,16,28,.18); color: #0b101c; }
+.cl-fc.on { background: var(--p2); color: #fff; } .cl-fc.on b { background: rgba(255,255,255,.24); color: #fff; }
+html.dark .cl-fc.on, html.dark .cl-fc.on b { color: #0b101c; }
+.urg-seg button.on[data-u=""] { background: var(--p2); }
+/* меню зліва: смужка-індикатор активного пункту */
+@media (min-width: 900px) { .n-i.active { box-shadow: inset 3px 0 0 var(--p2); background: linear-gradient(90deg, color-mix(in srgb, var(--p2) 12%, transparent), var(--p2-soft)); } }
+/* картки: шар світла зверху, при наведенні — тонкий акцентний контур */
+.card, .sum-tile, .td-tile, .td-card, .st-box, .ot-wrap, .cal-mon, .cc-tile { box-shadow: var(--sh-card), inset 0 1px 0 rgba(255,255,255,.65); }
+html.dark .card, html.dark .sum-tile, html.dark .td-tile, html.dark .td-card, html.dark .st-box, html.dark .ot-wrap, html.dark .cal-mon { box-shadow: var(--sh-card), inset 0 1px 0 rgba(255,255,255,.04); }
+.card:not(.is-open):not(.sel):not(.over):hover { box-shadow: var(--sh-card-h), 0 0 0 1px color-mix(in srgb, var(--p2) 22%, transparent); }
+.sum-tile:hover, .td-tile:hover { box-shadow: var(--sh-card-h), 0 0 0 1px color-mix(in srgb, var(--p2) 18%, transparent); }
+.sum-tile, .td-tile { background: linear-gradient(180deg, color-mix(in srgb, var(--p2) 3.5%, var(--surface)), var(--surface) 70%); }
+/* вікна й меню: глибша, трохи підфарбована тінь */
+.mbox { box-shadow: var(--sh-3), 0 0 0 1px color-mix(in srgb, var(--line) 60%, transparent); }
+.qa-menu, .bell-panel, .st-menu { box-shadow: var(--sh-3), 0 0 0 1px color-mix(in srgb, var(--line) 70%, transparent); }
+header { box-shadow: 0 1px 0 var(--line), 0 6px 20px -14px rgba(32,48,120,.25); }
+/* аватари: ніжний градієнт */
+.avatar, .mav { background-image: linear-gradient(135deg, hsl(var(--h, 220) 88% 95%), hsl(var(--h, 220) 70% 88%)); }
+html.dark .avatar, html.dark .mav { background-image: linear-gradient(135deg, hsl(var(--h, 220) 40% 30%), hsl(var(--h, 220) 38% 22%)); }
+/* прокрутка */
+* { scrollbar-color: color-mix(in srgb, var(--muted2) 45%, transparent) transparent; }
+*::-webkit-scrollbar-thumb:hover { background: var(--p2); }
+/* смуги прогресу й кільця — живіші */
+.paybar i, .o-bar i, .ps i, .pbar i { background: linear-gradient(90deg, color-mix(in srgb, var(--g-ok) 80%, #fff), var(--g-ok)); }
+.ring .pg { stroke: var(--p2); }
 </style>
 </head>
 <body>
@@ -4296,8 +4358,13 @@ function maybeTour() { if (_tourAsked || LS.get('crm_tour', '') === '1') return;
 
 /* ================= ЩО НОВОГО ================= */
 // При кожному оновленні піднімайте APP_VERSION і додавайте новий запис угору списку CHANGELOG: користувачі побачать його один раз.
-const APP_VERSION = '2026.11.13';
+const APP_VERSION = '2026.11.14';
 const CHANGELOG = [
+  { v: '2026.11.14', date: '14.11.2026',
+    news: [
+      'Оновлені кольори, м’якші тіні та градієнтні кнопки. Розташування кнопок не змінилось.'
+    ],
+    fixes: [] },
   { v: '2026.11.13', date: '13.11.2026',
     news: [
       'Новий статус «Призупинено» для проєктів на паузі: без нагадувань і прострочок, з полем причини.'
