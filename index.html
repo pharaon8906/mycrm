@@ -1687,6 +1687,7 @@ body:not(.look-plain) .o-money { background: linear-gradient(160deg, color-mix(i
 #instBar button { border: 0; border-radius: 9px; height: 34px; padding: 0 14px; font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap; }
 #instBar .ok { background: var(--p2); color: #fff; } html.dark #instBar .ok { color: #0c0d10; }
 #instBar .no { background: none; color: inherit; opacity: .7; padding: 0 6px; }
+.dup-note .lnk { border: 0; background: none; padding: 0 4px; font: inherit; font-weight: 700; color: var(--p2); cursor: pointer; text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -1824,6 +1825,7 @@ body:not(.look-plain) .o-money { background: linear-gradient(160deg, color-mix(i
           <button type="button" data-co="luxwin" onclick="qnSetCo('luxwin')">Lux Win</button>
         </div>
       </div>
+      <div class="dup-note info" id="qnDraftNote" style="display:none"></div>
       <div class="fg"><label>Клієнт</label><input id="qnClient" list="dlC" placeholder="Ім'я, компанія або номер телефону" oninput="qnPhoneHint()"></div>
       <div class="grid">
         <div class="fg"><label>Телефон</label><input id="qnPhone" type="tel" oninput="qnPhoneHint()"></div>
@@ -4663,10 +4665,23 @@ function maybeInstallBar() {
   }, 5000);
 }
 
+// Браузер при перезавантаженні сторінки сам відновлює введене в поля — для пошуку й коментарів це заважає
+(function () {
+  document.querySelectorAll('input:not([type=checkbox]):not([type=radio]):not([type=file]):not(#email):not(#password), textarea').forEach(el => el.setAttribute('autocomplete', 'off'));
+  ['q', 'qc', 'logText', 'kIn', 'teamNew'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+})();
+
 /* ================= ЩО НОВОГО ================= */
 // При кожному оновленні піднімайте APP_VERSION і додавайте новий запис угору списку CHANGELOG: користувачі побачать його один раз.
-const APP_VERSION = '2026.11.17';
+const APP_VERSION = '2026.11.18';
 const CHANGELOG = [
+  { v: '2026.11.18', date: '18.11.2026',
+    news: [],
+    fixes: [
+      'Недописаний коментар більше не переходить в інше замовлення.',
+      'Пошук очищується, коли переходите на іншу сторінку.',
+      'Незавершена «Нова заявка» не підставляється сама — тільки якщо натиснути «Відновити».'
+    ] },
   { v: '2026.11.17', date: '17.11.2026',
     news: [
       'Axis можна встановити як програму: іконка на робочому столі чи екрані телефона (Налаштування → Програма).'
@@ -5331,6 +5346,8 @@ const openO = id => {
   document.getElementById('btnEv').style.display = id ? 'block' : 'none';
   document.getElementById('logWrap').style.display = id ? 'block' : 'none';
   document.getElementById('logList').innerHTML = ''; if (id) loadLog(id);
+  ['logText', 'logRes'].forEach(i => { const el = document.getElementById(i); if (el) el.value = ''; });   // недописаний коментар від іншого замовлення не переносимо
+  document.getElementById('logKind').value = 'call';
   setAs('fAs', id ? o.assignee : ME());     // нове замовлення за замовчуванням призначається на мене
   applyAsRules(id ? o : null);
   // Історія змін — лише для наявного замовлення; вантажиться, коли розгорнути
@@ -5398,6 +5415,13 @@ const updateDl = () => { document.getElementById('dlC').innerHTML = clients.map(
 const flt = (s,el) => { curS=s; document.querySelectorAll('.s-t').forEach(t=>t.classList.remove('active')); if(el) el.classList.add('active'); else { const t=document.querySelector(`[data-s='${s}']`); if(t) t.classList.add('active'); } render(); }
 const tab = (t, fromPop) => {
   if (selMode && t !== 'orders') toggleSel(false);
+  if (t !== curT) {   // перехід з іншої сторінки: старий пошук не залишаємо
+    const q = document.getElementById('q'), qc = document.getElementById('qc');
+    if (t === 'orders' && q && q.value) { q.value = ''; setTimeout(render, 0); }
+    if (t === 'clients' && qc && qc.value) qc.value = '';
+    if (t === 'calendar') calQ = '';
+    if (t === 'trash' && typeof trashQ !== 'undefined') trashQ = '';
+  }
   curT=t; document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
   document.getElementById('p-'+t).style.display='block';
   document.querySelectorAll('.n-i').forEach(i=>i.classList.remove('active'));
@@ -5836,10 +5860,18 @@ document.addEventListener('input', e => {
   if (QN_IDS.some(i => d[i])) LS.set('crm_draft_qn_' + co, JSON.stringify(d)); else LS.del('crm_draft_qn_' + co);
 });
 function restoreQnDraft() {
-  if (QN_IDS.some(i => document.getElementById(i).value)) return;
+  const note = document.getElementById('qnDraftNote'); if (!note) return;
   let d = null; try { d = JSON.parse(LS.get('crm_draft_qn_' + co, 'null')); } catch (e) {}
-  if (!d) return;
-  QN_IDS.forEach(i => document.getElementById(i).value = d[i] || '');
+  if (!d || !QN_IDS.some(i => d[i]) || QN_IDS.some(i => document.getElementById(i).value)) { note.style.display = 'none'; return; }
+  note.innerHTML = `Є незавершена заявка${d.qnClient ? ': <b>' + esc(d.qnClient) + '</b>' : ''}. <button type="button" class="lnk" onclick="qnDraftUse(true)">Відновити</button> <button type="button" class="lnk" onclick="qnDraftUse(false)">Видалити</button>`;
+  note.style.display = '';
+}
+function qnDraftUse(yes) {
+  let d = null; try { d = JSON.parse(LS.get('crm_draft_qn_' + co, 'null')); } catch (e) {}
+  if (yes && d) QN_IDS.forEach(i => document.getElementById(i).value = d[i] || '');
+  else LS.del('crm_draft_qn_' + co);
+  document.getElementById('qnDraftNote').style.display = 'none';
+  if (yes) { autoGrow(document.getElementById('qnNotes')); qnPhoneHint(); }
 }
 
 /* ================= НАЛАШТУВАННЯ: тема, масштаб, поріг націнки ================= */
