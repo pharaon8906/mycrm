@@ -2153,11 +2153,11 @@ body:not(.look-plain) .o-money { background: linear-gradient(160deg, color-mix(i
       <div class="seg" id="poolSeg" style="margin-bottom:0"></div>
       <small style="color:var(--muted)">Натисніть імʼя, щоб виключити людину з черги (відпустка, лікарняний) або повернути.</small>
     </div>
-    <div class="fg fin-only"><label>Перекидати замовлення, якщо різниця в навантаженні від (відкритих замовлень)</label><input id="setBalGap" type="number" min="2" step="1" onchange="setBalGap(this.value)"></div>
+    <div class="fg fin-only"><label>Перерозподіляти, якщо різниця в нових заявках від</label><input id="setBalGap" type="number" min="2" step="1" onchange="setBalGap(this.value)"></div>
     <div class="fg fin-only" style="gap:8px">
       <div id="loadBox"></div>
       <button type="button" class="btn-alt" style="display:block;margin:0" onclick="balanceLoad()"><i class="fa fa-scale-balanced"></i> Перерозподілити навантаження</button>
-      <small style="color:var(--muted)">Переносяться лише заявки й кошториси (статуси «Нова» та «Кошторис»); те, що вже в роботі, залишається у свого співробітника.</small>
+      <small style="color:var(--muted)">Переносяться лише нові заявки (статус «Нова»). Кошториси й те, що в роботі, лишаються у свого менеджера. Заявку постійного клієнта не забираємо в менеджера, який уже веде його замовлення. Нова заявка, що висить понад 3 дні без жодного запису в журналі, сама переходить іншому менеджеру.</small>
     </div>
 
     <div class="sec fin-only">Дані</div>
@@ -2616,6 +2616,22 @@ const AS_ON = () => LS.get('crm_autoas', '1') !== '0';
 const BAL_GAP = () => Math.max(2, parseInt(LS.get('crm_bal_gap', '3'), 10) || 3);
 const qnAsDefault = () => AS_ON() ? AS_AUTO : ME();
 // Черга компанії: збережений вибір, інакше типовий склад
+const STALE_DAYS = 3;   // скільки днів нова заявка може висіти без руху, поки не перейде іншому менеджеру
+const hangDays = o => Math.floor((Date.now() - Math.max(orderTs(o), o.last_contact ? Date.parse(o.last_contact) : 0)) / 864e5);
+// Запускається, коли хтось відкриває програму (не частіше разу на 20 хв з одного пристрою); саму передачу робить функція бази
+async function autoReassignStale() {
+  if (!AS_ON()) return;
+  const k = 'crm_stale_run_' + co; if (Date.now() - (+LS.get(k, '0')) < 20 * 60 * 1000) return;
+  LS.set(k, String(Date.now()));
+  const pool = poolOf(co); if (pool.length < 2) return;
+  try {
+    const r = await _sb.rpc('reassign_stale_requests', { p_company: co, p_pool: pool, p_days: STALE_DAYS });
+    if (r.error || !Array.isArray(r.data) || !r.data.length) return;
+    orders = await loadOrders(); render(); renderSide();
+    const list = r.data.slice(0, 3).map(x => `${x.r_client || 'заявка'}: ${x.r_from} → ${x.r_to}`).join('; ');
+    toast(`Передано ${r.data.length} ${uaPl(r.data.length, 'заявку', 'заявки', 'заявок')}, що висіли ${STALE_DAYS}+ дні: ${list}${r.data.length > 3 ? '…' : ''}`);
+  } catch (e) {}
+}
 function poolOf(c) {
   try { const p = JSON.parse(LS.get('crm_pool_' + c, 'null')); if (Array.isArray(p)) return p; } catch (e) {}
   return (DEFAULT_POOL[c] || []).slice();
@@ -2639,14 +2655,20 @@ function togglePool(name) {
   if (i >= 0) p.splice(i, 1); else p.push(name);
   LS.set('crm_pool_' + co, JSON.stringify(p)); renderSettings(); renderBalBar();
 }
+// Клієнт уже має ІНШІ замовлення в цього ж менеджера — заявку не забираємо (за клієнтом або номером телефону)
+function keepsManager(o) {
+  if (!o.assignee) return false;
+  const k = phoneKey(orderPhone(o));
+  return orders.some(x => x.id !== o.id && x.assignee === o.assignee && ((o.client_id && x.client_id === o.client_id) || (k && phoneKey(orderPhone(x)) === k)));
+}
 // План вирівнювання: непризначені заявки/кошториси роздаємо тим, у кого менше; у перевантаженого забираємо зайві, поки різниця не стане меншою за поріг
 function balancePlan() {
   const pool = poolOf(co), gap = BAL_GAP(), load = {}, before = {}, moves = [];
   if (pool.length < 2) return { moves, before, after: before };
   pool.forEach(p => load[p] = 0);
-  orders.forEach(o => { if (isOpen(o) && load[o.assignee] !== undefined) load[o.assignee]++; });
+  orders.forEach(o => { if (o.status === 'Нова' && load[o.assignee] !== undefined) load[o.assignee]++; });   // рахуємо лише нові заявки
   Object.assign(before, load);
-  const movable = o => o.status === 'Нова' || o.status === 'Кошторис';
+  const movable = o => o.status === 'Нова' && !keepsManager(o);   // кошториси не чіпаємо: люди виходять на роботу в різні дні
   const lc = o => o.last_contact ? 1 : 0;      // спершу ті, з якими ще не спілкувалися, і новіші
   const byEase = (a, b) => lc(a) - lc(b) || orderTs(b) - orderTs(a);
   const pend = {}; pool.forEach(p => pend[p] = orders.filter(o => movable(o) && o.assignee === p).sort(byEase));
@@ -2664,7 +2686,7 @@ async function balanceLoad() {
   const p = balancePlan();
   if (!p.moves.length) return alert('Навантаження збалансоване — переносити нічого.');
   const sum = Object.keys(p.after).map(k => `${k}: ${p.before[k]} → ${p.after[k]}`).join('\n');
-  if (!confirm(`Буде змінено відповідального в ${p.moves.length} замовленнях (відкриті замовлення):\n\n${sum}\n\nПродовжити?`)) return;
+  if (!confirm(`Буде змінено відповідального в ${p.moves.length} нових заявках:\n\n${sum}\n\nПродовжити?`)) return;
   let ok = 0;
   for (const m of p.moves) {
     const { error } = await _sb.from('orders').update({ assignee: m.to }).eq('id', m.o.id);
@@ -2678,8 +2700,8 @@ async function balanceLoad() {
 // Навантаження в налаштуваннях і підказка зверху
 function loadStats() {
   const pool = poolOf(co), st = {};
-  pool.forEach(p => st[p] = { open: 0, work: 0, late: 0 });
-  orders.forEach(o => { const s = st[o.assignee]; if (!s || !isOpen(o)) return; s.open++; if (o.status === 'В роботі') s.work++; if (isRem(o) || isLate(o)) s.late++; });
+  pool.forEach(p => st[p] = { open: 0, work: 0, late: 0, news: 0, hang: 0 });
+  orders.forEach(o => { const s = st[o.assignee]; if (!s || !isOpen(o)) return; s.open++; if (o.status === 'В роботі') s.work++; if (isRem(o) || isLate(o)) s.late++; if (o.status === 'Нова') { s.news++; if (hangDays(o) >= STALE_DAYS) s.hang++; } });
   return st;
 }
 function renderPoolSettings() {
@@ -2690,14 +2712,14 @@ function renderPoolSettings() {
   document.querySelectorAll('#asSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === (AS_ON() ? '1' : '0')));
   document.getElementById('setBalGap').value = BAL_GAP();
   const st = loadStats();
-  document.getElementById('loadBox').innerHTML = Object.keys(st).length ? Object.keys(st).map(k => `<div class="file-chip">${avatarHtml(k)}<span style="color:var(--txt);cursor:default;flex:1">${esc(k)}</span><small style="color:var(--muted)">${st[k].open} відкритих · ${st[k].work} в роботі${st[k].late ? ` · <b style="color:var(--canc)">${st[k].late} потребують уваги</b>` : ''}</small></div>`).join('') : '';
+  document.getElementById('loadBox').innerHTML = Object.keys(st).length ? Object.keys(st).map(k => `<div class="file-chip">${avatarHtml(k)}<span style="color:var(--txt);cursor:default;flex:1">${esc(k)}</span><small style="color:var(--muted)"><b style="color:var(--txt)">${st[k].news} нових</b>${st[k].hang ? ` <b style="color:var(--danger)">(${st[k].hang} висять ${STALE_DAYS}+ дн.)</b>` : ''} · ${st[k].open} відкритих · ${st[k].work} в роботі${st[k].late ? ` · <b style="color:var(--canc)">${st[k].late} потребують уваги</b>` : ''}</small></div>`).join('') : '';
 }
 function renderBalBar() {
   const box = document.getElementById('balBar'); if (!box) return;
   if (isMgr() || !AS_ON()) { box.innerHTML = ''; return; }
   const p = balancePlan();
   box.innerHTML = p.moves.length
-    ? `<div class="bal-bar"><i class="fa fa-scale-balanced"></i><span>Навантаження нерівне: ${Object.keys(p.before).map(k => `<b>${esc(k)}</b> ${p.before[k]}`).join(' · ')}. Можна перерозподілити ${p.moves.length} зам.</span><button type="button" onclick="balanceLoad()">Перерозподілити</button></div>`
+    ? `<div class="bal-bar"><i class="fa fa-scale-balanced"></i><span>Нових заявок: ${Object.keys(p.before).map(k => `<b>${esc(k)}</b> ${p.before[k]}`).join(' · ')}. Можна перерозподілити ${p.moves.length}.</span><button type="button" onclick="balanceLoad()">Перерозподілити</button></div>`
     : '';
 }
 // Мітка відповідального на картці
@@ -2987,6 +3009,7 @@ async function sync() {
   if (curT==='calendar') renderCal();
   if (curT==='partners') renderPartners();
   if (!_synced) { playEnter(document.getElementById('p-' + curT)); maybeTour(); maybeWhat(); maybeInstallBar(); }
+  autoReassignStale();
   _synced = true; topbar(false);
   document.getElementById('loader').style.display = 'none';
 }
@@ -4673,8 +4696,16 @@ function maybeInstallBar() {
 
 /* ================= ЩО НОВОГО ================= */
 // При кожному оновленні піднімайте APP_VERSION і додавайте новий запис угору списку CHANGELOG: користувачі побачать його один раз.
-const APP_VERSION = '2026.11.19';
+const APP_VERSION = '2026.11.20';
 const CHANGELOG = [
+  { v: '2026.11.20', date: '20.11.2026',
+    news: [
+      'Нова заявка, що висить понад 3 дні без жодного запису в журналі, сама переходить менеджеру з найменшою кількістю нових заявок. Постійний клієнт лишається у свого менеджера.',
+      'У налаштуваннях видно, скільки нових заявок у кожного менеджера і скільки з них висять.'
+    ],
+    fixes: [
+      '«Перерозподілити» тепер переносить лише нові заявки, кошториси не чіпає.'
+    ] },
   { v: '2026.11.19', date: '19.11.2026',
     news: [],
     fixes: [
