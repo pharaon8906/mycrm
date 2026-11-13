@@ -4673,8 +4673,13 @@ function maybeInstallBar() {
 
 /* ================= ЩО НОВОГО ================= */
 // При кожному оновленні піднімайте APP_VERSION і додавайте новий запис угору списку CHANGELOG: користувачі побачать його один раз.
-const APP_VERSION = '2026.11.18';
+const APP_VERSION = '2026.11.19';
 const CHANGELOG = [
+  { v: '2026.11.19', date: '19.11.2026',
+    news: [],
+    fixes: [
+      'Постійному клієнту можна створити новий запит: програма лише питає й передає його менеджеру, який веде клієнта. Дубль клієнта не створюється.'
+    ] },
   { v: '2026.11.18', date: '18.11.2026',
     news: [],
     fixes: [
@@ -4895,6 +4900,7 @@ async function newRequest() {
   const { error } = await createRequest(o);
   if (error) return alert('Помилка: ' + error.message);
   logHistory(o.id, o.company, 'created', { status: 'Нова' });
+  if (!cross && asg && asg !== ME()) toast(`Заявку передано менеджеру ${asg}`);
 
   ['qnClient','qnPhone','qnNum','qnNotes'].forEach(i => document.getElementById(i).value = '');
   qnPhoneHint();
@@ -5224,13 +5230,13 @@ function clHint() {
 }
 async function saveO() {
   // Нове замовлення: звіряємо номер клієнта з базою компанії
+  let viaRpc = false;   // менеджер створює замовлення для клієнта колеги — запис через функцію бази
   if (!editId) {
     const cn0 = document.getElementById('fCl').value.trim(), ph0 = (document.getElementById('fClPh') ? document.getElementById('fClPh').value.trim() : '') || (phoneLike(cn0) ? cn0 : '');
     if (phoneKey(ph0)) {
       const g = await phoneGuard(ph0, co);
       if (!g.ok) return;
-      if (isMgr() && g.v.owner && g.v.owner !== ME()) { alert(`Цього клієнта вже веде ${g.v.owner} (${phoneDesc(g.v, co)}). Дублікат не створюється.`); return; }
-      if (g.v.valid && !isMgr()) setAs('fAs', g.v.valid);       // той самий менеджер, що вів цей номер
+      if (g.v.valid) { setAs('fAs', g.v.valid); viaRpc = isMgr() && g.v.valid !== ME(); }       // той самий менеджер, що вів цей номер
     }
   }
   const o = { id: editId || 'NEW'+Date.now(), company: co, client: document.getElementById('fCl').value, product: document.getElementById('fPr').value, factory: document.getElementById('fFa').value, status: document.getElementById('fSt').value, assignee: document.getElementById('fAs').value || null, urgency: document.getElementById('fUrg').value || null, factory_ordered: document.getElementById('fOr').value || null, eta_date: document.getElementById('fEta').value || null, sale_price_ht: n(document.getElementById('fSa').value), tva_rate: n(document.getElementById('fTv').value), total_ttc: n(document.getElementById('fTt').value), cost_price: n(document.getElementById('fCo').value), install_cost: n(document.getElementById('fIn').value), delivery: n(document.getElementById('fDe').value), paid_amount: payTotal(), payments: curPay, factory_payments: curFacPay, factory_prepay: n(document.getElementById('fFaPa').value), factory2: document.getElementById('fFa2').value || null, cost_price2: n(document.getElementById('fCo2').value), factory_prepay2: n(document.getElementById('fFaPa2').value), deadline: document.getElementById('fDl').value || null, reminder_date: document.getElementById('fRe').value || null, notes: document.getElementById('fNo').value, cancel_reason: document.getElementById('fCan').value, file_url: JSON.stringify(curFiles), check_measured: document.getElementById('fChM').checked, check_ordered: document.getElementById('fChO').checked, check_storage: document.getElementById('fChS').checked, check_installed: document.getElementById('fChI').checked };
@@ -5262,7 +5268,8 @@ async function saveO() {
     const cc = clients.find(x => x.id === o.client_id);
     if (cc) { await clBoxApply(cc); if (prev && prev.phone && cc.phone) o.phone = cc.phone; }
   }
-  const { error } = await writeOrder(o, 'upsert');
+  const { error } = viaRpc ? await createRequest(o) : await writeOrder(o, 'upsert');
+  if (!error && viaRpc) toast(`Замовлення передано менеджеру ${o.assignee}`);
   if (error) return alert('Помилка збереження: ' + error.message);
 
   // Історія змін (без полів собівартості — щоб не показувати їх менеджерам)
@@ -5513,7 +5520,7 @@ function phoneVerdict(rows, company) {
   const pick = l => (l.find(r => r.assignee) || {}).assignee || '';
   const owner = pick(open) || pick(ords);
   const named = rows.find(r => r.client && !nameIsPhone(r.client)) || rows.find(r => r.client) || {};
-  return { rows, ords, open, owner, valid: owner && (company !== co || teamOf(company).includes(owner)) ? owner : '',
+  return { rows, ords, open, owner, valid: owner && (company !== co || !teamOf(company).length || teamOf(company).includes(owner)) ? owner : '',   // список команди порожній — довіряємо імені з реального замовлення
     clientId: (rows.find(r => r.client_id) || {}).client_id || null, clientName: named.client || '' };
 }
 function phoneDesc(v, company, noWhere) {
@@ -5526,8 +5533,11 @@ async function phoneGuard(phone, company) {
   const v = phoneVerdict(await phoneLookup(phone, company), company);
   if (!v.rows.length || !v.open.length || company !== co) return { ok: true, v };   // заявка в іншу компанію не блокується: вона прив'язується до наявного клієнта й менеджера
   const desc = phoneDesc(v, company);
-  if (isMgr()) { alert(`Цей номер уже в роботі: ${desc}.\n\nДублікат не створюється. Відкрийте наявне замовлення або зверніться до адміна${v.owner ? ' чи колеги (' + v.owner + ')' : ''}.`); return { ok: false, v }; }
-  if (!confirm(`Цей номер уже в роботі: ${desc}.\n\nВсе одно створити ще одне${v.valid ? ' (заявку буде призначено: ' + v.valid + ')' : ''}?`)) return { ok: false, v };
+  const other = v.valid && v.valid !== ME();
+  const msg = other
+    ? `Це постійний клієнт: ${desc}.\n\nСтворити новий запит і передати його менеджеру ${v.valid}? Клієнт у базі лишиться один.`
+    : `У клієнта вже є відкриті замовлення: ${desc}.\n\nСтворити ще один запит? Клієнт у базі лишиться один.`;
+  if (!confirm(msg)) return { ok: false, v };
   return { ok: true, v };
 }
 // Підказка під полем одразу під час введення номера
@@ -5544,11 +5554,11 @@ function phoneHint(elId, phone, company, onVerdict) {
     let h = '', cls = 'dup-note';
     const xc = company !== co;
     if (rows.length) {
-      cls += (!xc && v.open.length) ? (isMgr() ? ' stop' : ' warn') : ' info';
+      cls += (!xc && v.open.length) ? ' warn' : ' info';
       h += `<b>${xc ? 'Клієнт уже є в ' + CO_NAME[company] + ':' : 'Номер уже є в базі:'}</b> ${esc(phoneDesc(v, company, xc))}`;
       if (xc) h += `<span class="sub">Дублікат не створюється: заявку буде прив'язано до цього клієнта${v.valid ? ' і передано: <b>' + esc(v.valid) + '</b>' : ''}.</span>`;
       else {
-        if (v.open.length) h += `<span class="sub">${isMgr() ? 'Дублікат створити не вдасться.' : 'Створення ще одного потребуватиме підтвердження.'}</span>`;
+        if (v.open.length) h += `<span class="sub">Постійний клієнт: новий запит можна створити (з підтвердженням), дубль клієнта не зʼявиться.</span>`;
         if (v.valid) h += `<span class="sub">Автоматично призначу: <b>${esc(v.valid)}</b></span>`;
       }
     }
