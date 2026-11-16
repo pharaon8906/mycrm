@@ -1748,6 +1748,7 @@ body:not(.look-plain) .o-money { background: linear-gradient(160deg, color-mix(i
 <div class="nav-s" id="navS" style="display:none">
   <div class="s-t active" data-s="Усі" onclick="flt('Усі',this)">Усі</div>
   <div class="s-t" data-s="Нова" onclick="flt('Нова',this)"><i class="fa fa-inbox"></i> Нові</div>
+  <div class="s-t" data-s="Каталог надіслано" onclick="flt('Каталог надіслано',this)"><i class="fa fa-book-open"></i> Каталог надіслано</div>
   <div class="s-t" data-s="Терміново" onclick="flt('Терміново',this)"><i class="fa fa-bolt"></i> Терміново</div>
   <div class="s-t" data-s="Мої" onclick="flt('Мої',this)" style="display:none"><i class="fa fa-user"></i> Мої</div>
   <div class="s-t" data-s="Нагадування" onclick="flt('Нагадування',this)"><i class="fa fa-phone"></i> Дзвінки</div>
@@ -1886,7 +1887,7 @@ body:not(.look-plain) .o-money { background: linear-gradient(160deg, color-mix(i
   <div class="bulk-row"><b>Вибрано: <span id="bulkCnt">0</span></b><span style="flex:1"></span><button class="bulk-x" onclick="toggleSel(false)" title="Скасувати вибір">✕</button></div>
   <div class="bulk-row">
     <select id="bulkSt">
-      <option>Нова</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option>
+      <option>Нова</option><option>Каталог надіслано</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option>
       <option>В роботі</option><option>На складі</option><option>Виконано</option><option>Призупинено</option><option>Скасовано</option>
     </select>
     <button class="bulk-ok" onclick="applyBulk()">Змінити статус</button>
@@ -1927,7 +1928,7 @@ body:not(.look-plain) .o-money { background: linear-gradient(160deg, color-mix(i
       <button type="button" class="btn-alt" id="clBoxSave" style="margin:0" onclick="clBoxSave()"><i class="fa fa-floppy-disk"></i> Зберегти дані клієнта</button>
     </div>
     <div class="grid"><div class="fg"><label>Номер замовлення</label><input id="fPr" placeholder="напр. WEB/26/0947426"></div><div class="fg"><label>Фабрика 1</label><select id="fFa" onchange="renderFacPay()"></select></div></div>
-    <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan(); autoOnStatus(); oChip()"><option>Нова</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Призупинено</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
+    <div class="grid"><div class="fg"><label>Статус</label><select id="fSt" onchange="tglCan(); autoOnStatus(); oChip()"><option>Нова</option><option>Каталог надіслано</option><option>Кошторис</option><option>Підтверджено</option><option>Перевірка</option><option>В роботі</option><option>На складі</option><option>Виконано</option><option>Призупинено</option><option>Скасовано</option></select></div><div class="fg"><label>Дедлайн</label><input id="fDl" type="date"></div></div>
     <div id="autoHint" style="font-size:12px;color:var(--p2);margin:-6px 0 10px"></div>
     <div class="fg"><label>Відповідальний</label><select id="fAs"></select><small class="fc-hint" id="fAsHint"></small></div>
     <div class="fg"><label>Терміновість</label><select id="fUrg"><option value="">Звичайна</option><option>Терміново</option><option>Дуже терміново</option></select></div>
@@ -2904,7 +2905,7 @@ function addFacPay() {
 function rmFacPay(i) { curFacPay.splice(i, 1); renderFacPay(); saveDraft(); }
 
 // ---- Картка замовлення: вкладки, чіп статусу, права панель грошей ----
-const STG = { 'Нова': 'wait', 'Кошторис': 'wait', 'Перевірка': 'wait', 'Підтверджено': 'work', 'В роботі': 'work', 'На складі': 'ok', 'Виконано': 'ok', 'Призупинено': 'off', 'Скасовано': 'off' };
+const STG = { 'Нова': 'wait', 'Каталог надіслано': 'wait', 'Кошторис': 'wait', 'Перевірка': 'wait', 'Підтверджено': 'work', 'В роботі': 'work', 'На складі': 'ok', 'Виконано': 'ok', 'Призупинено': 'off', 'Скасовано': 'off' };
 const stColor = st => `var(--g-${STG[st] || 'work'})`;
 function oTab(k) {
   document.querySelectorAll('#oTabs button').forEach(b => b.classList.toggle('on', b.dataset.t === k));
@@ -3086,7 +3087,7 @@ const render = () => {
   if (dTo)   { const t1 = Date.parse(dTo + 'T23:59:59');   f = f.filter(o => orderTs(o) <= t1); }
   updateFltBtn();
 
-  const stPriority = { 'Нова':0, 'В роботі':1, 'На складі':2, 'Перевірка':3, 'Підтверджено':4, 'Кошторис':5, 'Виконано':6, 'Призупинено':7, 'Скасовано':8 };
+  const stPriority = { 'Нова':0, 'Каталог надіслано':0.5, 'В роботі':1, 'На складі':2, 'Перевірка':3, 'Підтверджено':4, 'Кошторис':5, 'Виконано':6, 'Призупинено':7, 'Скасовано':8 };
   if(sort === 'status') f.sort((a,b) => (stPriority[a.status]||99) - (stPriority[b.status]||99));
   else if(sort === 'deadline') f.sort((a,b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
   else if(sort === 'urgency') f.sort((a,b) => urgRank(b) - urgRank(a) || orderTs(b) - orderTs(a));
@@ -3155,7 +3156,7 @@ const render = () => {
 
 /* ================= КАНБАН ================= */
 const BOARD_ST = [
-  { k: 'Нова', c: '--new' }, { k: 'Кошторис', c: '--est' }, { k: 'Підтверджено', c: '--conf' }, { k: 'Перевірка', c: '--verify' },
+  { k: 'Нова', c: '--new' }, { k: 'Каталог надіслано', c: '--g-wait' }, { k: 'Кошторис', c: '--est' }, { k: 'Підтверджено', c: '--conf' }, { k: 'Перевірка', c: '--verify' },
   { k: 'В роботі', c: '--work' }, { k: 'На складі', c: '--store' }, { k: 'Виконано', c: '--done' }, { k: 'Призупинено', c: '--g-off' }, { k: 'Скасовано', c: '--canc' }
 ];
 const KB_PAGE = 25;                 // скільки карток показуємо в колонці (кошторисів сотні — решту підвантажує кнопка)
@@ -3412,6 +3413,8 @@ const WA_TPL = [
   { k: 'recu',        ua: 'Отримали запит',                  fr: c => `${hello(c)}\n\nMerci pour votre demande${c.num}, nous l'avons bien reçue. Nous l'étudions et revenons vers vous très rapidement avec une proposition.` },
   { k: 'preciser',   ua: 'Отримали запит, потрібно уточнити', fr: c => `${hello(c)}\n\nMerci pour votre demande${c.num}, nous l'avons bien reçue. Avant de vous faire une proposition, j'aurais besoin de quelques précisions :\n\n{|}` },
   { k: 'photos',     ua: 'Попросити фото й розміри',        fr: c => `${hello(c)}\n\nPour préparer votre devis${c.num}, pourriez-vous nous envoyer quelques photos des ouvertures concernées, ainsi que les dimensions approximatives si vous les avez ? Cela nous aidera à vous proposer quelque chose de précis.` },
+  { k: 'catalogue',  ua: 'Надіслати каталоги',              fr: c => `${hello(c)}\n\nComme convenu, je vous envoie nos catalogues. Prenez le temps de les regarder, et n'hésitez pas à me dire ce qui vous intéresse : je vous préparerai une proposition sur mesure.` },
+  { k: 'relance_cat', ua: 'Нагадати про каталоги',           fr: c => `${hello(c)}\n\nJ'espère que vous allez bien. Avez-vous eu le temps de regarder les catalogues que je vous ai envoyés ? Si un modèle vous plaît, je peux vous préparer un devis rapidement.` },
   { k: 'relance',   ua: 'Нагадати про кошторис',          fr: c => `${hello(c)}\n\nJ'espère que vous allez bien. Je reviens vers vous au sujet de votre devis${c.num} : avez-vous eu le temps de le regarder ? Si vous avez des questions, ou si vous souhaitez que nous ajustions quelque chose, n'hésitez pas, je suis là pour vous aider.` },
   { k: 'confirm',    ua: 'Підтвердження замовлення',       fr: c => `${hello(c)}\n\nMerci pour votre confiance, nous avons bien enregistré votre commande${c.num}. Nous revenons vers vous très vite pour vous indiquer les prochaines étapes.` },
   { k: 'acompte',    ua: 'Запит передоплати (30%)',        fr: c => `${hello(c)}\n\nPour lancer la fabrication de votre commande${c.num}, nous aurions besoin de l'acompte de ${c.acompte} €. Dès que nous l'aurons reçu, nous passerons votre commande en production. N'hésitez pas à me dire si vous avez la moindre question.` },
@@ -3425,7 +3428,7 @@ const WA_TPL = [
   { k: 'nouvelles',  ua: 'Клієнт не відповідає',           fr: c => `${hello(c)}\n\nJe vous écris au sujet de votre demande${c.num}. Je n'arrive pas à vous joindre : pourriez-vous me rappeler ou me dire quand vous êtes disponible ? Merci d'avance.` }
 ];
 // Які шаблони пропонувати першими за статусом
-const WA_SUGGEST = { 'Нова': ['devis', 'recu', 'preciser', 'photos', 'nouvelles'], 'Кошторис': ['devis', 'relance', 'acompte'], 'Підтверджено': ['confirm', 'acompte', 'mesure'], 'Перевірка': ['mesure', 'confirm'], 'В роботі': ['production', 'retard', 'solde'], 'На складі': ['stock', 'pose', 'solde'], 'Виконано': ['fin', 'solde'], 'Скасовано': ['relance'], 'Призупинено': ['relance', 'nouvelles'] };
+const WA_SUGGEST = { 'Нова': ['devis', 'recu', 'preciser', 'photos', 'nouvelles'], 'Каталог надіслано': ['catalogue', 'relance_cat', 'nouvelles'], 'Кошторис': ['devis', 'relance', 'acompte'], 'Підтверджено': ['confirm', 'acompte', 'mesure'], 'Перевірка': ['mesure', 'confirm'], 'В роботі': ['production', 'retard', 'solde'], 'На складі': ['stock', 'pose', 'solde'], 'Виконано': ['fin', 'solde'], 'Скасовано': ['relance'], 'Призупинено': ['relance', 'nouvelles'] };
 function waCtx(o) {
   const ttc = n(o.total_ttc), paid = n(o.paid_amount);
   return { nom: /\p{L}/u.test(o.client || '') ? String(o.client).trim() : '', num: o.product ? ` n° ${o.product}` : '', ttc: ttc > 0 ? frN(ttc) : '', acompte: frN(Math.round(ttc * 0.3)), solde: frN(Math.max(0, ttc - paid)), date: o.deadline ? frDate(o.deadline) : 'la date convenue', eta: o.eta_date ? frDate(o.eta_date) : '' };
@@ -4497,7 +4500,8 @@ function bellData() {
 }
 // «Клієнт мовчить»: нова заявка без руху 2+ дні або кошторис 3+ дні (рух = запис у журналі спілкування)
 const touchTs = o => Math.max(orderTs(o), o.last_contact ? Date.parse(o.last_contact) : 0);
-const staleOf = o => { if (o.status !== 'Нова' && o.status !== 'Кошторис') return 0; const d = (Date.now() - touchTs(o)) / 864e5; return d >= (o.status === 'Нова' ? 2 : 3) ? Math.floor(d) : 0; };
+const STALE_LIM = { 'Нова': 2, 'Кошторис': 3, 'Каталог надіслано': 5 };
+const staleOf = o => { const lim = STALE_LIM[o.status]; if (!lim) return 0; const d = (Date.now() - touchTs(o)) / 864e5; return d >= lim ? Math.floor(d) : 0; };
 const staleKey = o => 'stale:' + o.id + ':' + ymd(touchTs(o));
 // Прибрані зі сповіщень (на цьому пристрої): ключ містить дату, тому при новій даті сповіщення зʼявиться знову
 const BELL_KEY = 'crm_bell_x';
@@ -4696,8 +4700,14 @@ function maybeInstallBar() {
 
 /* ================= ЩО НОВОГО ================= */
 // При кожному оновленні піднімайте APP_VERSION і додавайте новий запис угору списку CHANGELOG: користувачі побачать його один раз.
-const APP_VERSION = '2026.11.20';
+const APP_VERSION = '2026.11.21';
 const CHANGELOG = [
+  { v: '2026.11.21', date: '21.11.2026',
+    news: [
+      'Новий статус «Каталог надіслано»: заявка чекає відповіді клієнта і не переходить автоматично іншому менеджеру. Якщо клієнт мовчить 5 днів — нагадування в дзвіночку.',
+      'Шаблони «Надіслати каталоги» і «Нагадати про каталоги».'
+    ],
+    fixes: [] },
   { v: '2026.11.20', date: '20.11.2026',
     news: [
       'Нова заявка, що висить понад 3 дні без жодного запису в журналі, сама переходить менеджеру з найменшою кількістю нових заявок. Постійний клієнт лишається у свого менеджера.',
@@ -4976,6 +4986,7 @@ function renderStats() {
 
   const S = [
     {k:'Нова', ic:'fa-inbox', c:'var(--new)'},
+    {k:'Каталог надіслано', ic:'fa-book-open', c:'var(--g-wait)'},
     {k:'Виконано', ic:'fa-box', c:'var(--done)'},
     {k:'В роботі', ic:'fa-gears', c:'var(--work)'},
     {k:'Перевірка', ic:'fa-magnifying-glass', c:'var(--verify)'},
@@ -5179,7 +5190,7 @@ function statSeries(mgr) {
   return ms;
 }
 function donutHtml(src) {
-  const G = [['wait', 'Чекають', ['Нова', 'Кошторис', 'Перевірка']], ['work', 'В роботі', ['Підтверджено', 'В роботі']], ['ok', 'Склад і готово', ['На складі', 'Виконано']], ['off', 'Скасовано і пауза', ['Скасовано', 'Призупинено']]];
+  const G = [['wait', 'Чекають', ['Нова', 'Каталог надіслано', 'Кошторис', 'Перевірка']], ['work', 'В роботі', ['Підтверджено', 'В роботі']], ['ok', 'Склад і готово', ['На складі', 'Виконано']], ['off', 'Скасовано і пауза', ['Скасовано', 'Призупинено']]];
   const cnt = G.map(g => src.filter(o => g[2].includes(o.status)).length), total = cnt.reduce((a, b) => a + b, 0);
   if (!total) return '<div class="sa-empty">Немає замовлень за цей період</div>';
   const R = 42, C = 2 * Math.PI * R; let off = 0;
