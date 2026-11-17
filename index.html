@@ -2158,7 +2158,7 @@ body:not(.look-plain) .o-money { background: linear-gradient(160deg, color-mix(i
     <div class="fg fin-only" style="gap:8px">
       <div id="loadBox"></div>
       <button type="button" class="btn-alt" style="display:block;margin:0" onclick="balanceLoad()"><i class="fa fa-scale-balanced"></i> Перерозподілити навантаження</button>
-      <small style="color:var(--muted)">Переносяться лише нові заявки (статус «Нова»). Кошториси й те, що в роботі, лишаються у свого менеджера. Заявку постійного клієнта не забираємо в менеджера, який уже веде його замовлення. Нова заявка, що висить понад 3 дні без жодного запису в журналі, сама переходить іншому менеджеру.</small>
+      <small style="color:var(--muted)">Переносяться лише нові заявки (статус «Нова»). Кошториси й те, що в роботі, лишаються у свого менеджера. Заявку постійного клієнта не забираємо в менеджера, який уже веде його замовлення. Переносимо лише ті нові заявки, з якими ще нічого не робили (жодного запису в журналі, зміни чи події). Така заявка, що висить понад 3 дні, сама переходить іншому менеджеру.</small>
     </div>
 
     <div class="sec fin-only">Дані</div>
@@ -2656,6 +2656,19 @@ function togglePool(name) {
   if (i >= 0) p.splice(i, 1); else p.push(name);
   LS.set('crm_pool_' + co, JSON.stringify(p)); renderSettings(); renderBalBar();
 }
+// Із заявкою вже щось робили — її не перенаправляємо (ні вручну, ні автоматично)
+let _touched = new Set();
+const isTouched = o => _touched.has(o.id) || !!o.last_contact || events.some(e => e.order_id === o.id);
+async function refreshTouched() {
+  if (isMgr()) return;
+  const ids = orders.filter(o => o.status === 'Нова').map(o => o.id), t = new Set();
+  if (ids.length) {
+    try { const r = await _sb.from('order_history').select('order_id,action,user_email').in('order_id', ids);
+      (r.data || []).forEach(h => { if (h.action !== 'created' && h.user_email !== 'авто') t.add(h.order_id); }); } catch (e) {}
+    try { const r = await _sb.from('order_log').select('order_id').in('order_id', ids); (r.data || []).forEach(l => t.add(l.order_id)); } catch (e) {}
+  }
+  _touched = t; renderBalBar();
+}
 // Клієнт уже має ІНШІ замовлення в цього ж менеджера — заявку не забираємо (за клієнтом або номером телефону)
 function keepsManager(o) {
   if (!o.assignee) return false;
@@ -2669,7 +2682,7 @@ function balancePlan() {
   pool.forEach(p => load[p] = 0);
   orders.forEach(o => { if (o.status === 'Нова' && load[o.assignee] !== undefined) load[o.assignee]++; });   // рахуємо лише нові заявки
   Object.assign(before, load);
-  const movable = o => o.status === 'Нова' && !keepsManager(o);   // кошториси не чіпаємо: люди виходять на роботу в різні дні
+  const movable = o => o.status === 'Нова' && !keepsManager(o) && !isTouched(o);   // лише ті, з якими ще нічого не робили   // кошториси не чіпаємо: люди виходять на роботу в різні дні
   const lc = o => o.last_contact ? 1 : 0;      // спершу ті, з якими ще не спілкувалися, і новіші
   const byEase = (a, b) => lc(a) - lc(b) || orderTs(b) - orderTs(a);
   const pend = {}; pool.forEach(p => pend[p] = orders.filter(o => movable(o) && o.assignee === p).sort(byEase));
@@ -2684,6 +2697,7 @@ function balancePlan() {
   return { moves, before, after: load };
 }
 async function balanceLoad() {
+  await refreshTouched();
   const p = balancePlan();
   if (!p.moves.length) return alert('Навантаження збалансоване — переносити нічого.');
   const sum = Object.keys(p.after).map(k => `${k}: ${p.before[k]} → ${p.after[k]}`).join('\n');
@@ -3010,7 +3024,7 @@ async function sync() {
   if (curT==='calendar') renderCal();
   if (curT==='partners') renderPartners();
   if (!_synced) { playEnter(document.getElementById('p-' + curT)); maybeTour(); maybeWhat(); maybeInstallBar(); }
-  autoReassignStale();
+  autoReassignStale(); refreshTouched();
   _synced = true; topbar(false);
   document.getElementById('loader').style.display = 'none';
 }
@@ -4700,8 +4714,13 @@ function maybeInstallBar() {
 
 /* ================= ЩО НОВОГО ================= */
 // При кожному оновленні піднімайте APP_VERSION і додавайте новий запис угору списку CHANGELOG: користувачі побачать його один раз.
-const APP_VERSION = '2026.11.21';
+const APP_VERSION = '2026.11.22';
 const CHANGELOG = [
+  { v: '2026.11.22', date: '22.11.2026',
+    news: [],
+    fixes: [
+      'Нова заявка переходить іншому менеджеру (вручну чи автоматично) лише якщо з нею ще нічого не робили: жодного запису в журналі, зміни чи події.'
+    ] },
   { v: '2026.11.21', date: '21.11.2026',
     news: [
       'Новий статус «Каталог надіслано»: заявка чекає відповіді клієнта і не переходить автоматично іншому менеджеру. Якщо клієнт мовчить 5 днів — нагадування в дзвіночку.',
